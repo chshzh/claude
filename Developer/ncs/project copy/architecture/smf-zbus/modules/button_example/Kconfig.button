@@ -1,0 +1,47 @@
+#
+# Copyright (c) 2024 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+menu "Button Module"
+
+config APP_BUTTON_STACK_SIZE
+	int "Button module thread stack size"
+	default 2048
+	help
+	  Stack size for the button module thread in bytes.
+
+config APP_BUTTON_PRIORITY
+	int "Button module thread priority"
+	default 7
+	range 0 14
+	help
+	  Thread priority (0 = highest, 14 = lowest for cooperative threads).
+
+config APP_BUTTON_LONG_PRESS_TIMEOUT_MS
+	int "Long press timeout in milliseconds"
+	default 3000
+	help
+	  Time in milliseconds that a button must be held to be considered
+	  a long press. Short presses are detected when the button is
+	  released before this timeout expires.
+
+config APP_BUTTON_MSG_PROCESSING_TIMEOUT_SECONDS
+	int "Message processing timeout in seconds"
+	default 30
+	help
+	  Maximum time to wait for zbus messages before running state machine anyway.
+
+config APP_BUTTON_WATCHDOG_TIMEOUT_SECONDS
+	int "Watchdog timeout in seconds"
+	default 60
+	help
+	  Watchdog timeout for the button module. Must be greater than
+	  message processing timeout.
+
+module = APP_BUTTON
+module-str = Button
+source "subsys/logging/Kconfig.template.log_config"
+
+endmenu # Button Module

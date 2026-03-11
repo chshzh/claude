@@ -1,0 +1,24 @@
+#
+# Copyright (c) 2026 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+source "Kconfig.zephyr"
+
+menu "Basic NCS Application"
+
+config BASIC_APP_LED_BLINK_INTERVAL_MS
+    int "LED blink interval in milliseconds"
+    range 100 10000
+    default 1000
+    help
+      The interval between LED state changes in milliseconds.
+
+config BASIC_APP_ENABLE_SHELL
+    bool "Enable shell commands for the application"
+    default y
+    help
+      Enable custom shell commands for controlling the application.
+
+endmenu

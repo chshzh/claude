@@ -152,22 +152,6 @@ After reviews, update templates based on findings:
 - `ProductManager/ncs/features/overlays/overlay-memfault.conf` - Memfault monitoring
 - `ProductManager/ncs/features/overlays/overlay-ble-prov.conf` - BLE credential provisioning
 
-### Reusable Modules (copy from ncs-project-logo)
-
-These modules live in `src/modules/` of the `ncs-project-logo` reference project.
-Copy the folder into your project, wire `CMakeLists.txt` + `Kconfig`, and enable
-with one `CONFIG_` switch.
-
-| Module folder | Enable switch | What it does |
-|---|---|---|
-| `heap_monitor/` | `CONFIG_HEAPS_MONITOR=y` | Monitors system heap and/or mbedTLS heap; standardised log format; auto-updates Memfault heartbeat metrics when `CONFIG_APP_MEMFAULT_MODULE=y` |
-| `app_memfault/` | `CONFIG_APP_MEMFAULT_MODULE=y` | Memfault core, OTA triggers, Wi-Fi/stack metrics, nRF70 CDR |
-| `network/` | `CONFIG_WIFI_MODULE=y` | Wi-Fi STA connection manager, net events, WPA supplicant |
-| `wifi_prov_over_ble/` | `CONFIG_WIFI_STA_PROV_OVER_BLE_ENABLED=y` | BLE credential provisioning |
-| `app_https_client/` | `CONFIG_APP_HTTPS_CLIENT_MODULE=y` | Periodic HTTPS GET with TLS |
-| `app_mqtt_client/` | `CONFIG_APP_MQTT_CLIENT_MODULE=y` | Persistent MQTT over TLS |
-| `button/` | `CONFIG_BUTTON_MODULE=y` | SMF button with short/long press |
-
 ### Architecture Pattern Overlays (NEW!)
 - `ProductManager/ncs/features/overlays/overlay-smf-zbus.conf` - SMF+zbus modular architecture
 - `ProductManager/ncs/features/overlays/overlay-multithreaded.conf` - Simple multi-threaded architecture
@@ -455,7 +439,7 @@ ls openspec/specs/      # Technical specs complete?
    - Module Kconfig: `Kconfig.[name]`
    - Module config template: `[name].conf.template` (copy from skill library)
 4. **Merge module configs** - When enabling, merge `.conf.template` into `prj.conf`
-5. **Follow Wi-Fi memory requirements** - Heap ≥80KB critical; size with heap_monitor (see `Developer/ncs/mem-opt/SKILL.md`)
+5. **Follow Wi-Fi memory requirements** - Heap ≥80KB critical
 6. **Handle all network events** - Connect/disconnect/IP assigned
 7. **Keep docs in sync** - Update specs when implementation changes
 8. **Test against specs** - Verify behavior matches state machines/sequences
@@ -527,11 +511,6 @@ ncs-project/
     ├── basic_app/             # Minimal NCS application
     ├── wifi_sta/              # Wi-Fi Station example
     └── wifi_p2p/              # Wi-Fi P2P example
-
-> **ncs-project-logo** — a standalone GitHub reference project containing all
-> production-ready modules above. Use it as a copy-paste source when assembling
-> a new application. See `Developer/ncs/mem-opt/SKILL.md` for heap_monitor
-> details and the project README for `west init` / build instructions.
 ```
 
 ---
@@ -703,8 +682,6 @@ This skill provides everything needed for professional NCS project development:
 **Advanced Features:**
 - Memfault - Cloud monitoring & OTA
 - BLE Provisioning - Credential setup
-- **Heap Monitor** - Runtime heap tracking, Memfault metrics, standardised logs
-
 Architecture Patterns (NEW!):**
 - Simple Multi-Threaded - Traditional approach (queues, semaphores)
 - SMF + zbus Modular - Nordic's recommended pattern for complex systems

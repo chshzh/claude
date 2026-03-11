@@ -1,0 +1,166 @@
+#
+# CMakeLists.txt Fragment for Static Web Server
+#
+# Add this section to your project's CMakeLists.txt
+# Based on Nordic Thingy91x Suitcase Demo
+#
+
+# ============================================================================
+# HTTP Service Linker Section
+# ============================================================================
+# Required to place HTTP service resources in correct memory sections
+
+zephyr_linker_sources(SECTIONS sections-rom.ld)
+
+zephyr_linker_section_ifdef(CONFIG_HTTP_SERVER
+				NAME http_resource_desc_web_service
+				KVMA RAM_REGION 
+				GROUP RODATA_REGION
+				SUBALIGN Z_LINK_ITERABLE_SUBALIGN)
+
+# ============================================================================
+# Static Web Resources (HTML, CSS, JS, Images)
+# ============================================================================
+# Automatically gzip and embed static files as .inc files
+
+set(gen_dir ${ZEPHYR_BINARY_DIR}/include/generated/)
+
+# List all static web resources to embed
+# Add your files here following the same pattern
+foreach(web_resource
+    index.html
+    main.js
+    styles.css
+    logo.svg
+    # Add more files:
+    # favicon.ico
+    # bootstrap.min.css
+    # model.glb
+    # ...
+    )
+    generate_inc_file_for_target(
+        app
+        src/static_web_resources/${web_resource}
+        ${gen_dir}/${web_resource}.gz.inc
+        --gzip
+    )
+endforeach()
+
+# ============================================================================
+# TLS Certificates (if using HTTPS)
+# ============================================================================
+# Embed TLS certificates as .inc files (without gzip)
+
+# set(cert_dir ${CMAKE_CURRENT_BINARY_DIR}/certs)
+# zephyr_include_directories(${cert_dir})
+# 
+# generate_inc_file_for_target(
+#     app
+#     cert/server-cert.pem
+#     ${cert_dir}/server-cert.pem.inc
+# )
+# 
+# generate_inc_file_for_target(
+#     app
+#     cert/server-key.pem
+#     ${cert_dir}/server-key.pem.inc
+# )
+
+# ============================================================================
+# Source Files
+# ============================================================================
+
+target_sources(app PRIVATE
+    src/main.c
+    src/http_resources.c
+    # Add more source files as needed
+)
+
+# ============================================================================
+# Include Paths
+# ============================================================================
+
+target_include_directories(app PUBLIC 
+    ${ZEPHYR_BASE}/subsys/net/ip
+)
+
+# ============================================================================
+# Complete CMakeLists.txt Example
+# ============================================================================
+
+# cmake_minimum_required(VERSION 3.20.0)
+# 
+# find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
+# project(my_webserver_app)
+# 
+# # Add HTTP service linker section
+# zephyr_linker_sources(SECTIONS sections-rom.ld)
+# zephyr_linker_section_ifdef(CONFIG_HTTP_SERVER
+#                             NAME http_resource_desc_web_service
+#                             KVMA RAM_REGION 
+#                             GROUP RODATA_REGION
+#                             SUBALIGN Z_LINK_ITERABLE_SUBALIGN)
+# 
+# # Generate .inc files for static resources
+# set(gen_dir ${ZEPHYR_BINARY_DIR}/include/generated/)
+# 
+# foreach(web_resource
+#     index.html
+#     main.js
+#     styles.css
+#     )
+#     generate_inc_file_for_target(
+#         app
+#         src/static_web_resources/${web_resource}
+#         ${gen_dir}/${web_resource}.gz.inc
+#         --gzip
+#     )
+# endforeach()
+# 
+# # Add source files
+# target_sources(app PRIVATE
+#     src/main.c
+#     src/http_resources.c
+# )
+# 
+# # Include paths
+# target_include_directories(app PUBLIC ${ZEPHYR_BASE}/subsys/net/ip)
+
+# ============================================================================
+# Directory Structure
+# ============================================================================
+#
+# my_webserver_app/
+# ├── CMakeLists.txt
+# ├── prj.conf
+# ├── sections-rom.ld              # Required for HTTP service
+# ├── src/
+# │   ├── main.c
+# │   ├── http_resources.c
+# │   ├── http_resources.h
+# │   └── static_web_resources/    # Your web files
+# │       ├── index.html
+# │       ├── main.js
+# │       └── styles.css
+# └── build/
+#     └── zephyr/
+#         └── include/
+#             └── generated/       # Auto-generated .gz.inc files
+#                 ├── index.html.gz.inc
+#                 ├── main.js.gz.inc
+#                 └── styles.css.gz.inc
+
+# ============================================================================
+# Build Commands
+# ============================================================================
+#
+# # Build with web server enabled
+# west build -p -b nrf7002dk/nrf5340/cpuapp -- \
+#   -DEXTRA_CONF_FILE="wifi-sta.conf;overlay-static-webserver.conf"
+#
+# # Flash
+# west flash
+#
+# # Access web interface
+# # http://192.168.1.99/  (or configured IP)
+# # http://mydevice.local/  (if mDNS enabled)

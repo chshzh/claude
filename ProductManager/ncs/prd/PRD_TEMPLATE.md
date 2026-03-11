@@ -350,7 +350,11 @@ All production-ready NCS applications must display comprehensive system informat
 
 ## 3. Technical Specification
 
-> **Note**: This section is filled in collaboration with Engineering team
+> **Note**: High-level architecture only. Detailed technical specifications are maintained in `openspec/specs/` directory.
+> **OpenSpec Integration**: For module-level implementation details, state machines, APIs, and sequence diagrams, see:
+> - `openspec/specs/architecture.md` - System architecture and patterns
+> - `openspec/specs/[module-name].md` - Individual module specifications
+> - `openspec/changes/` - Technical proposals and change tracking
 
 ### 3.1 Architecture Design
 

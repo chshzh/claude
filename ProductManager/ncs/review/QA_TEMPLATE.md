@@ -59,7 +59,7 @@ _Release / Hold / Rework - with justification_
 | LICENSE | ☐ Yes ☐ No | ☐ | | /1 |
 | README.md | ☐ Yes ☐ No | ☐ | | /1 |
 | .gitignore | ☐ Yes ☐ No | ☐ | | /1 |
-| Copyright headers | ☐ All ☐ Most ☐ Some ☐ None | | | /1 |
+| Copyright headers (current year for new/modified) | ☐ All ☐ Most ☐ Some ☐ None | | | /1 |
 
 **Subtotal**: ___/8
 
@@ -108,7 +108,7 @@ _3=All appropriate files present, 2=Most present, 1=Some present, 0=None_
 - [ ] Zephyr package found [1]
 - [ ] All sources listed [1]
 - [ ] No hardcoded paths [1]
-- [ ] Copyright header [1]
+- [ ] Copyright header with current year [1]
 
 **Score**: ___/5
 
@@ -143,7 +143,7 @@ _3=All appropriate files present, 2=Most present, 1=Some present, 0=None_
 
 ### 2.4 src/main.c (5 points)
 
-- [ ] Copyright header [1]
+- [ ] Copyright header with current year [1]
 - [ ] Proper includes [1]
 - [ ] Error handling [1]
 - [ ] Coding style [1]

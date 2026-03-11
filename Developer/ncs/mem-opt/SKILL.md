@@ -295,19 +295,211 @@ CONFIG_SHELL_BACKEND_SERIAL_RX_RING_BUFFER_SIZE=64
 
 ### Heap Monitoring Module
 
-**Purpose:** Real-time heap usage tracking with peak detection and threshold alerts.
+> **Reference implementation**: `memfault-nrf7002dk` / `ncs-project-logo`  
+> `src/modules/heap_monitor/` — production-ready, copy into any NCS project.
+
+**Purpose:** Real-time heap usage tracking with standardised log output, peak
+detection, threshold alerts, and optional Memfault heartbeat metrics.
 
 **When to Use:**
+- Sizing heap for production (measure peak under full workload, apply 1.5× margin)
 - Debugging heap exhaustion
-- Sizing heap for production
-- Monitoring heap growth during development
+- Monitoring heap growth during long-running tests
 - Detecting memory leaks
 
-**Implementation Steps:**
+---
 
-**1. Create Heap Monitor Module**
+#### Module structure
 
-Create `src/modules/memory/heap_monitor.c`:
+```
+src/modules/heap_monitor/
+├── heap_monitor.c        # Implementation
+├── CMakeLists.txt        # Conditionally added when CONFIG_HEAPS_MONITOR=y
+├── Kconfig.heap_monitor  # Symbol definitions + log-level template
+└── Kconfig.defaults      # Sensible defaults (off by default)
+```
+
+Wire into the project-level `Kconfig` and `CMakeLists.txt`:
+
+```kconfig
+# Kconfig — inside menu "Application configuration"
+rsource "src/modules/heap_monitor/Kconfig.heap_monitor"
+# ...
+rsource "src/modules/heap_monitor/Kconfig.defaults"
+```
+
+```cmake
+# CMakeLists.txt
+add_subdirectory(src/modules/heap_monitor)
+```
+
+---
+
+#### Enable with one switch
+
+```kconfig
+# prj.conf
+CONFIG_HEAPS_MONITOR=y
+CONFIG_HEAPS_MONITOR_LOG_LEVEL_INF=y
+```
+
+The module automatically selects `SYS_HEAP_LISTENER` + `SYS_HEAP_RUNTIME_STATS`
+when `CONFIG_HEAP_MEM_POOL_SIZE > 0`, and selects `MBEDTLS_MEMORY_DEBUG` when
+`CONFIG_MBEDTLS_ENABLE_HEAP=y`. No other `prj.conf` entries are needed.
+
+The module depends on `(HEAP_MEM_POOL_SIZE > 0) || MBEDTLS_ENABLE_HEAP`, so it
+can only be enabled when at least one heap is present.
+
+---
+
+#### Tuning knobs (all have defaults in `Kconfig.defaults`)
+
+| Symbol | Default | Meaning |
+|--------|---------|---------|
+| `CONFIG_HEAPS_MONITOR_WARN_PCT` | 88 | Emit `LOG_WRN` when used% reaches this |
+| `CONFIG_HEAPS_MONITOR_STEP_BYTES` | 512 | Fire alloc-path report only when high-water mark advances by this many bytes |
+| `CONFIG_HEAPS_MONITOR_PERIODIC_INTERVAL_SEC` | 30 | Seconds between timed snapshots |
+
+```kconfig
+# Development: verbose
+CONFIG_HEAPS_MONITOR_STEP_BYTES=512
+CONFIG_HEAPS_MONITOR_PERIODIC_INTERVAL_SEC=10
+
+# Production: reduce log noise
+CONFIG_HEAPS_MONITOR_STEP_BYTES=4096
+CONFIG_HEAPS_MONITOR_PERIODIC_INTERVAL_SEC=60
+CONFIG_HEAPS_MONITOR_WARN_PCT=90
+```
+
+---
+
+#### Log output (standardised format for both heaps)
+
+```
+<inf> heap_monitor: System Heap: used=51712/98304 (52%) blocks=n/a, peak=64752/98304 (65%), peak_blocks=n/a
+<inf> heap_monitor: mbedTLS Heap: used=19136/110592 (17%) blocks=49, peak=72684/110592 (65%), peak_blocks=197
+<wrn> heap_monitor: System Heap: used=86500/98304 (88%) blocks=n/a, peak=86500/98304 (88%), peak_blocks=n/a
+```
+
+- **System heap**: Zephyr runtime stats expose bytes only, so `blocks=n/a`.
+- **mbedTLS heap**: reports real `blocks` and `peak_blocks` from
+  `mbedtls_memory_buffer_alloc_{cur,max}_get()`. The module accumulates a
+  rolling all-time peak externally because `max_get()` resets each call.
+
+---
+
+#### Memfault integration (automatic)
+
+When `CONFIG_APP_MEMFAULT_MODULE=y` the module calls
+`MEMFAULT_METRIC_SET_UNSIGNED()` on every periodic snapshot — no extra
+wiring needed. When Memfault is absent a stub no-op macro is used so the
+module compiles cleanly in both configurations.
+
+Register the metric keys in
+`src/modules/app_memfault/config/memfault_metrics_heartbeat_config.def`:
+
+```c
+#if CONFIG_HEAPS_MONITOR
+#if CONFIG_HEAP_MEM_POOL_SIZE > 0
+MEMFAULT_METRICS_KEY_DEFINE(ncs_system_heap_total, kMemfaultMetricType_Unsigned)
+MEMFAULT_METRICS_KEY_DEFINE(ncs_system_heap_used,  kMemfaultMetricType_Unsigned)
+MEMFAULT_METRICS_KEY_DEFINE(ncs_system_heap_peak,  kMemfaultMetricType_Unsigned)
+#endif
+#if CONFIG_MBEDTLS_ENABLE_HEAP
+MEMFAULT_METRICS_KEY_DEFINE(ncs_mbedtls_heap_total, kMemfaultMetricType_Unsigned)
+MEMFAULT_METRICS_KEY_DEFINE(ncs_mbedtls_heap_used,  kMemfaultMetricType_Unsigned)
+MEMFAULT_METRICS_KEY_DEFINE(ncs_mbedtls_heap_peak,  kMemfaultMetricType_Unsigned)
+#endif
+#endif
+```
+
+---
+
+#### Old single-file approach (deprecated)
+
+The previous pattern (`src/modules/memory/heap_monitor.c`, `CONFIG_APP_HEAP_MONITOR`,
+`CONFIG_SYS_HEAP_LISTENER=y` manually in `prj.conf`) is superseded by the
+module above. Do not use it in new projects.
+
+---
+
+**Heap Architecture Notes:**
+
+**System Heap vs Dedicated Heaps:**
+
+NCS/Zephyr uses multiple heaps:
+
+1. **`_system_heap`** (monitored by heap_monitor):
+   - General malloc/calloc/free
+   - POSIX thread allocations
+   - WPA supplicant heap (when CONFIG_NRF_WIFI_GLOBAL_HEAP=y)
+   - Sized by `CONFIG_HEAP_MEM_POOL_SIZE + <subsystem add-ons>`
+
+2. **Net Buffer Heaps** (NOT monitored):
+   - Dedicated slab pools for network packets
+   - Configured via `CONFIG_NET_BUF_RX_COUNT`, `CONFIG_NET_BUF_TX_COUNT`
+   - Separate to avoid heap fragmentation and guarantee ISR-safe allocation
+   - Cannot easily be moved to system heap without rewriting net_buf internals
+
+3. **Wi-Fi Driver Heap** (when `CONFIG_NRF_WIFI_GLOBAL_HEAP=n`):
+   - Dedicated region for firmware, DMA descriptors
+   - Provides isolation and predictable performance
+   - Use global heap only if severely memory-constrained
+
+4. **mbedTLS Heap** (`CONFIG_MBEDTLS_ENABLE_HEAP=y`):
+   - A fixed-size buffer carved out of RAM at boot, separate from `_system_heap`
+   - Sized by `CONFIG_MBEDTLS_HEAP_SIZE` — this is the **total** capacity (no add-ons)
+   - Used exclusively by mbedTLS for TLS session state, certificate chains, key material
+   - Peaks during TLS handshakes; can spike to ~70 KB on Wi-Fi/HTTPS workloads
+   - `CONFIG_MBEDTLS_MEMORY_DEBUG=y` is auto-selected by `CONFIG_HEAPS_MONITOR`
+   - Sizing: `CONFIG_MBEDTLS_HEAP_SIZE` is the only knob; there are no auto add-ons
+   - Recommended margin: 1.5× of measured peak (same as system heap for TLS workloads)
+   - Example configuration:
+     ```
+     CONFIG_MBEDTLS_ENABLE_HEAP=y
+     CONFIG_MBEDTLS_HEAP_SIZE=110592    # 150% of ~72 KB measured peak
+     ```
+
+**Why Net Buffers Don't Use System Heap:**
+- **Latency**: ISR-level networking needs lock-free allocation
+- **Fragmentation**: ~1 KB packets would fragment general heap
+- **Determinism**: Fixed-size slabs guarantee allocation success
+- **Alignment**: DMA requires strict alignment guarantees
+
+**Recommendation**: Keep net buffers dedicated; monitor `_system_heap` and mbedTLS heap separately.
+
+### Memfault Heartbeat Metrics Integration
+
+> **Already handled by the heap_monitor module** when
+> `CONFIG_APP_MEMFAULT_MODULE=y`. The section below is kept for reference
+> if you need to wire heap metrics manually in a project that does not use
+> the module.
+
+Wire heap stats into Memfault so peak usage is observable in the cloud dashboard without needing a serial terminal.
+
+**1. Define metric keys in `memfault_metrics_heartbeat_config.def`**
+
+```c
+/* Heap metrics — report total capacity, current usage, and high-water mark */
+MEMFAULT_METRICS_KEY_DEFINE(ncs_system_heap_total, kMemfaultMetricType_Unsigned)
+MEMFAULT_METRICS_KEY_DEFINE(ncs_system_heap_used,  kMemfaultMetricType_Unsigned)
+MEMFAULT_METRICS_KEY_DEFINE(ncs_system_heap_peak,  kMemfaultMetricType_Unsigned)
+#if CONFIG_MBEDTLS_ENABLE_HEAP
+MEMFAULT_METRICS_KEY_DEFINE(ncs_mbedtls_heap_total, kMemfaultMetricType_Unsigned)
+MEMFAULT_METRICS_KEY_DEFINE(ncs_mbedtls_heap_used,  kMemfaultMetricType_Unsigned)
+MEMFAULT_METRICS_KEY_DEFINE(ncs_mbedtls_heap_peak,  kMemfaultMetricType_Unsigned)
+#endif
+```
+
+**2. Populate metrics inside `heap_monitor.c` (periodic work + boot)**
+
+```c
+#ifdef CONFIG_MEMFAULT
+#include <memfault/metrics/metrics.h>
+#else
+/* Stub so the same code compiles without Memfault */
+#define MEMFAULT_METRIC_SET_UNSIGNED(...) ((void)0)
+#endif
 ```c
 /*
  * Copyright (c) 2026 Nordic Semiconductor ASA
@@ -511,13 +703,115 @@ NCS/Zephyr uses multiple heaps:
    - Provides isolation and predictable performance
    - Use global heap only if severely memory-constrained
 
+4. **mbedTLS Heap** (`CONFIG_MBEDTLS_ENABLE_HEAP=y`):
+   - A fixed-size buffer carved out of RAM at boot, separate from `_system_heap`
+   - Sized by `CONFIG_MBEDTLS_HEAP_SIZE` — this is the **total** capacity (no add-ons)
+   - Used exclusively by mbedTLS for TLS session state, certificate chains, key material
+   - Peaks during TLS handshakes; can spike to ~60 KB on Wi-Fi/HTTPS workloads
+   - Enable `CONFIG_MBEDTLS_MEMORY_DEBUG=y` to activate peak/current tracking APIs
+   - Monitoring APIs (requires `CONFIG_MBEDTLS_MEMORY_DEBUG=y`):
+     ```c
+     #include <mbedtls/memory_buffer_alloc.h>
+
+     size_t cur_used, cur_blocks;
+     size_t max_used, max_blocks;
+     mbedtls_memory_buffer_alloc_cur_get(&cur_used, &cur_blocks);
+     mbedtls_memory_buffer_alloc_max_get(&max_used, &max_blocks);
+     // Note: max_used resets between calls — call periodically and track externally
+     ```
+   - Sizing: `CONFIG_MBEDTLS_HEAP_SIZE` is the only knob; there are no auto add-ons
+   - Recommended margin: 1.5× of measured peak (same as system heap for TLS workloads)
+   - Example configuration:
+     ```
+     CONFIG_MBEDTLS_ENABLE_HEAP=y
+     CONFIG_MBEDTLS_HEAP_SIZE=90112    # 150% of ~60 KB measured peak
+     CONFIG_MBEDTLS_MEMORY_DEBUG=y     # Enable in dev; costs ~10 KB Flash
+     ```
+
 **Why Net Buffers Don't Use System Heap:**
 - **Latency**: ISR-level networking needs lock-free allocation
 - **Fragmentation**: ~1 KB packets would fragment general heap
 - **Determinism**: Fixed-size slabs guarantee allocation success
 - **Alignment**: DMA requires strict alignment guarantees
 
-**Recommendation**: Keep net buffers dedicated; only monitor `_system_heap`.
+**Recommendation**: Keep net buffers dedicated; monitor `_system_heap` and mbedTLS heap separately.
+
+### Memfault Heartbeat Metrics Integration
+
+Wire heap stats into Memfault so peak usage is observable in the cloud dashboard without needing a serial terminal.
+
+**1. Define metric keys in `memfault_metrics_heartbeat_config.def`**
+
+```c
+/* Heap metrics — report total capacity, current usage, and high-water mark */
+MEMFAULT_METRICS_KEY_DEFINE(ncs_system_heap_total, kMemfaultMetricType_Unsigned)
+MEMFAULT_METRICS_KEY_DEFINE(ncs_system_heap_used,  kMemfaultMetricType_Unsigned)
+MEMFAULT_METRICS_KEY_DEFINE(ncs_system_heap_peak,  kMemfaultMetricType_Unsigned)
+#if CONFIG_MBEDTLS_ENABLE_HEAP
+MEMFAULT_METRICS_KEY_DEFINE(ncs_mbedtls_heap_total, kMemfaultMetricType_Unsigned)
+MEMFAULT_METRICS_KEY_DEFINE(ncs_mbedtls_heap_used,  kMemfaultMetricType_Unsigned)
+MEMFAULT_METRICS_KEY_DEFINE(ncs_mbedtls_heap_peak,  kMemfaultMetricType_Unsigned)
+#endif
+```
+
+**2. Populate metrics inside `heap_monitor.c` (periodic work + boot)**
+
+```c
+#ifdef CONFIG_MEMFAULT
+#include <memfault/metrics/metrics.h>
+#else
+/* Stub so the same code compiles without Memfault */
+#define MEMFAULT_METRIC_SET_UNSIGNED(...) ((void)0)
+#endif
+
+static void update_system_heap_metrics(uint32_t total, uint32_t used, uint32_t peak)
+{
+    MEMFAULT_METRIC_SET_UNSIGNED(ncs_system_heap_total, total);
+    MEMFAULT_METRIC_SET_UNSIGNED(ncs_system_heap_used,  used);
+    MEMFAULT_METRIC_SET_UNSIGNED(ncs_system_heap_peak,  peak);
+}
+
+#if defined(CONFIG_MBEDTLS_ENABLE_HEAP) && defined(CONFIG_MBEDTLS_MEMORY_DEBUG)
+static void update_mbedtls_heap_metrics(size_t total, size_t used, size_t peak)
+{
+    MEMFAULT_METRIC_SET_UNSIGNED(ncs_mbedtls_heap_total, (uint32_t)total);
+    MEMFAULT_METRIC_SET_UNSIGNED(ncs_mbedtls_heap_used,  (uint32_t)used);
+    MEMFAULT_METRIC_SET_UNSIGNED(ncs_mbedtls_heap_peak,  (uint32_t)peak);
+}
+#endif
+
+/* Call both from periodic_heap_work_fn() and app_heap_monitor_init() */
+static void report_all_heaps(void)
+{
+    struct sys_memory_stats stats;
+    if (sys_heap_runtime_stats_get((struct sys_heap *)&_system_heap.heap, &stats) == 0) {
+        uint32_t total = (uint32_t)(stats.allocated_bytes + stats.free_bytes);
+        update_system_heap_metrics(total,
+                                   (uint32_t)stats.allocated_bytes,
+                                   (uint32_t)stats.max_allocated_bytes);
+    }
+
+#if defined(CONFIG_MBEDTLS_ENABLE_HEAP) && defined(CONFIG_MBEDTLS_MEMORY_DEBUG)
+    size_t cur_used, cur_blocks, max_used, max_blocks;
+    mbedtls_memory_buffer_alloc_cur_get(&cur_used, &cur_blocks);
+    mbedtls_memory_buffer_alloc_max_get(&max_used, &max_blocks);
+    update_mbedtls_heap_metrics(CONFIG_MBEDTLS_HEAP_SIZE, cur_used, max_used);
+#endif
+}
+```
+
+**Key architectural decisions:**
+- Metrics are set from `heap_monitor.c` (which already owns the stats calls) — no new collection path needed
+- `ncs_*_heap_total` for system heap is derived at runtime (`allocated + free`); for mbedTLS it is the compile-time constant `CONFIG_MBEDTLS_HEAP_SIZE`
+- `mbedtls_memory_buffer_alloc_max_get()` returns peak since last reset, not rolling max — call it from the periodic task to capture each window's peak
+- Guard with `#ifdef CONFIG_MEMFAULT` so the heap monitor compiles cleanly in builds without Memfault
+
+**Enable in `prj.conf`:**
+```
+# Memfault metrics (enable alongside heap monitor)
+CONFIG_MEMFAULT=y
+CONFIG_MEMFAULT_NCS_IMPLEMENTATION=y
+```
 
 ## Memory Debugging
 

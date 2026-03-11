@@ -1,0 +1,49 @@
+#
+# Module Template Kconfig
+#
+# Add this to your main Kconfig file or src/Kconfig.modules
+
+menu "Module Template"
+
+config APP_MODULE_TEMPLATE
+	bool "Enable module template"
+	default y
+	help
+	  Enable the module template.
+
+if APP_MODULE_TEMPLATE
+
+config APP_MODULE_TEMPLATE_STACK_SIZE
+	int "Module template thread stack size"
+	default 2048
+	help
+	  Stack size for the module template thread.
+
+config APP_MODULE_TEMPLATE_THREAD_PRIORITY
+	int "Module template thread priority"
+	default 7
+	help
+	  Thread priority for the module template (lower number = higher priority).
+	  Range: 0 (highest) to 14 (lowest), with wifi/network typically at 7.
+
+config APP_MODULE_TEMPLATE_WATCHDOG_TIMEOUT_SECONDS
+	int "Watchdog timeout in seconds"
+	default 60
+	help
+	  Timeout in seconds for the module watchdog.
+	  Must be greater than MSG_PROCESSING_TIMEOUT_SECONDS.
+
+config APP_MODULE_TEMPLATE_MSG_PROCESSING_TIMEOUT_SECONDS
+	int "Message processing timeout in seconds"
+	default 30
+	help
+	  Maximum time allowed for processing a single message.
+	  Must be less than WATCHDOG_TIMEOUT_SECONDS.
+
+module = APP_MODULE_TEMPLATE
+module-str = Module Template
+source "subsys/logging/Kconfig.template.log_config"
+
+endif # APP_MODULE_TEMPLATE
+
+endmenu

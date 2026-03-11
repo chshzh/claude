@@ -11,6 +11,8 @@ Quick reference checklist for conducting NCS project reviews.
 - [ ] Identify target board/platform
 - [ ] Review project documentation
 - [ ] Run automated check script: `./check_project.sh`
+- [ ] Check for PRD.md (business requirements)
+- [ ] Check for openspec/ directory (technical specs)
 
 ---
 
@@ -20,6 +22,8 @@ Quick reference checklist for conducting NCS project reviews.
 - [ ] CMakeLists.txt present and valid
 - [ ] Kconfig present with options
 - [ ] prj.conf with basic configs
+- [ ] PRD.md present (business requirements)
+- [ ] openspec/ directory present (technical specs)
 - [ ] src/main.c exists
 - [ ] README.md complete
 - [ ] LICENSE file present (Nordic 5-Clause)
@@ -43,7 +47,7 @@ Quick reference checklist for conducting NCS project reviews.
 - [ ] All required files present
 - [ ] Optional files appropriate
 - [ ] Directory structure organized
-- [ ] Copyright headers on all files
+- [ ] Copyright headers on all files (**current year** for new/modified files, e.g. 2026)
 - [ ] SPDX identifiers correct
 
 ### Core Files (30 min)
@@ -195,6 +199,7 @@ Quick reference checklist for conducting NCS project reviews.
 - ❌ No .gitignore → Copy from template
 - ⚠️  Build artifacts committed → Add to .gitignore
 - ⚠️  No board directory → Create if board-specific configs needed
+- ⚠️  Copyright year outdated → Use **current year** (e.g. 2026) in new or substantially modified files; keep original year for unmodified upstream files
 
 ### CMakeLists.txt
 - ❌ No minimum version → Add `cmake_minimum_required(VERSION 3.20.0)`
@@ -295,7 +300,7 @@ Quick reference checklist for conducting NCS project reviews.
 ## Review Report Delivery
 
 ### Report Format
-- Use QA_REPORT_TEMPLATE.md
+- Use QA_TEMPLATE.md
 - Include all sections
 - Provide specific examples
 - Give actionable recommendations

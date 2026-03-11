@@ -1,0 +1,61 @@
+# Copyright (c) 2024 Nordic Semiconductor ASA
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+
+menuconfig MODULE_TEMPLATE
+	bool "Enable Module Template (Simple Multi-Threaded)"
+	default n
+	help
+	  Enable the simple multi-threaded module template.
+	  This uses traditional RTOS patterns with message queues,
+	  semaphores, and mutexes.
+
+if MODULE_TEMPLATE
+
+config MODULE_TEMPLATE_STACK_SIZE
+	int "Module thread stack size"
+	default 2048
+	help
+	  Stack size for the module thread in bytes.
+	  Increase if experiencing stack overflow.
+	  Typical range: 1024-4096 bytes.
+
+config MODULE_TEMPLATE_PRIORITY
+	int "Module thread priority"
+	default 7
+	range 0 14
+	help
+	  Thread priority (0 = highest, 14 = lowest cooperative threads).
+	  Default: 7 (medium priority)
+	  - Use lower numbers (0-6) for time-critical operations
+	  - Use higher numbers (8-14) for background tasks
+
+module = MODULE_TEMPLATE
+module-str = Module Template Simple
+source "subsys/logging/Kconfig.template.log_config"
+
+config MODULE_TEMPLATE_MSGQ_SIZE
+	int "Message queue size"
+	default 10
+	range 1 100
+	help
+	  Number of messages that can be queued.
+	  Increase if messages are being dropped.
+	  Each message consumes RAM.
+
+config MODULE_TEMPLATE_OPERATION_TIMEOUT_SEC
+	int "Operation timeout in seconds"
+	default 5
+	range 1 60
+	help
+	  Timeout for blocking operations (init, start, stop).
+	  Adjust based on expected operation duration.
+
+# Add module-specific configurations below
+# Example:
+# config MODULE_TEMPLATE_ENABLE_FEATURE_X
+#	bool "Enable feature X"
+#	default n
+#	help
+#	  Enable additional feature X.
+
+endif # MODULE_TEMPLATE

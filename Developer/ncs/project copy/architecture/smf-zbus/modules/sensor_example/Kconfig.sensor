@@ -1,0 +1,36 @@
+#
+# Copyright (c) 2024 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+menu "Sensor Module"
+
+config APP_SENSOR_STACK_SIZE
+	int "Sensor module thread stack size"
+	default 2048
+
+config APP_SENSOR_PRIORITY
+	int "Sensor module thread priority"
+	default 7
+	range 0 14
+
+config APP_SENSOR_SAMPLE_INTERVAL_SECONDS
+	int "Sensor sampling interval in seconds"
+	default 10
+	help
+	  Time between sensor readings when sampling is active.
+
+config APP_SENSOR_MSG_PROCESSING_TIMEOUT_SECONDS
+	int "Message processing timeout in seconds"
+	default 30
+
+config APP_SENSOR_WATCHDOG_TIMEOUT_SECONDS
+	int "Watchdog timeout in seconds"
+	default 60
+
+module = APP_SENSOR
+module-str = Sensor
+source "subsys/logging/Kconfig.template.log_config"
+
+endmenu # Sensor Module

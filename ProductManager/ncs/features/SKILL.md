@@ -9,6 +9,14 @@ parent: ncs-project
 
 Modular feature overlays for Nordic NCS projects - choose any combination of 12 features.
 
+## Documentation Strategy
+
+**PRD.md** (Product Manager responsibility):
+- ✅ Business requirements and feature selection (the "what" and "why")
+- ✅ User stories and acceptance criteria
+- ✅ Success metrics and target users
+- ✅ High-level architecture (pattern selection)
+
 ## 🎯 Feature Categories
 
 ### Wi-Fi Features
@@ -28,7 +36,7 @@ When reviewing PRDs or QA reports, verify these four items exist; otherwise the 
 
 ## 🧪 Lessons from SoftAP Webserver QA
 
-- **Lock down networking facts** – PRD.md, README.md, QA_REPORT.md, and REST samples must all cite the same SoftAP subnet (`192.168.7.0/24` with gateway `192.168.7.1`). Any drift confuses testers and customers.
+- **Lock down networking facts** – PRD.md, README.md, QA.md, and REST samples must all cite the same SoftAP subnet (`192.168.7.0/24` with gateway `192.168.7.1`). Any drift confuses testers and customers.
 - **Template credentials** – Require an `overlay-wifi-credentials.conf.template` (or similar) in every Wi-Fi project, documented in Quick Start instructions, with the real overlay `.gitignored`. Reject PRs that log or commit passwords.
 - **Per-board capability matrices** – Capture button/LED counts per development kit directly in PRD acceptance criteria so QA can score features accurately when firmware targets multiple boards.
 - **Automation is a gate** – Treat `ProductManager/ncs/review/check_project.sh` as blocking. Feature work pauses until the script runs clean, otherwise every QA cycle repeats the same manual findings.
@@ -39,6 +47,23 @@ When reviewing PRDs or QA reports, verify these four items exist; otherwise the 
   (See [Developer protocols skill](../../../Developer/ncs/project/protocols/SKILL.md))
 
 ### Advanced Features
+
+**Heap Monitor** — Runtime heap tracking with standardised logs and Memfault metrics:
+```kconfig
+# prj.conf
+CONFIG_HEAPS_MONITOR=y
+CONFIG_HEAPS_MONITOR_LOG_LEVEL_INF=y
+```
+- Flash: ~+2 KB, RAM: negligible (static state vars only)
+- Auto-detects system heap (`HEAP_MEM_POOL_SIZE > 0`) and mbedTLS heap (`MBEDTLS_ENABLE_HEAP=y`)
+- Auto-selects required low-level Zephyr/mbedTLS stats options — no manual `prj.conf` wiring needed
+- Emits standardised periodic log lines every 30 s (configurable):
+  ```
+  <inf> heap_monitor: System Heap: used=51712/98304 (52%) blocks=n/a, peak=64752/98304 (65%), peak_blocks=n/a
+  <inf> heap_monitor: mbedTLS Heap: used=19136/110592 (17%) blocks=49, peak=72684/110592 (65%), peak_blocks=197
+  ```
+- When `CONFIG_APP_MEMFAULT_MODULE=y` automatically updates `ncs_system_heap_*` and `ncs_mbedtls_heap_*` Memfault heartbeat metrics
+- Reference: copy `src/modules/heap_monitor/` from `ncs-project-logo`
 
 **Memfault** - Cloud monitoring, debugging, and OTA:
 ```bash
@@ -65,6 +90,12 @@ cp ~/.claude/skills/ProductManager/ncs/features/overlays/overlay-wifi-shell.conf
 - Commands: wifi scan, connect, disconnect, stats
 
 ## 📖 Complete Documentation
+
+**OpenSpec specs/** (Developer responsibility):
+- ✅ Technical implementation details (the "how")
+- ✅ Module architecture and state machines
+- ✅ API specifications and sequence diagrams
+- ✅ See `openspec/specs/` for module-level documentation
 
 **[FEATURE_SELECTION.md](features/FEATURE_SELECTION.md)** (~15,000 tokens)
 - Detailed docs for all 12 features

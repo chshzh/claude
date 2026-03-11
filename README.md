@@ -51,7 +51,7 @@ Checklists, report templates, and automation scripts for validating builds again
 - Location: `ProductManager/ncs/review/`
 - Highlights:
 	- [CHECKLIST.md](ProductManager/ncs/review/CHECKLIST.md)
-	- [QA_REPORT_TEMPLATE.md](ProductManager/ncs/review/QA_REPORT_TEMPLATE.md)
+	- [QA_TEMPLATE.md](ProductManager/ncs/review/QA_TEMPLATE.md)
 	- [check_project.sh](ProductManager/ncs/review/check_project.sh)
 
 ## 🚀 Usage

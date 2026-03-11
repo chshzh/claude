@@ -95,15 +95,23 @@ echo ""
 echo -e "${BLUE}3. Copyright Headers Check${NC}"
 echo "-----------------------------------"
 
-# Check C source files for copyright
+# Check C source files for copyright. Use CURRENT YEAR (e.g. 2026) for new or
+# substantially modified files; keep original year for unmodified upstream files.
 c_files_count=0
 c_files_with_copyright=0
+current_year=$(date +%Y)
+files_old_year=""
 
 if [ -d "src" ]; then
     while IFS= read -r -d '' file; do
         ((c_files_count++))
         if head -n 10 "$file" | grep -q "Copyright"; then
             ((c_files_with_copyright++))
+            # Warn if copyright year is not current (e.g. 2025 when current is 2026)
+            year_in_file=$(head -n 10 "$file" | grep -oE "Copyright \(c\) [0-9]{4}" | head -1 | grep -oE "[0-9]{4}")
+            if [ -n "$year_in_file" ] && [ "$year_in_file" -lt "$current_year" ] 2>/dev/null; then
+                files_old_year="${files_old_year}${file} (${year_in_file})\n"
+            fi
         fi
     done < <(find src -type f \( -name "*.c" -o -name "*.h" \) -print0)
     
@@ -113,6 +121,9 @@ if [ -d "src" ]; then
         print_warning "$c_files_with_copyright of $c_files_count files have copyright headers"
     else
         print_critical "No copyright headers found in source files"
+    fi
+    if [ -n "$files_old_year" ]; then
+        print_warning "Some source files have copyright year before $current_year; use current year for new or substantially modified files"
     fi
 else
     print_critical "src/ directory not found"
