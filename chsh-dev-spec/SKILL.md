@@ -97,6 +97,7 @@ modules:
 
 Use `OVERVIEW_TEMPLATE.md` as the base. Fill in:
 
+- **PRD Version**: read the latest entry from `docs/product/PRD.md`'s Changelog table and copy its timestamp into the `PRD Version` field of Document Information. Do the same for every spec file generated.
 - **Spec Index**: list every spec file to be generated, with a one-line description and the PRD sections it covers
 - **Architecture Summary**: pattern choice (SMF+Zbus vs multi-threaded) and the top 3–5 design decisions with rationale
 - **PRD-to-Spec Mapping**: table mapping each FR/NFR to the spec file that implements it
@@ -163,9 +164,10 @@ Present the impact analysis to the user before making changes.
 
 For each impacted spec file:
 
+- Update the `PRD Version` field in Document Information to the new PRD Changelog timestamp.
 - Apply the PRD change to the relevant section (state machine, Kconfig, API, etc.).
-- Add a new row to the spec's **Revision History** table:
-  `| <today> | <version+1> | <author> | <summary of change> |`
+- Add a new row to the spec's **Changelog** table:
+  `| YYYY-MM-DD-HH-MM | Updated to PRD v<timestamp>: <summary of change> |`
 - If a module is newly added, generate its spec from `MODULE_TEMPLATE.md`.
 - If a module is removed, mark it `[DEPRECATED]` in the header; do not delete.
 
@@ -236,5 +238,6 @@ Every document produced by this skill must include a **Changelog** table near th
 Rules:
 - Version is a timestamp `YYYY-MM-DD-HH-MM` (e.g. `2026-04-09-14-30`) — includes time so multiple edits on the same day are distinguishable.
 - Never delete rows; the table is append-only.
-- Keep the summary short — one line describing what changed.
+- Keep the summary short — one line describing what changed. When the change is driven by a PRD update, include the PRD version: `Updated to PRD v2026-04-09-10-00: added P2P mode`.
+- The `PRD Version` field in Document Information always reflects the PRD Changelog timestamp this spec was written against.
 - Git tracks the actual diff; the Changelog is the human-readable log.
