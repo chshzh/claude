@@ -4,6 +4,13 @@ Personal collection of specialized skills for development workflows with Claude.
 
 ## 📦 Skills Overview
 
+### Workflow Orchestrator
+
+#### `chsh-ncs-workflow` — Full Lifecycle Orchestrator
+Single entry point for any NCS project. Scans project state, shows a status dashboard,
+and guides through each phase — invoking the right skill at each step.
+- Entry: [SKILL.md](chsh-ncs-workflow/SKILL.md)
+
 ### Developer Skills
 
 #### `chsh-dev-commit` — Git Commit Workflow
@@ -48,12 +55,14 @@ Changes are tracked via a Revision History table inside the document (no dated f
 - Entry: [SKILL.md](chsh-pm-prd/SKILL.md)
 - Template: [PRD_TEMPLATE.md](chsh-pm-prd/PRD_TEMPLATE.md)
 
-#### `chsh-pm-review` — NCS Project Review & QA
-Checklists, report templates, and automation scripts for validating builds against the PRD.
+#### `chsh-pm-review` — QA & Functional Test (Phase 4)
+Generates two reports: a QA Report (code quality, no hardware) and a Test Report
+(PRD acceptance criteria pass/fail, hardware required).
 - Entry: [SKILL.md](chsh-pm-review/SKILL.md)
 - Key assets:
+	- [QA_TEMPLATE.md](chsh-pm-review/QA_TEMPLATE.md) — code quality review
+	- [TEST_TEMPLATE.md](chsh-pm-review/TEST_TEMPLATE.md) — PRD acceptance criteria testing
 	- [CHECKLIST.md](chsh-pm-review/CHECKLIST.md)
-	- [QA_TEMPLATE.md](chsh-pm-review/QA_TEMPLATE.md)
 	- [check_project.sh](chsh-pm-review/check_project.sh)
 
 ### Writing Skills
@@ -80,6 +89,7 @@ Mention the skill name in your request, for example:
 
 ```
 skills/
+├── chsh-ncs-workflow/     Full lifecycle orchestrator (entry point)
 ├── chsh-dev-commit/       Git commit workflow
 ├── chsh-dev-mem-opt/      Memory optimization
 ├── chsh-dev-spec/         Technical design — specs from PRD
@@ -97,7 +107,7 @@ skills/
 │   ├── templates/
 │   └── guides/
 ├── chsh-pm-prd/           PRD authoring (SKILL.md + PRD_TEMPLATE.md)
-├── chsh-pm-review/        Project review & QA
+├── chsh-pm-review/        QA report + functional test report
 ├── chsh-txt-review/       Text / message review
 ├── NCS-Project-WORKFLOW.md  Cross-skill lifecycle reference
 ├── README.md

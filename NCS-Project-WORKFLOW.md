@@ -1,7 +1,10 @@
 # Skills Workflow — NCS Project Lifecycle
 
-This document describes the end-to-end workflow connecting the four project skills.
+This document describes the end-to-end workflow connecting the project skills.
 It is a coordination reference; each skill has its own detailed instructions.
+
+> **Start here**: Use **`chsh-ncs-workflow`** as the single entry point.
+> It scans the project state and guides you to the right phase automatically.
 
 ---
 
@@ -51,21 +54,26 @@ It is a coordination reference; each skill has its own detailed instructions.
                             │ Implementation done → triggers Phase 4
                             ▼
 ┌────────────────────────────────────────────────────────────────┐
-│  PHASE 4 — QA REVIEW                  skill: chsh-pm-review    │
+│  PHASE 4 — QA & FUNCTIONAL TEST       skill: chsh-pm-review    │
 │                                                                 │
-│  Reviewer validates implementation against both PRD and specs: │
-│  • Does code meet PRD acceptance criteria?                     │
-│  • Does code match the engineering specs?                      │
+│  Part A — QA Report (no hardware needed):                      │
+│  • Code quality: structure, config, coding standards, security │
 │  • Automated check: chsh-pm-review/check_project.sh            │
 │  • Manual review: chsh-pm-review/CHECKLIST.md                  │
+│  • Output: docs/qa/QA-YYYY-MM-DD-HH-MM.md (0–100 score)       │
+│                                                                 │
+│  Part B — Test Report (hardware required):                     │
+│  • One test case per PRD acceptance criterion (TC-XXX-YY)      │
+│  • UART log evidence per test case                             │
+│  • NFR measurements vs targets                                 │
+│  • Output: docs/qa/TEST-YYYY-MM-DD-HH-MM.md (pass/fail)       │
 │                                                                 │
 │  Input:  code + docs/product/PRD.md + docs/engineering/        │
-│  Output: docs/qa/QA-YYYY-MM-DD.md (scored, with issues)        │
 │                                                                 │
 │  Issues loop back:                                             │
-│  • P0 critical issue → fix immediately (Phase 3)              │
-│  • New requirement → update PRD (Phase 1)                      │
-│  • Design change → update spec (Phase 2)                       │
+│  • P0 code bug → fix immediately (Phase 3)                     │
+│  • Spec gap → update spec (Phase 2)                            │
+│  • New/changed requirement → update PRD (Phase 1)              │
 └────────────────────────────────────────────────────────────────┘
 ```
 
@@ -110,10 +118,12 @@ docs/qa/QA-2026-05-01.md
 | Document | Location | Owned by | Answers |
 |----------|----------|----------|---------|
 | `PRD.md` | `docs/product/` | Product Manager | What & why — features, behaviour, success metrics |
+| `overview.md` | `docs/engineering/specs/` | Developer Engineer | Spec index, PRD-to-spec map, design decisions |
 | `architecture.md` | `docs/engineering/specs/` | Developer Engineer | System design, module map, memory budget |
 | `<module>.md` | `docs/engineering/specs/` | Developer Engineer | How — state machines, Kconfig, APIs |
 | `config.yaml` | `docs/engineering/` | Developer Engineer | Project context fed to chsh-dev-project |
-| `QA-YYYY-MM-DD.md` | `docs/qa/` | Reviewer / PM | Scores, issues, pass/fail verdict |
+| `QA-YYYY-MM-DD-HH-MM.md` | `docs/qa/` | Reviewer / PM | Code quality score (0–100), issues |
+| `TEST-YYYY-MM-DD-HH-MM.md` | `docs/qa/` | Tester / PM | PRD acceptance criteria pass/fail, UART evidence |
 
 **Division of responsibility:**
 - PRD describes behaviour in user terms — no Kconfig flags, no memory numbers.
@@ -140,9 +150,10 @@ docs/qa/QA-2026-05-01.md
 
 | Skill | Invoke when | Output |
 |-------|-------------|--------|
-| `chsh-pm-prd` | Defining or updating product requirements | `docs/product/PRD.md` (new revision row) |
-| `chsh-dev-spec` | Translating PRD to engineering specs | `docs/engineering/specs/*.md` (new revision rows) |
+| `chsh-ncs-workflow` | **Starting any project work** — scans state, routes to right phase | Status dashboard + phase guidance |
+| `chsh-pm-prd` | Defining or updating product requirements | `docs/product/PRD.md` (new Changelog row) |
+| `chsh-dev-spec` | Translating PRD to engineering specs | `docs/engineering/specs/*.md` (new Changelog rows) |
 | `chsh-dev-project` | Implementing code from specs | `src/modules/`, `prj.conf`, passing build |
-| `chsh-pm-review` | Validating a build against PRD and specs | `docs/qa/QA-YYYY-MM-DD.md` |
+| `chsh-pm-review` | Validating a build against PRD and specs | `docs/qa/QA-*.md` + `docs/qa/TEST-*.md` |
 | `chsh-dev-commit` | Preparing git commits | Clean, logical commit history |
 | `chsh-dev-mem-opt` | Diagnosing memory usage | Heap / stack recommendations |
