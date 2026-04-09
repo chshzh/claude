@@ -227,14 +227,14 @@ Every document produced by this skill must include a **Changelog** table near th
 ```markdown
 ## Changelog
 
-| Version    | Summary of changes          |
-|------------|-----------------------------|
-| YYYY-MM-DD | Initial design              |
-| YYYY-MM-DD | Updated wifi state machine  |
+| Version          | Summary of changes          |
+|------------------|-----------------------------|
+| YYYY-MM-DD-HH-MM | Initial design              |
+| YYYY-MM-DD-HH-MM | Updated wifi state machine  |
 ```
 
 Rules:
-- Version is the date the change was made (`YYYY-MM-DD`).
+- Version is a timestamp `YYYY-MM-DD-HH-MM` (e.g. `2026-04-09-14-30`) — includes time so multiple edits on the same day are distinguishable.
 - Never delete rows; the table is append-only.
 - Keep the summary short — one line describing what changed.
 - Git tracks the actual diff; the Changelog is the human-readable log.

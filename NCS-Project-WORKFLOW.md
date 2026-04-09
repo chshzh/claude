@@ -79,20 +79,19 @@ It is a coordination reference; each skill has its own detailed instructions.
 filename and track change history in a built-in table:
 
 ```markdown
-## Revision History
+## Changelog
 
-| Date       | Version | Author | Summary                        |
-|------------|---------|--------|--------------------------------|
-| 2026-04-09 | 1.0     | Alice  | Initial draft                  |
-| 2026-04-15 | 1.1     | Alice  | Added P2P mode requirements    |
-| 2026-04-20 | 1.2     | Bob    | Revised success metrics        |
+| Version          | Summary of changes              |
+|------------------|---------------------------------|
+| 2026-04-09-10-00 | Initial draft                   |
+| 2026-04-15-14-30 | Added P2P mode requirements     |
+| 2026-04-20-09-15 | Revised success metrics         |
 ```
 
 Rules:
-- Version: increment MINOR for small changes, MAJOR for architectural changes.
-- Date: ISO 8601 (`YYYY-MM-DD`).
+- Version is a timestamp `YYYY-MM-DD-HH-MM` — includes time so multiple edits on the same day are distinguishable.
 - Never delete rows — the table is append-only.
-- Git provides the actual diff; the table is the human-readable log.
+- Git provides the actual diff; the Changelog is the human-readable log.
 
 ### Audit snapshots — dated filenames
 

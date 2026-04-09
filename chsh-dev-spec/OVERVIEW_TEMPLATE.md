@@ -5,7 +5,7 @@
 | Field | Value |
 |-------|-------|
 | Project | |
-| Version | YYYY-MM-DD |
+| Version | YYYY-MM-DD-HH-MM |
 | Author | |
 | NCS Version | e.g. v3.2.4 |
 | Target Board(s) | e.g. nRF7002DK |
@@ -17,7 +17,7 @@
 
 | Version | Summary of changes |
 |---|---|
-| YYYY-MM-DD | Initial overview |
+| YYYY-MM-DD-HH-MM | Initial overview |
 
 ---
 

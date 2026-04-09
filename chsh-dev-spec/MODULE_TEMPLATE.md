@@ -5,7 +5,7 @@
 | Field | Value |
 |-------|-------|
 | Module | |
-| Version | YYYY-MM-DD |
+| Version | YYYY-MM-DD-HH-MM |
 | Author | |
 | Status | Draft |
 
@@ -15,7 +15,7 @@
 
 | Version | Summary of changes |
 |---|---|
-| YYYY-MM-DD | Initial module spec |
+| YYYY-MM-DD-HH-MM | Initial module spec |
 
 ---
 

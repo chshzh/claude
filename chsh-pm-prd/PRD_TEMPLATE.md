@@ -5,7 +5,7 @@
 | Field | Value |
 |---|---|
 | Product Name | |
-| Version | YYYY-MM-DD |
+| Version | YYYY-MM-DD-HH-MM |
 | Previous Version | — |
 | Status | Draft |
 | Product Manager | |
@@ -18,7 +18,7 @@
 
 | Version | Summary of changes |
 |---|---|
-| YYYY-MM-DD | Initial version |
+| YYYY-MM-DD-HH-MM | Initial version |
 
 ---
 

@@ -91,6 +91,21 @@ For each spec in `docs/engineering/specs/` (skip `architecture.md`):
 
 Contains all shared Zbus message structs from `architecture.md`.
 
+### A4b. Record spec version in `src/main.c`
+
+Read the latest version timestamp from `docs/engineering/specs/overview.md`'s Changelog
+table and embed it as a startup log line so every UART capture is traceable to its spec:
+
+```c
+/* Spec version from docs/engineering/specs/overview.md */
+#define SPECS_VERSION "YYYY-MM-DD-HH-MM"
+
+/* In main() or SYS_INIT entry: */
+LOG_INF("<project> built from specs v" SPECS_VERSION);
+```
+
+Update this define whenever `chsh-dev-spec` adds a new Changelog entry to `overview.md`.
+
 ### A5. Build and verify
 
 ```bash
@@ -134,6 +149,7 @@ For each changed spec:
 ### B3. Implement the changes
 
 Apply only the code changes required by the spec delta — do not refactor unrelated code.
+Update `SPECS_VERSION` in `src/main.c` to the latest timestamp from `overview.md`'s Changelog.
 
 ### B4. Build and verify
 

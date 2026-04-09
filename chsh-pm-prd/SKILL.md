@@ -169,7 +169,7 @@ After any mode:
 1. Update `docs/product/PRD.md` using `PRD_TEMPLATE.md` as the structure.
 2. Add a new row to the **Revision History** table at the bottom of the document:
    ```markdown
-   | YYYY-MM-DD | <version+0.1> | <author> | <one-line summary of changes> |
+   | YYYY-MM-DD-HH-MM | <one-line summary of changes> |
    ```
 3. Confirm: *"PRD updated. New revision added to Revision History."*
 
