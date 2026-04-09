@@ -1,12 +1,25 @@
-# NCS Project Quality Assurance Report
+# NCS Project Quality Assurance Report — <Project Name>
 
-**Project Name**: _________________________  
-**Project Repository**: _________________________  
-**Review Date**: _________________________  
-**Reviewer(s)**: _________________________  
-**NCS Version**: _________________________  
-**Project Version**: _________________________  
-**Board/Platform**: _________________________  
+## Document Information
+
+| Field | Value |
+|-------|-------|
+| Project | |
+| Version | YYYY-MM-DD-HH-MM |
+| PRD Version | YYYY-MM-DD-HH-MM |
+| Specs Version | YYYY-MM-DD-HH-MM |
+| Reviewer | |
+| NCS Version | e.g. v3.2.4 |
+| Board / Platform | e.g. nRF7002DK |
+| Status | Draft / Pass / Fail |
+
+---
+
+## Changelog
+
+| Version | Summary of changes |
+|---|---|
+| YYYY-MM-DD-HH-MM | Initial QA review |
 
 ---
 

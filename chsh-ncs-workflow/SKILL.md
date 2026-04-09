@@ -56,7 +56,7 @@ status dashboard, and guides you through each phase — invoking the right skill
                             │ Implementation done → triggers Phase 4
                             ▼
 ┌────────────────────────────────────────────────────────────────┐
-│  PHASE 4 — QA & FUNCTIONAL TEST       skill: chsh-pm-review    │
+│  PHASE 4 — QA & FUNCTIONAL TEST       skill: chsh-qa-test    │
 │                                                                 │
 │  Test Report (always):                                         │
 │  • One TC per PRD acceptance criterion, UART evidence          │
@@ -172,18 +172,18 @@ Each spec's `PRD Version` field must match the latest PRD Changelog timestamp.
 - Passing `west build`
 
 **On completion**, ask:
-> "Implementation done. Proceed to **Phase 4 — QA & Test** with chsh-pm-review? (yes / stop)"
+> "Implementation done. Proceed to **Phase 4 — QA & Test** with chsh-qa-test? (yes / stop)"
 
 ---
 
-## Phase 4 — QA & Test  `skill: chsh-pm-review`
+## Phase 4 — QA & Test  `skill: chsh-qa-test`
 
 **Enter Phase 4 when:**
 - Implementation is complete or updated
 - Before any release or demo
 - After any merge to main
 
-**Run:** Load skill **chsh-pm-review** and follow its workflow.
+**Run:** Load skill **chsh-qa-test** and follow its workflow.
 
 | Document | When | Hardware? |
 |----------|------|-----------|
@@ -277,6 +277,6 @@ docs/QA-2026-04-09-14-30.md
 | `chsh-pm-prd` | Defining or updating product requirements | `docs/PRD.md` |
 | `chsh-dev-spec` | Translating PRD to engineering specs | `docs/specs/*.md` |
 | `chsh-dev-project` | Implementing code from specs | `src/`, `prj.conf`, passing build |
-| `chsh-pm-review` | Validating a build against PRD and specs | `TEST-*.md` + `QA-*.md` |
+| `chsh-qa-test` | Validating a build against PRD and specs | `TEST-*.md` + `QA-*.md` |
 | `chsh-dev-commit` | Preparing git commits | Clean, logical commit history |
 | `chsh-dev-mem-opt` | Diagnosing memory usage | Heap / stack recommendations |

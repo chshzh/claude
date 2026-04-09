@@ -1,9 +1,9 @@
 ---
-name: chsh-pm-review
-description: Phase 4 of the NCS project lifecycle. Generates two documents: a QA Report (code quality, 0-100 score, no hardware needed) and a Test Report (PRD acceptance criteria pass/fail, hardware required). Use when validating a build against PRD and specs.
+name: chsh-qa-test
+description: Phase 4 of the NCS project lifecycle. Generates a Test Report (PRD acceptance criteria pass/fail, hardware required, always) and optionally a QA Report (code quality 0-100, no hardware, release/demo only). Use when validating a build against PRD and specs.
 ---
 
-# chsh-pm-review — QA & Functional Test
+# chsh-qa-test — QA & Functional Test
 
 Phase 4 of the NCS project lifecycle. Validates that the implementation is both
 well-built (QA Report) and behaves as the PRD requires (Test Report).
@@ -23,56 +23,22 @@ Before starting, verify:
 
 ```bash
 cat docs/PRD.md                          # acceptance criteria source
-ls docs/specs/overview.md            # spec version reference
-grep "SPECS_VERSION" src/main.c                  # firmware spec version
-west build --build-dir build/ 2>&1 | tail -5     # confirm build is clean
+ls docs/specs/overview.md                # spec version reference
+grep "SPECS_VERSION" src/main.c          # firmware spec version
+west build --build-dir build/ 2>&1 | tail -5   # confirm build is clean
 ```
 
-Note the PRD Changelog version and Specs overview Changelog version — both go into the
+Note the PRD Changelog version and specs overview Changelog version — both go into the
 Document Information of each report.
 
 ---
 
-## Part A — QA Report (Code Quality) — *Release/Demo Only*
-
-**No hardware required. AI reviews code and documents.**
-**Skip this part for routine development cycles. Run before any release or demo.**
-
-### A1. Run automated check
-
-```bash
-~/.claude/skills/chsh-pm-review/check_project.sh /path/to/project
-```
-
-### A2. Manual review — follow `CHECKLIST.md`
-
-Score each category systematically.
-
-### A3. Generate `docs/QA-YYYY-MM-DD-HH-MM.md`
-
-Use `QA_TEMPLATE.md` as the base. Fill in all sections:
-
-- Project structure (required files, directory layout)
-- Core files quality (CMakeLists.txt, Kconfig, prj.conf, main.c)
-- Configuration (Wi-Fi config, build config)
-- Code quality (coding standards, error handling, memory, thread safety)
-- Documentation (README, code comments)
-- Wi-Fi implementation (mode-specific correctness, event handling)
-- Security (credentials, network security, debug features)
-- Build verification (clean build, no warnings, binary size)
-
-**Do NOT include PRD acceptance criterion testing here** — that goes in the Test Report.
-
-Record the overall score (0–100) and verdict (PASS / PASS WITH ISSUES / REWORK / FAIL).
-
----
-
-## Part B — Test Report (Functional Testing) — *Always Required*
+## Part A — Test Report (Functional Testing) — *Always Required*
 
 **Hardware required. Run firmware on the target board.**
 **Run after every implementation cycle — this is the proof that the PRD is satisfied.**
 
-### B1. Flash the firmware
+### A1. Flash the firmware
 
 ```bash
 west flash --build-dir build/
@@ -80,14 +46,14 @@ west flash --build-dir build/
 
 Open a serial monitor and capture the boot log.
 
-### B2. Map PRD acceptance criteria to test cases
+### A2. Map PRD acceptance criteria to test cases
 
 Read `docs/PRD.md`. For every FR and NFR:
 - Extract all acceptance criteria lines
 - Assign each a TC ID: `TC-<FR number>-<sequence>` (e.g. `TC-001-01`)
 - List them in the Test Report before starting any testing
 
-### B3. Execute each test case
+### A3. Execute each test case
 
 For each TC:
 1. Follow the acceptance criterion literally
@@ -99,10 +65,11 @@ For failures, record expected vs actual behaviour and suggest routing:
 - Spec gap → Phase 2
 - Missing PRD requirement → Phase 1
 
-### B4. Generate `docs/TEST-YYYY-MM-DD-HH-MM.md`
+### A4. Generate `docs/TEST-YYYY-MM-DD-HH-MM.md`
 
 Use `TEST_TEMPLATE.md` as the base. Fill in:
 - Document Information (PRD Version, Specs Version, firmware build timestamp)
+- Changelog entry for this run
 - Summary table (total / passed / failed / blocked)
 - Results grouped by FR
 - NFR measurements with targets vs actuals
@@ -111,19 +78,42 @@ Use `TEST_TEMPLATE.md` as the base. Fill in:
 
 ---
 
+## Part B — QA Report (Code Quality) — *Release/Demo Only*
+
+**No hardware required. AI reviews code and documents.**
+**Skip for routine development cycles. Run before any release or demo.**
+
+### B1. Review code systematically
+
+Score each category:
+- Project structure (required files, directory layout)
+- Core files quality (CMakeLists.txt, Kconfig, prj.conf, main.c)
+- Configuration (Wi-Fi config, build config)
+- Code quality (coding standards, error handling, memory, thread safety)
+- Documentation (README, code comments)
+- Wi-Fi implementation (mode-specific correctness, event handling)
+- Security (credentials, network security, debug features)
+- Build verification (clean build, no warnings, binary size)
+
+### B2. Generate `docs/QA-YYYY-MM-DD-HH-MM.md`
+
+Use `QA_TEMPLATE.md` as the base. Fill in all sections.
+Record the overall score (0–100) and verdict (PASS / PASS WITH ISSUES / REWORK / FAIL).
+
+---
+
 ## Part C — Review Summary & Routing
 
-After generating the Test Report (and QA Report if applicable), present a combined summary:
+After generating the report(s), present a combined summary:
 
 ```
 ═══════════════════════════════════════════════
   PHASE 4 REVIEW SUMMARY
 ═══════════════════════════════════════════════
-  QA Score:    ___/100  [PASS / REWORK / FAIL]
   Test Result: __/__TCs passed  [PASS / FAIL]
+  QA Score:    ___/100  [PASS / REWORK / FAIL]  ← if run
 ═══════════════════════════════════════════════
   Critical issues requiring action:
-  • [P0] <issue> → route to Phase <N>
   • [P0] <issue> → route to Phase <N>
 ═══════════════════════════════════════════════
 ```
@@ -162,22 +152,19 @@ Then ask:
 
 | File | Purpose |
 |------|---------|
-| `QA_TEMPLATE.md` | Code quality review template (Part A output) |
-| `TEST_TEMPLATE.md` | Functional test report template (Part B output) |
-| `CHECKLIST.md` | Manual review checklist for QA scoring |
-| `check_project.sh` | Automated project health check script |
-| `IMPROVEMENT_GUIDE.md` | How to feed review findings back into templates |
+| `QA_TEMPLATE.md` | Code quality review template (Part B output) |
+| `TEST_TEMPLATE.md` | Functional test report template (Part A output) |
 
 ## Document Conventions
 
-- **QA Report**: `docs/QA-YYYY-MM-DD-HH-MM.md` — code quality audit snapshot
 - **Test Report**: `docs/TEST-YYYY-MM-DD-HH-MM.md` — functional test snapshot
-- Both are dated snapshots (not living documents); keep all runs for history
-- Reference the PRD Changelog version and Specs overview version in both headers
+- **QA Report**: `docs/QA-YYYY-MM-DD-HH-MM.md` — code quality audit snapshot
+- Both are dated snapshots; keep all runs for history
+- Both include PRD Version and Specs Version in Document Information for traceability
 
 ## Related Skills
 
 - `chsh-ncs-workflow` — full lifecycle orchestrator; routes back here after Phase 3
 - `chsh-pm-prd` — update `docs/PRD.md` if requirements need changing
-- `chsh-dev-spec` — update engineering specs if design gaps are found
+- `chsh-dev-spec` — update `docs/specs/` if design gaps are found
 - `chsh-dev-project` — fix code for P0 issues

@@ -114,7 +114,7 @@ Fix build errors. Verify that UART output matches the test points listed in each
 
 ### A6. Handoff
 
-> "Implementation complete. Run **chsh-pm-review** to validate against PRD and specs."
+> "Implementation complete. Run **chsh-qa-test** to validate against PRD and specs."
 
 ---
 
@@ -159,7 +159,7 @@ Verify that UART output still matches the test points in each spec (including un
 
 ### B5. Handoff
 
-> "Implementation updated. Run **chsh-pm-review** to validate the new build."
+> "Implementation updated. Run **chsh-qa-test** to validate the new build."
 
 ---
 

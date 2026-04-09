@@ -55,15 +55,12 @@ Changes are tracked via a Revision History table inside the document (no dated f
 - Entry: [SKILL.md](chsh-pm-prd/SKILL.md)
 - Template: [PRD_TEMPLATE.md](chsh-pm-prd/PRD_TEMPLATE.md)
 
-#### `chsh-pm-review` — QA & Functional Test (Phase 4)
-Generates two reports: a QA Report (code quality, no hardware) and a Test Report
-(PRD acceptance criteria pass/fail, hardware required).
-- Entry: [SKILL.md](chsh-pm-review/SKILL.md)
-- Key assets:
-	- [QA_TEMPLATE.md](chsh-pm-review/QA_TEMPLATE.md) — code quality review
-	- [TEST_TEMPLATE.md](chsh-pm-review/TEST_TEMPLATE.md) — PRD acceptance criteria testing
-	- [CHECKLIST.md](chsh-pm-review/CHECKLIST.md)
-	- [check_project.sh](chsh-pm-review/check_project.sh)
+#### `chsh-qa-test` — QA & Functional Test (Phase 4)
+Test Report (always, hardware required) and QA Report (release/demo only, no hardware).
+- Entry: [SKILL.md](chsh-qa-test/SKILL.md)
+- Templates:
+	- [TEST_TEMPLATE.md](chsh-qa-test/TEST_TEMPLATE.md) — PRD acceptance criteria testing
+	- [QA_TEMPLATE.md](chsh-qa-test/QA_TEMPLATE.md) — code quality review (0–100)
 
 ### Writing Skills
 
@@ -82,7 +79,7 @@ guides, automation scripts, and best practices.
 
 Mention the skill name in your request, for example:
 - *"Use `chsh-dev-project` to generate a new Wi-Fi STA project."*
-- *"Run `chsh-pm-review` on the nordic-wifi-webdash project."*
+- *"Run `chsh-qa-test` on the nordic-wifi-webdash project."*
 - *"Commit with `chsh-dev-commit`."*
 
 ## 📁 Structure
@@ -107,7 +104,7 @@ skills/
 │   ├── templates/
 │   └── guides/
 ├── chsh-pm-prd/           PRD authoring (SKILL.md + PRD_TEMPLATE.md)
-├── chsh-pm-review/        QA report + functional test report
+├── chsh-qa-test/        QA report + functional test report
 ├── chsh-txt-review/       Text / message review
 ├── README.md
 └── .gitignore
@@ -118,7 +115,7 @@ skills/
 See [`chsh-ncs-workflow/SKILL.md`](chsh-ncs-workflow/SKILL.md) for the full four-phase lifecycle, document conventions, and ownership table:
 
 ```
-chsh-pm-prd  →  PRD.md  →  chsh-dev-spec  →  docs/specs/  →  chsh-dev-project  →  code  →  chsh-pm-review
+chsh-pm-prd  →  PRD.md  →  chsh-dev-spec  →  docs/specs/  →  chsh-dev-project  →  code  →  chsh-qa-test
 ```
 
 Living documents (`PRD.md`, specs) use a **Changelog table**. QA/Test reports use dated filenames (`TEST-YYYY-MM-DD-HH-MM.md`, `QA-YYYY-MM-DD-HH-MM.md`).
