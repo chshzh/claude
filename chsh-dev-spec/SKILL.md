@@ -100,7 +100,35 @@ Use `ARCH_TEMPLATE.md` as the base. Fill in:
 - **Message Definitions**: `messages.h` struct/enum definitions
 - **Boot Sequence**: numbered list with `SYS_INIT` priorities
 - **Memory Budget**: table of Flash/RAM allocation per module plus total headroom
+- **Thread Budget**: table of every application thread with name, stack size, priority, and purpose (justify each one — see Threads ≠ Modules below)
 - **Test Points**: UART log markers expected at each stage
+
+#### Threads ≠ Modules
+
+A thread is an **execution context** (priority, stack, timing). A module is **logic** (state machine or callback-driven). They are independent:
+
+- SMF needs **no dedicated thread** when driven from hardware callbacks (ISR/`dk_buttons_init`), `net_mgmt` callbacks, or zbus listeners. The state machine runs inside the publisher's or peripheral's context.
+- Only add a thread when a module must **block-wait on events** (e.g. `zbus_sub_wait`) or perform **sustained/CPU-intensive processing**.
+- A thread that only loops with `k_sleep()` and does zero blocking serves no purpose — remove it.
+
+#### SYS_INIT Safety Rules
+
+- **Never use `K_FOREVER`** in a `SYS_INIT` callback. If the awaited resource never arrives (hardware fault, wrong Kconfig), boot hangs permanently with no error.
+- Use a bounded timeout: `k_sem_take(&sem, K_SECONDS(30))`; on failure log and `return -ETIMEDOUT`.
+- The entire `SYS_INIT` sequence runs sequentially on the main thread; an infinite block prevents all subsequent init functions from executing.
+
+#### zbus Observer Type Selection
+
+Choose the observer type that matches the work performed by each module:
+
+| Observer type | Execution context | When to use |
+|---|---|---|
+| `ZBUS_LISTENER_DEFINE` | Publisher's thread (VDED) — **synchronous** | Fastest reaction. **Must complete in microseconds.** No `k_sleep`, no blocking I/O, no mutex with non-zero timeout, no `zbus_chan_pub` with non-zero timeout. Treat like an ISR. |
+| `ZBUS_ASYNC_LISTENER_DEFINE` | System work queue — **deferred** | Light deferred work (< ~20 ms). Gets message copy. Safe to submit further `k_work`. |
+| `ZBUS_MSG_SUBSCRIBER_DEFINE` | Dedicated thread blocks on `zbus_sub_wait_msg` | Module needs to block-wait on events with **zero data loss** (gets full message copy). |
+| `ZBUS_SUBSCRIBER_DEFINE` | Dedicated thread blocks on `zbus_sub_wait` | Module blocks-waits; occasional loss OK (notification only — must re-read channel). |
+
+> **Anti-pattern**: calling `k_sleep()` or `http_server_start()` inside a `ZBUS_LISTENER` callback blocks the publisher's thread (e.g. the `net_mgmt` thread) for the entire duration. Use `k_work_schedule(&work, K_MSEC(delay))` from the listener instead.
 
 Add the revision history entry (version 1.0, today's date).
 

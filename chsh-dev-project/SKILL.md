@@ -205,6 +205,39 @@ Always follow these rules when generating NCS/Zephyr code:
 - **Multi-threaded**: each application module has its own `k_thread`; communicates via message queues or semaphores
 - Never use global variables to share state between application modules — use Zbus channels
 
+#### Threads ≠ Modules
+
+A thread is an **execution context**. A module is **logic**. Do not conflate them:
+
+- SMF driven from hardware callbacks (`dk_buttons_init`, net_mgmt, zbus listener) needs **no dedicated thread**. The state machine runs inside the callback's context.
+- Only add a thread when the module must **block-wait on events** (e.g. `zbus_sub_wait`) or do **sustained, long-running processing**.
+- A thread whose body is only `while(1) { k_sleep(K_MSEC(N)); }` with no blocking kernel object serves zero purpose — **remove it**.
+
+#### zbus Observer Rules
+
+| Observer type | Run context | Rules |
+|---|---|---|
+| `ZBUS_LISTENER_DEFINE` | Publisher's thread (VDED) | **ISR-equivalent**: must finish in microseconds. **Forbidden**: `k_sleep`, blocking I/O, mutex with non-zero timeout, `zbus_chan_pub` with non-zero timeout. |
+| `ZBUS_ASYNC_LISTENER_DEFINE` | System work queue | OK for deferred light work (< ~20 ms). Safe to call `k_work_submit/k_work_schedule`. Gets message copy. |
+| `ZBUS_MSG_SUBSCRIBER_DEFINE` | Dedicated thread loops on `zbus_sub_wait_msg` | Use when module must block-wait with zero data loss. |
+| `ZBUS_SUBSCRIBER_DEFINE` | Dedicated thread loops on `zbus_sub_wait` | Use when occasional loss is acceptable (notification only). |
+
+**For deferred work triggered by a zbus listener**, never `k_sleep()` — schedule a work item instead:
+```c
+/* In the listener (VDED context) — safe: */
+k_work_schedule(&my_work, K_MSEC(1000));
+
+/* In the work handler (system work queue) — safe to do I/O: */
+static void my_work_fn(struct k_work *w) { /* start server, etc. */ }
+static K_WORK_DELAYABLE_DEFINE(my_work, my_work_fn);
+```
+
+#### SYS_INIT Safety Rules
+
+- **Never use `K_FOREVER`** in a `SYS_INIT` callback — if the awaited resource never arrives, boot hangs permanently.
+- Use a bounded timeout: `k_sem_take(&sem, K_SECONDS(30))`; on failure: `LOG_ERR(…); return -ETIMEDOUT;`
+- `SYS_INIT` callbacks run sequentially on the main thread; an infinite block prevents all subsequent init from executing.
+
 ### Library Wrapper Modules (`app_<lib>/`)
 
 A wrapper module bridges an external library into the application architecture:
