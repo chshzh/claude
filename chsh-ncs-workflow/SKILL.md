@@ -158,6 +158,14 @@ Each spec's `PRD Version` field must match the latest PRD Changelog timestamp.
 
 ## Phase 3 — Implementation  `skill: chsh-dev-project`
 
+**⛔ Phase 3 guard — check before touching `src/`:**
+Before writing any code, verify that all agreed design changes are captured in docs.
+If the conversation contains discussed-but-undocumented changes:
+- Requirements changed → route to **Phase 1** first (update PRD)
+- Only spec/implementation details changed → route to **Phase 2** first (update specs)
+Never touch `src/` until PRD and specs are current and approved.
+A user saying "start implementation" does **not** bypass this guard.
+
 **Enter Phase 3 when:**
 - Specs exist and are approved
 - Specs were updated and code needs to catch up
