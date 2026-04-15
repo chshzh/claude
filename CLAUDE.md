@@ -1,10 +1,3 @@
----
-description: 
-alwaysApply: true
----
-
-# CLAUDE.md
-
 Behavioral guidelines to reduce common LLM coding mistakes.
 **Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.
 
