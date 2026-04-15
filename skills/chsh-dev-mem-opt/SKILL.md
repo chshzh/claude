@@ -1,4 +1,3 @@
-````skill
 ---
 name: chsh-dev-mem-opt
 description: Optimize and debug memory usage in Nordic nRF Connect SDK (NCS) applications. Use when analyzing RAM/Flash usage, reducing memory footprint, debugging stack overflows, or investigating memory-related crashes in nRF projects.
