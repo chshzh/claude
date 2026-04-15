@@ -1,6 +1,6 @@
 ---
 name: chsh-git-commit
-description: Use when the user asks to prepare commits, review changes for committing, commit all changes, or decide how to split work into multiple Git commits.
+description: Plans, groups, and executes git commits. Inspects the worktree, proposes a commit plan grouped by logical change, waits for approval, then stages and commits. Supports Conventional Commits (user app repos) and Zephyr style (NCS/Zephyr repos). Use when the user asks to prepare commits, commit changes, or split work into multiple git commits.
 ---
 
 # Git Commit Workflow
@@ -28,9 +28,7 @@ git diff --cached   # only if staged changes exist
 Present a table or list showing:
 - **Group**: the set of files for each proposed commit
 - **Rationale**: why these files belong together
-- **Suggested commit message**: following Conventional Commits style (`type(scope): short description`)
-
-Common types: `feat`, `fix`, `refactor`, `docs`, `chore`, `test`, `style`, `build`
+- **Suggested commit message**: use the correct style for the repo (see **Commit Message Formats** below)
 
 ### Step 3 — Wait for approval
 
@@ -68,6 +66,65 @@ EOF
 )"
 ```
 
+## Commit Message Formats
+
+### Detect repo type first
+
+| Repo | Style |
+|---|---|
+| User app repo (own project) | Conventional Commits |
+| `zephyr/`, `nrf/`, `nrfxlib/`, `modules/` | Zephyr style |
+
+### User App Repos — Conventional Commits
+
+```
+type(scope): short summary
+```
+
+Common types: `feat`, `fix`, `refactor`, `docs`, `chore`, `test`, `style`, `build`. Title ≤ 72 chars. Body optional but helpful for non-trivial changes.
+
+### NCS / Zephyr Repos — Zephyr Style
+
+```
+[nrf tag] area: subarea: short summary
+
+Body explaining what, why, assumptions, and how it was verified.
+
+Upstream PR #: NNNNN          (if porting from upstream)
+Ref: NCSDK-XXXXX              (if tracking an internal ticket)
+Assisted-by: Claude:claude-sonnet-4.6   (if AI-assisted)
+Signed-off-by: Full Name <email>
+```
+
+- Title ≤ 72 chars; **body is required** (non-empty) for any upstream contribution
+- Body lines ≤ 75 chars
+- `Signed-off-by:` required (DCO) — use `git commit -s`
+- NRF prefix tags: `[nrf fromlist]` (to upstream), `[nrf fromtree]` (from upstream), `[nrf noup]` (NCS-only), `[nrf ncsdk]` (SDK-only)
+- Add `Assisted-by:` when AI wrote substantial code
+
+**Examples:**
+
+```
+[nrf fromlist] drivers: nrf_wifi: add WPA3-AUTO security type
+
+The wpa_supplicant requires a dedicated key_mgmt enum value for
+WPA3-AUTO mode. Without this, stations advertising both WPA2 and
+WPA3 fail key exchange.
+
+Upstream PR #: 106674
+Signed-off-by: Your Name <your.email@example.com>
+```
+
+```
+[nrf noup] tests: my_module: add unit test for zero-length buffer
+
+Tests the boundary condition where input buffer length equals zero,
+which previously triggered an assertion in the parser.
+
+Ref: NCSDK-12345
+Signed-off-by: Your Name <your.email@example.com>
+```
+
 ## Grouping Guidelines
 
 | Change type | Separate commit? |
@@ -84,11 +141,17 @@ EOF
 
 ## NCS-Specific Notes
 
+**File grouping:**
 - `prj.conf`, `boards/*.conf`, `overlay-*.conf` — group with the feature they enable
 - `CMakeLists.txt` changes — separate commit unless trivially part of a feature add
 - `west.yml` changes — always a separate commit with a clear rationale
 - `sysbuild/` files — group by logical purpose (e.g. mcuboot config changes together)
 - Generated partition manager files (`pm/`, `*.map`) — separate `chore` commit or omit if not meaningful
+
+**In NCS/Zephyr repos (`zephyr/`, `nrf/`, `nrfxlib/`):**
+- Use Zephyr style (see above), not Conventional Commits
+- Always include a non-empty body — CI will reject empty bodies for upstream PRs
+- Run `git log -- <file>` to see how others formatted commits for the same subsystem
 
 ## Splitting Changes Within a Single File
 
