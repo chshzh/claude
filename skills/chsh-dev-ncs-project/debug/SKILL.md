@@ -1,9 +1,4 @@
----
-name: chsh-dev-ncs-project/debug
-description: Debug Nordic nRF Connect SDK (NCS) applications using GDB, RTT logging, and other debugging tools. Use when debugging nRF projects, analyzing crashes, or troubleshooting runtime issues.
----
-
-# Nordic nRF Connect SDK (NCS) Debugging
+# Nordic nRF Connect SDK (NCS) Debugging Reference
 
 ## Key Concepts
 

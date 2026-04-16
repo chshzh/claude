@@ -1,11 +1,4 @@
-````skill
----
-name: chsh-dev-ncs-project/architecture
-description: Architecture patterns for Nordic NCS projects - simple multi-threaded vs SMF+zbus modular
-parent: ncs-project
----
-
-# Architecture Patterns Subskill  
+# Architecture Patterns Reference  
 
 Choose the right architecture for your Nordic NCS project.
 

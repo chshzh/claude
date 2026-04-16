@@ -292,6 +292,29 @@ config APP_<NAME>_LOG_LEVEL
 - Credentials in git-ignored `overlay-credentials.conf`
 - Template tracked as `overlay-credentials.conf.template`
 
+Pass temporary overrides at build time without editing `prj.conf`:
+```sh
+west build -b <board> -d build -- -DEXTRA_CONF_FILE="overlay-debug.conf;overlay-memfault.conf"
+west build -b <board> -d build -- -DCONFIG_LOG_DEFAULT_LEVEL=4
+```
+
+### Devicetree overlays
+
+Board-specific overlays live in `boards/`, named after the board target with **slashes replaced by underscores**:
+```
+boards/nrf52840dk_nrf52840.overlay
+boards/nrf5340dk_nrf5340_cpuapp.overlay
+boards/nrf54l15dk_nrf54l15_cpuapp.overlay
+```
+
+> **Critical (multi-core boards):** Always use the full board target as the filename.
+> `nrf54l15dk.overlay` is silently ignored — the full form is required.
+
+Pass additional overlays at build time:
+```sh
+west build -b <board> -d build -- -DEXTRA_DTC_OVERLAY_FILE="my-sensor.overlay"
+```
+
 ### Memory requirements (Wi-Fi projects)
 - `CONFIG_HEAP_MEM_POOL_SIZE` ≥ 80000 (critical)
 - `CONFIG_MAIN_STACK_SIZE` ≥ 4096
@@ -349,11 +372,13 @@ Copy these from the `ncs-project-logo` reference project:
 
 ## Reference: Sub-Skills
 
-| Sub-skill | When to load |
+| Reference file | Purpose |
+|---|---|
+| [debug/SKILL.md](debug/SKILL.md) | Debugging crashes, RTT logging, GDB (reference only — load when needed) |
+| [architecture/SKILL.md](architecture/SKILL.md) | Architecture patterns, SMF+Zbus vs multi-threaded (reference only — load when needed) |
+
+| Loadable skill | When to load |
 |-----------|-------------|
-| `chsh-dev-ncs-project/debug` | Debugging crashes, RTT logging, GDB |
-| `chsh-dev-ncs-project/env-setup` | Toolchain setup, west init/update |
-| `chsh-dev-ncs-project/architecture` | Architecture pattern selection and templates |
 | `chsh-dev-ncs-project/protocols` | MQTT, CoAP, HTTP, TCP/UDP details |
 | `chsh-dev-ncs-project/protocols/webserver` | Static HTTP server, REST API patterns |
 | `chsh-dev-ncs-project/wifi` | Wi-Fi STA/SoftAP/P2P implementation details |
