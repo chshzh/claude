@@ -60,8 +60,3 @@ For multi-step tasks, state a brief plan:
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
 
 ---
-
-## Special Commands & Triggers
-
-### Git Commits
-- **Never commit without explicit user approval.** Always propose commit message(s) and wait for the user to say "yes", "commit", or equivalent before running `git commit`.
