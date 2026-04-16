@@ -27,7 +27,7 @@ status dashboard, and guides you through each phase — invoking the right skill
                             │ PRD approved → triggers Phase 2
                             ▼
 ┌────────────────────────────────────────────────────────────────┐
-│  PHASE 2 — TECHNICAL DESIGN           skill: chsh-dev-spec     │
+│  PHASE 2 — TECHNICAL DESIGN           skill: chsh-dev-ncs-spec     │
 │                                                                 │
 │  Developer Engineer translates PRD into technical specs:       │
 │  • Architecture choice (SMF+Zbus or multi-threaded)            │
@@ -132,17 +132,17 @@ Ask: *"Where would you like to start?"* — or proceed with the recommended step
 **Output:** `docs/PRD.md` with new Changelog entry
 
 **On completion**, ask:
-> "PRD is updated. Proceed to **Phase 2 — Specs** with chsh-dev-spec? (yes / stop)"
+> "PRD is updated. Proceed to **Phase 2 — Specs** with chsh-dev-ncs-spec? (yes / stop)"
 
 ---
 
-## Phase 2 — Technical Design  `skill: chsh-dev-spec`
+## Phase 2 — Technical Design  `skill: chsh-dev-ncs-spec`
 
 **Enter Phase 2 when:**
 - PRD exists and was just updated (or is newer than current specs)
 - No engineering specs exist yet
 
-**Run:** Load skill **chsh-dev-spec** and follow its workflow.
+**Run:** Load skill **chsh-dev-ncs-spec** and follow its workflow.
 
 **Outputs:**
 - `docs/specs/overview.md` — spec index, PRD-to-spec mapping
@@ -283,7 +283,7 @@ docs/QA-2026-04-09-14-30.md
 |-------|-------------|--------|
 | `chsh-dev-ncs-workflow` | **Starting any project work** | Status dashboard + phase guidance |
 | `chsh-pm-ncs-prd` | Defining or updating product requirements | `docs/PRD.md` |
-| `chsh-dev-spec` | Translating PRD to engineering specs | `docs/specs/*.md` |
+| `chsh-dev-ncs-spec` | Translating PRD to engineering specs | `docs/specs/*.md` |
 | `chsh-dev-ncs-project` | Implementing code from specs | `src/`, `prj.conf`, passing build |
 | `chsh-qa-ncs-test` | Validating a build against PRD and specs | `TEST-*.md` + `QA-*.md` |
 | `chsh-dev-git-commit` | Preparing git commits | Clean, logical commit history |
