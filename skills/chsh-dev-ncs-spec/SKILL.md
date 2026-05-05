@@ -274,3 +274,39 @@ If updates are warranted:
 3. Apply approved updates to this file immediately.
 
 Do **not** modify this skill mid-conversation unless the user explicitly asks.
+
+---
+
+## Spec Quality Checklist
+
+Use this checklist before handing off specs to `chsh-dev-ncs-project`.
+
+> **Reminder**: The spec covers HOW. The PRD covers WHAT. A good spec answers every question a developer needs to write code — without them having to re-read the PRD.
+
+### Completeness
+- [ ] Every FR in the PRD maps to at least one spec section (check PRD-to-Spec table in `overview.md`)
+- [ ] Every module has a spec file with Overview, Zbus Integration, Error Handling, and Memory Estimate
+- [ ] Architecture.md has a Thread Budget (justified) and Memory Budget (with headroom)
+- [ ] All Zbus channels are listed with publisher, subscriber(s), and message struct
+
+### Implementability (the "no-ask" test)
+- [ ] A developer could write all source files using only the specs — no PRD re-reading needed
+- [ ] All public function signatures are documented with parameters and return types
+- [ ] State machine diagrams show all states and all transitions, including error paths
+- [ ] Each Kconfig symbol has a default value and a one-line description
+- [ ] SYS_INIT priorities are assigned and justified
+
+### Architecture safety
+- [ ] No `K_FOREVER` in SYS_INIT callbacks — bounded timeouts only
+- [ ] Each thread has a documented justification (blocking I/O or sustained processing)
+- [ ] ZBUS_LISTENER callbacks do not call `k_sleep()` or blocking I/O
+- [ ] Library wrapper modules document all callbacks the library will call into app code
+
+### Size guidelines (not hard limits — use judgment)
+| Document | Target length |
+|----------|--------------|
+| `overview.md` | 200–400 words + tables |
+| `architecture.md` | 400–800 words + diagrams |
+| Per-module spec | 250–600 words + state diagram (if applicable) |
+
+Specs longer than these targets often contain PRD content that belongs in `docs/PRD.md` instead.
