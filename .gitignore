@@ -31,3 +31,12 @@
 /hooks/
 settings.json
 skills/gitnexus-*
+
+# Claude Code runtime state — do NOT track
+.claude.json
+backups/
+cache/
+history.jsonl
+plugins/
+sessions/
+
