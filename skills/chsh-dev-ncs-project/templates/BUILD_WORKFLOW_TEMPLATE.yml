@@ -1,0 +1,376 @@
+# NCS Application — Build & Release Workflow Template
+#
+# Usage:
+#   1. Copy to .github/workflows/build.yml in your NCS project repo.
+#   2. Replace every <PLACEHOLDER> with project-specific values.
+#   3. Ensure west.yml contains `revision: <ncs-version>` so the version
+#      is extracted automatically — no hardcoding needed.
+#
+# Jobs:
+#   set-version          Extracts NCS version from west.yml
+#   build-and-test       Builds all board configurations in a matrix
+#   validate-docs        Validates README sections and required config files
+#   static-analysis      Runs Zephyr checkpatch on changed source files
+#   create-release       Creates a GitHub Release with hex files (tag push only)
+#
+# Requirements:
+#   - west.yml in repo root with `revision: <ncs-version>`
+#   - GitHub token with contents: write permission (for releases)
+#   - Nordic toolchain container: ghcr.io/nrfconnect/sdk-nrf-toolchain
+
+name: Build — <PROJECT_DISPLAY_NAME>
+
+on:
+  push:
+    branches: [ main, develop ]
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [ main ]
+
+# Cancel any in-progress run for the same branch/PR to avoid wasting CI minutes.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  set-version:
+    runs-on: ubuntu-24.04
+    outputs:
+      NCS_VERSION: ${{ steps.extract-version.outputs.NCS_VERSION }}
+      TOOLCHAIN_VERSION: ${{ steps.extract-version.outputs.TOOLCHAIN_VERSION }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: app-workspace/<REPO_NAME>
+
+      - name: Extract NCS version from west.yml
+        id: extract-version
+        working-directory: app-workspace/<REPO_NAME>
+        run: |
+          NCS_VERSION=$(grep 'revision:' west.yml | awk '{print $2}')
+          echo "NCS_VERSION=${NCS_VERSION}" >> $GITHUB_OUTPUT
+          # The toolchain Docker image tag matches the NCS revision exactly.
+          # Nordic publishes toolchain images for every release including RCs
+          # (e.g. ghcr.io/nrfconnect/sdk-nrf-toolchain:v3.3.0).
+          echo "TOOLCHAIN_VERSION=${NCS_VERSION}" >> $GITHUB_OUTPUT
+
+  build-and-test:
+    needs: set-version
+    runs-on: ubuntu-24.04
+    container: ghcr.io/nrfconnect/sdk-nrf-toolchain:${{ needs.set-version.outputs.TOOLCHAIN_VERSION }}
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      matrix:
+        config:
+          # Add one entry per supported board configuration.
+          - name: "<Board A display name>"
+            build_dir: "build_<board_a>"
+            board: "<board_a/cpuapp>"
+            cmake_args: ""
+          - name: "<Board B display name>"
+            build_dir: "build_<board_b>"
+            board: "<board_b/cpuapp>"
+            cmake_args: "-DSHIELD=<shield>"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: app-workspace/<REPO_NAME>
+
+      - name: Prepare west workspace
+        working-directory: app-workspace
+        run: |
+          west init -l <REPO_NAME>
+          west update -o=--depth=1 -n
+
+      - name: Build ${{ matrix.config.name }}
+        working-directory: app-workspace/<REPO_NAME>
+        run: |
+          BUILD_LOG="${{ matrix.config.build_dir }}/build.log"
+          EXTRA_ARGS="${{ matrix.config.cmake_args }}"
+
+          # Inject firmware version: use the git tag on tag pushes, "dev" otherwise.
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            FW_VERSION="${{ github.ref_name }}"
+          else
+            FW_VERSION="dev"
+          fi
+          EXTRA_ARGS="$EXTRA_ARGS -DAPP_VERSION_STRING=${FW_VERSION}"
+
+          mkdir -p "${{ matrix.config.build_dir }}"
+          set -o pipefail
+
+          west build -p -b ${{ matrix.config.board }} \
+            -d ${{ matrix.config.build_dir }} -- $EXTRA_ARGS 2>&1 | tee "$BUILD_LOG"
+
+      - name: Extract memory usage for ${{ matrix.config.name }}
+        if: always()
+        working-directory: app-workspace/<REPO_NAME>
+        run: |
+          BUILD_LOG="${{ matrix.config.build_dir }}/build.log"
+          USAGE_SUMMARY="${{ matrix.config.build_dir }}/usage-summary.txt"
+
+          if [ -f "$BUILD_LOG" ]; then
+            ROM_USAGE="$(awk '/^[[:space:]]*FLASH:/ {print $2 " " $3 " / " $4 " " $5 " (" $6 ")"}' "$BUILD_LOG" | tail -n 1)"
+            RAM_USAGE="$(awk '/^[[:space:]]*RAM:/ {print $2 " " $3 " / " $4 " " $5 " (" $6 ")"}' "$BUILD_LOG" | tail -n 1)"
+          else
+            ROM_USAGE="n/a"
+            RAM_USAGE="n/a"
+          fi
+
+          : "${ROM_USAGE:=n/a}"
+          : "${RAM_USAGE:=n/a}"
+
+          {
+            echo "ROM_USAGE=$ROM_USAGE"
+            echo "RAM_USAGE=$RAM_USAGE"
+          } > "$USAGE_SUMMARY"
+
+          echo "ROM usage: $ROM_USAGE"
+          echo "RAM usage: $RAM_USAGE"
+
+      - name: Capture size report for ${{ matrix.config.name }}
+        if: always()
+        working-directory: app-workspace/<REPO_NAME>
+        run: |
+          ELF_PATH="${{ matrix.config.build_dir }}/<REPO_NAME>/zephyr/zephyr.elf"
+          SIZE_REPORT="${{ matrix.config.build_dir }}/size-report.txt"
+          SIZE_TOOL="$(command -v arm-zephyr-eabi-size || command -v llvm-size || command -v size)"
+
+          echo "ELF: ${ELF_PATH}" > "$SIZE_REPORT"
+          echo "Tool: ${SIZE_TOOL}" >> "$SIZE_REPORT"
+          echo >> "$SIZE_REPORT"
+
+          if [ -f "$ELF_PATH" ] && [ -n "$SIZE_TOOL" ]; then
+            "$SIZE_TOOL" "$ELF_PATH" >> "$SIZE_REPORT"
+          else
+            echo "size data unavailable" >> "$SIZE_REPORT"
+          fi
+
+      - name: Create merged hex for ${{ matrix.config.name }}
+        if: always()
+        working-directory: app-workspace/<REPO_NAME>
+        run: |
+          BUILD_DIR="${{ matrix.config.build_dir }}"
+          MERGED_HEX="${BUILD_DIR}/merged.hex"
+
+          if [ -f "${MERGED_HEX}" ]; then
+            echo "merged.hex already exists"
+          else
+            echo "merged.hex not found, creating from mcuboot + signed app..."
+            MCUBOOT_HEX="${BUILD_DIR}/mcuboot/zephyr/zephyr.hex"
+            APP_HEX="${BUILD_DIR}/<REPO_NAME>/zephyr/zephyr.signed.hex"
+
+            if [ -f "${MCUBOOT_HEX}" ] && [ -f "${APP_HEX}" ]; then
+              python3 -c "
+import sys
+from intelhex import IntelHex
+ih = IntelHex()
+ih.loadhex(sys.argv[1])
+app = IntelHex()
+app.loadhex(sys.argv[2])
+ih.merge(app, overlap='replace')
+ih.write_hex_file(sys.argv[3])
+print('merged.hex created successfully')
+" "${MCUBOOT_HEX}" "${APP_HEX}" "${MERGED_HEX}"
+            else
+              PLAIN_HEX="${BUILD_DIR}/<REPO_NAME>/zephyr/zephyr.hex"
+              if [ -f "${PLAIN_HEX}" ]; then
+                echo "No MCUboot image found, using plain zephyr.hex as release artifact"
+                cp "${PLAIN_HEX}" "${MERGED_HEX}"
+              else
+                echo "Warning: no flashable hex found"
+              fi
+            fi
+          fi
+
+      - name: Stage artifacts for ${{ matrix.config.name }}
+        if: always()
+        working-directory: app-workspace/<REPO_NAME>
+        run: |
+          STAGE="artifact-staging-${{ matrix.config.build_dir }}"
+          mkdir -p "$STAGE"
+          for f in merged.hex build.log usage-summary.txt size-report.txt; do
+            cp "${{ matrix.config.build_dir }}/$f" "$STAGE/" 2>/dev/null || true
+          done
+
+      - name: Upload artifacts for ${{ matrix.config.name }}
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          if-no-files-found: warn
+          name: build-${{ matrix.config.build_dir }}
+          path: app-workspace/<REPO_NAME>/artifact-staging-${{ matrix.config.build_dir }}/
+
+  validate-docs:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: app-workspace/<REPO_NAME>
+
+      - name: Validate README structure
+        working-directory: app-workspace/<REPO_NAME>
+        run: |
+          echo "Validating README.md structure..."
+
+          # Update these section names to match your project's README headings.
+          grep -q "Project Overview" README.md      || (echo "Missing: Project Overview" && exit 1)
+          grep -q "Evaluator Quick Start" README.md  || (echo "Missing: Evaluator Quick Start" && exit 1)
+          grep -q "Developer Info" README.md         || (echo "Missing: Developer Info" && exit 1)
+
+          echo "README.md validation passed"
+
+      - name: Validate required configuration files
+        working-directory: app-workspace/<REPO_NAME>
+        run: |
+          echo "Checking required configuration files..."
+          [ -f prj.conf ]       || (echo "Missing: prj.conf" && exit 1)
+          [ -f west.yml ]       || (echo "Missing: west.yml" && exit 1)
+          [ -f CMakeLists.txt ] || (echo "Missing: CMakeLists.txt" && exit 1)
+          [ -f Kconfig ]        || (echo "Missing: Kconfig" && exit 1)
+          echo "Configuration files validation passed"
+
+  static-analysis:
+    needs: set-version
+    runs-on: ubuntu-24.04
+    container: ghcr.io/nrfconnect/sdk-nrf-toolchain:${{ needs.set-version.outputs.TOOLCHAIN_VERSION }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: app-workspace/<REPO_NAME>
+
+      - name: Prepare west workspace
+        working-directory: app-workspace
+        run: |
+          west init -l <REPO_NAME>
+          west update -o=--depth=1 -n
+
+      - name: Run Zephyr checkpatch
+        working-directory: app-workspace
+        run: |
+          echo "Running Zephyr checkpatch on source files..."
+
+          if git rev-parse --verify HEAD~1 >/dev/null 2>&1; then
+            cd <REPO_NAME> && git diff HEAD~1 | ../zephyr/scripts/checkpatch.pl --no-tree -
+          else
+            echo "Single commit detected, checking all source files..."
+            if [ -d <REPO_NAME>/src/ ]; then
+              for file in $(find <REPO_NAME>/src/ -name "*.c" -o -name "*.h"); do
+                [ -f "$file" ] && ./zephyr/scripts/checkpatch.pl --no-tree --file "$file" || true
+              done
+            fi
+          fi
+
+          echo "Checkpatch analysis completed"
+
+  create-release:
+    needs: [set-version, build-and-test, validate-docs, static-analysis]
+    runs-on: ubuntu-24.04
+    if: startsWith(github.ref, 'refs/tags/')
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          path: app-workspace/<REPO_NAME>
+
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Generate release notes
+        id: release-notes
+        working-directory: app-workspace/<REPO_NAME>
+        run: |
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          if [ -z "$PREV_TAG" ]; then
+            CHANGELOG="Initial release"
+          else
+            CHANGELOG=$(git log --pretty=format:"- %s (%h)" ${PREV_TAG}..HEAD)
+          fi
+          echo "$CHANGELOG" > /tmp/changelog.txt
+          COMMIT_COUNT=$(git rev-list ${PREV_TAG}..HEAD --count 2>/dev/null || echo "0")
+          echo "COMMIT_COUNT=$COMMIT_COUNT" >> $GITHUB_OUTPUT
+          echo "PREV_TAG=$PREV_TAG" >> $GITHUB_OUTPUT
+
+      - name: Prepare release body
+        run: |
+          read_usage() { grep "^${2}=" "$1" 2>/dev/null | cut -d= -f2-; }
+
+          # Update artifact directory names to match your build matrix build_dir values.
+          BOARD_A_FILE="artifacts/build-build_<board_a>/usage-summary.txt"
+          BOARD_B_FILE="artifacts/build-build_<board_b>/usage-summary.txt"
+
+          BOARD_A_ROM="$(read_usage "$BOARD_A_FILE" ROM_USAGE)"; : "${BOARD_A_ROM:=n/a}"
+          BOARD_A_RAM="$(read_usage "$BOARD_A_FILE" RAM_USAGE)"; : "${BOARD_A_RAM:=n/a}"
+          BOARD_B_ROM="$(read_usage "$BOARD_B_FILE" ROM_USAGE)"; : "${BOARD_B_ROM:=n/a}"
+          BOARD_B_RAM="$(read_usage "$BOARD_B_FILE" RAM_USAGE)"; : "${BOARD_B_RAM:=n/a}"
+
+          cat > /tmp/release-body.txt <<EOF
+          ## <PROJECT_DISPLAY_NAME> Release ${{ github.ref_name }}
+
+          > Built with NCS ${{ needs.set-version.outputs.NCS_VERSION }}
+
+          ### Firmware Files
+
+          | Board | File | ROM | RAM |
+          |-------|------|-----|-----|
+          | <Board A> | [<REPO_NAME>-<board_a>-${{ github.ref_name }}.hex](...) | ${BOARD_A_ROM} | ${BOARD_A_RAM} |
+          | <Board B> | [<REPO_NAME>-<board_b>-${{ github.ref_name }}.hex](...) | ${BOARD_B_ROM} | ${BOARD_B_RAM} |
+
+          ### Changes Since Last Release
+
+          EOF
+          [ -f /tmp/changelog.txt ] && cat /tmp/changelog.txt >> /tmp/release-body.txt || echo "Initial release" >> /tmp/release-body.txt
+
+      - name: Create release package
+        run: |
+          mkdir -p release-package
+
+          # Update hex source paths to match your build matrix.
+          [ -f "artifacts/build-build_<board_a>/merged.hex" ] && \
+            cp "artifacts/build-build_<board_a>/merged.hex" \
+               "release-package/<REPO_NAME>-<board_a>-${{ github.ref_name }}.hex"
+
+          [ -f "artifacts/build-build_<board_b>/merged.hex" ] && \
+            cp "artifacts/build-build_<board_b>/merged.hex" \
+               "release-package/<REPO_NAME>-<board_b>-${{ github.ref_name }}.hex"
+
+          HEX_COUNT=$(find release-package -name "*.hex" | wc -l)
+          if [ "$HEX_COUNT" -gt 0 ]; then
+            cd release-package
+            zip -r "../<REPO_NAME>-firmware-${{ github.ref_name }}.zip" .
+            cd ..
+            echo "Created zip with $HEX_COUNT hex file(s)"
+          else
+            echo "Warning: no merged hex files found in artifacts"
+          fi
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "<PROJECT_DISPLAY_NAME> ${{ github.ref_name }}"
+          body_path: /tmp/release-body.txt
+          files: |
+            release-package/*.hex
+            <REPO_NAME>-firmware-*.zip
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
