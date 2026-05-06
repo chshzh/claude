@@ -61,7 +61,7 @@ west flash --build-dir build/
 ### Test Results
 
 > Each test case (TC) maps directly to a PRD acceptance criterion.
-> Copy the TC IDs and acceptance text from `docs/PRD.md`.
+> Copy the TC IDs and acceptance text from `docs/pm-prd/PRD.md`.
 
 #### FR-001 — <Feature Title>
 

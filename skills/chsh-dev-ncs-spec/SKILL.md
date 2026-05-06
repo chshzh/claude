@@ -1,12 +1,12 @@
 ---
 name: chsh-dev-spec
-description: Translate an approved PRD into engineering specs under docs/specs/. Produces architecture.md, per-module specs (app modules and library wrapper modules). Architecture pattern applies to application code only; library wrappers document the external lib API boundary. Use when starting a new project design, updating specs after a PRD change, or documenting an existing codebase's design.
+description: Translate an approved PRD into engineering specs under docs/dev-specs/. Produces architecture.md, per-module specs (app modules and library wrapper modules). Architecture pattern applies to application code only; library wrappers document the external lib API boundary. Use when starting a new project design, updating specs after a PRD change, or documenting an existing codebase's design.
 ---
 
 # chsh-dev-spec — Technical Design Workflow
 
-Turns the product requirements in `docs/PRD.md` into the engineering specifications
-that drive implementation. Specs live in `docs/specs/` and are the contract
+Turns the product requirements in `docs/pm-prd/PRD.md` into the engineering specifications
+that drive implementation. Specs live in `docs/dev-specs/` and are the contract
 between design (this skill) and implementation (`chsh-dev-ncs-project`).
 
 ---
@@ -16,8 +16,8 @@ between design (this skill) and implementation (`chsh-dev-ncs-project`).
 Check what exists before choosing a mode:
 
 ```bash
-cat docs/PRD.md                    # product requirements
-ls docs/specs/ 2>/dev/null         # existing specs
+cat docs/pm-prd/PRD.md                    # product requirements
+ls docs/dev-specs/ 2>/dev/null         # existing specs
 git log --oneline -5                             # recent commits
 ```
 
@@ -36,7 +36,7 @@ Ask the user to confirm the mode before proceeding.
 
 ### A1. Read the PRD
 
-Load `docs/PRD.md`. Extract:
+Load `docs/pm-prd/PRD.md`. Extract:
 
 - Project name, NCS version, target board(s)
 - Selected feature list (FR entries)
@@ -49,7 +49,7 @@ Load `docs/PRD.md`. Extract:
 - Non-functional requirements: memory headroom, latency targets, security notes
 
 If no PRD exists, stop:
-> "No PRD found at `docs/PRD.md`. Please run **chsh-pm-ncs-prd** first."
+> "No PRD found at `docs/pm-prd/PRD.md`. Please run **chsh-pm-ncs-prd** first."
 
 ### A2. Plan the spec set
 
@@ -57,8 +57,8 @@ Derive the required spec files from PRD features. Always required:
 
 | File | Content |
 |------|---------|
-| `docs/specs/overview.md` | Entry point — spec index, PRD-to-spec mapping, design decisions |
-| `docs/specs/architecture.md` | System overview, module map, Zbus channels, boot sequence, memory budget |
+| `docs/dev-specs/overview.md` | Entry point — spec index, PRD-to-spec mapping, design decisions |
+| `docs/dev-specs/architecture.md` | System overview, module map, Zbus channels, boot sequence, memory budget |
 
 Per module (one file per significant feature):
 
@@ -77,11 +77,11 @@ Per module (one file per significant feature):
 
 Present the plan to the user and confirm before generating.
 
-### A3. Generate `docs/specs/overview.md`
+### A3. Generate `docs/dev-specs/overview.md`
 
 Use `OVERVIEW_TEMPLATE.md` as the base. Fill in:
 
-- **PRD Version**: read the latest entry from `docs/PRD.md`'s Changelog table and copy its timestamp into the `PRD Version` field of Document Information. Do the same for every spec file generated.
+- **PRD Version**: read the latest entry from `docs/pm-prd/PRD.md`'s Changelog table and copy its timestamp into the `PRD Version` field of Document Information. Do the same for every spec file generated.
 - **Spec Index**: list every spec file to be generated, with a one-line description and the PRD sections it covers
 - **Architecture Summary**: pattern choice (SMF+Zbus vs multi-threaded) and the top 3–5 design decisions with rationale
 - **PRD-to-Spec Mapping**: table mapping each FR/NFR to the spec file that implements it
@@ -90,7 +90,7 @@ Use `OVERVIEW_TEMPLATE.md` as the base. Fill in:
 
 Add the changelog entry (initial version, today's date).
 
-### A6. Generate `docs/specs/architecture.md`
+### A6. Generate `docs/dev-specs/architecture.md`
 
 Use `ARCH_TEMPLATE.md` as the base. Fill in:
 
@@ -309,4 +309,4 @@ Use this checklist before handing off specs to `chsh-dev-ncs-project`.
 | `architecture.md` | 400–800 words + diagrams |
 | Per-module spec | 250–600 words + state diagram (if applicable) |
 
-Specs longer than these targets often contain PRD content that belongs in `docs/PRD.md` instead.
+Specs longer than these targets often contain PRD content that belongs in `docs/pm-prd/PRD.md` instead.

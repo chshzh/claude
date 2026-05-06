@@ -14,8 +14,6 @@ README QUALITY TARGETS
 
 <One sentence describing what the device does and for whom.>
 
-![Screenshot or demo of the device in action](docs/images/screenshot.png)
-
 ---
 
 ## Project Overview
@@ -38,34 +36,10 @@ README QUALITY TARGETS
 - **&lt;Feature 3&gt;** — brief description
 - **&lt;Feature 4&gt;** — brief description
 
-### Project Structure
-
-```
-<project-name>/
-├── CMakeLists.txt
-├── Kconfig
-├── prj.conf
-├── west.yml
-├── docs/
-│   ├── PRD.md                   ← product requirements and acceptance criteria
-│   └── specs/
-│       ├── overview.md          ← spec index and architecture summary
-│       ├── architecture.md      ← module map, Zbus channels, boot sequence
-│       └── <module>-module.md   ← per-module specs
-├── src/
-│   ├── main.c
-│   └── modules/
-│       ├── <module-a>/
-│       ├── <module-b>/
-│       └── messages.h
-└── boards/
-    └── <board>.overlay
-```
-
 ### Target Users
 
-- **Evaluator** — grab a pre-built `.hex` from the [Releases](<releases-url>) page, follow [Evaluator Quick Start](#evaluator-quick-start), and reach a working device in under 5 minutes.
-- **Developer** — clone the workspace, build from source, and customise the firmware; see [Developer Info](#developer-info).
+- **Evaluator** — grab a pre-built `.hex` from the [Releases](<releases-url>) page, flash it, and follow the [Evaluator Quick Start](#evaluator-quick-start) guide to reach a working device in under 5 minutes.
+- **Developer** — clone the workspace, build from source, and customise the firmware; see [Developer Info](#developer-info) for build setup and [Documentation](#documentation) for product requirements, architecture, and per-module specs.
 
 ---
 
@@ -75,32 +49,30 @@ README QUALITY TARGETS
 
 ### Step 1 — Flash the firmware
 
-Download the pre-built `.hex` for your board from the [Releases](<releases-url>) page.
+Download the pre-built `.hex` for your board from the [Releases](<releases-url>) page, then open **nRF Connect for Desktop → Programmer**, select your board, add the `.hex` file, and click **Erase & Write**.
 
-Open **nRF Connect for Desktop → Programmer**, select your board, add the `.hex` file, and click **Erase & Write**.
+| Board | Release page |
+|-------|--------------|
+| &lt;Board A&gt; | [Latest release](<releases-url>/latest) |
+| &lt;Board B&gt; + &lt;Shield&gt; | [Latest release](<releases-url>/latest) |
 
-### Step 2 — Connect
+### Step 2 — Connect and open the dashboard
 
-<Describe the shortest path to a working device: join Wi-Fi network, open browser URL, etc.>
+Open a serial terminal at `115200` baud and follow the instructions printed by the firmware.
 
-| Action | Value |
-|--------|-------|
-| &lt;e.g. Wi-Fi SSID&gt; | `<SSID>` |
-| &lt;e.g. Browser URL&gt; | `http://<hostname>.local` |
+- **&lt;Mode 1&gt;** (default on fresh flash): &lt;describe auto-start behaviour and how to reach the UI&gt;
+- **&lt;Mode 2&gt;**: run `<shell command>`, reboot, &lt;describe connection steps&gt;
+- **&lt;Mode 3&gt;**: run `<shell command>`, reboot, &lt;describe connection steps&gt;
+
+At any time, you can switch modes with `<shell command> [mode1|mode2|mode3]`. The choice is saved to NVS and survives reboot.
 
 ### Step 3 — Verify
 
-&lt;What the user should see: LED state, browser dashboard URL, UART output. Include the screenshot here.&gt;
+&lt;What the user should see: browser dashboard URL, UART output. Include the screenshot here.&gt;
 
 ![&lt;Project name&gt; dashboard](docs/images/screenshot.png)
 
 ## Buttons & LEDs
-
-<!--
-Include this section when buttons/LEDs have user-visible behaviour or controls.
-For projects where buttons are read-only inputs and LEDs are API-controlled,
-replace with two tables (one per component).
--->
 
 ### Buttons
 
@@ -120,7 +92,41 @@ replace with two tables (one per component).
 
 ## Developer Info
 
+### Project Structure
+
+```text
+<project-name>/
+├── CMakeLists.txt
+├── Kconfig
+├── prj.conf
+├── west.yml
+├── docs/
+│   ├── PRD.md                   ← product requirements and acceptance criteria
+│   └── specs/
+│       ├── overview.md          ← spec index and architecture summary
+│       ├── architecture.md      ← module map, Zbus channels, boot sequence
+│       └── <module>-module.md   ← per-module specs
+├── src/
+│   ├── main.c
+│   └── modules/
+│       ├── <module-a>/
+│       ├── <module-b>/
+│       └── messages.h
+```
+
 ### Workspace Setup
+
+West workspace is driven by [west.yml](west.yml), which contains the NCS version this application is based on. For example, the following entry means NCS v3.3.0:
+
+```sh
+    - name: sdk-nrf
+      path: nrf
+      revision: v3.3.0
+      import: true
+      remote: ncs
+```
+
+Use nRF Connect for VS Code or a shell initialized with the NCS toolchain.
 
 #### Method 1 (Preferred) — Add to an existing NCS installation
 
@@ -148,28 +154,22 @@ Follow the [custom repository guide](https://docs.nordicsemi.com/bundle/nrf-conn
 
 ##### Option B: CLI
 
-See the Nordic guide on [Workspace Application Setup](https://docs.nordicsemi.com/bundle/ncs-latest/page/nrf/dev_model_and_contributions/adding_code.html#workflow_4_workspace_application_repository_recommended).
-
 ```sh
 west init -m https://github.com/<org>/<repo> --mr main <workspace-dir>
 cd <workspace-dir>
 west update
 ```
 
-For product context and implementation details, start at [docs/specs/overview.md](docs/specs/overview.md) — it maps every PRD requirement to the spec file that implements it.
+See the Nordic guide on [Workspace Application Setup](https://docs.nordicsemi.com/bundle/ncs-latest/page/nrf/dev_model_and_contributions/adding_code.html#workflow_4_workspace_application_repository_recommended) for details.
 
 ### Build
 
 ```bash
-nrfutil sdk-manager toolchain launch --ncs-version=v3.x.x -- \
-  west build -p -b <board-target> -d build <app-dir>
-```
+# <Board A>
+west build -p -b <board-target> -- <cmake-args>
 
-For &lt;Board B&gt; with shield:
-
-```bash
-nrfutil sdk-manager toolchain launch --ncs-version=v3.x.x -- \
-  west build -p -b <board-target> -d build <app-dir> -- -DSHIELD=<shield>
+# <Board B> + <Shield>
+west build -p -b <board-target> -- <cmake-args> -DSHIELD=<shield>
 ```
 
 ### Flash
@@ -184,19 +184,27 @@ west flash --recover
 
 ### Serial Monitor
 
-Connect at **115200 baud**. The device prints its IP address and connection status at boot.
+Connect at **115200 baud**. The device prints its IP address, Wi-Fi mode, and connection instructions at boot.
+
+### Developer Notes
+
+- &lt;board-specific caveat, e.g. one button unavailable due to shield pin conflict&gt;
+- &lt;intentional design decision worth flagging, e.g. session-based connections&gt;
+- &lt;default mode or configuration on fresh flash&gt;
+- &lt;startup banner or debug output notes&gt;
 
 ---
 
 ## Documentation
 
-| Document | Description |
-|----------|-------------|
-| [docs/PRD.md](docs/PRD.md) | Product requirements, features, acceptance criteria |
-| [docs/specs/overview.md](docs/specs/overview.md) | Spec index, PRD-to-spec mapping, architecture summary |
-| [docs/specs/architecture.md](docs/specs/architecture.md) | Module map, Zbus channels, SYS_INIT boot order |
+The full design documentation lives under `docs/`. Start with [docs/dev-specs/overview.md](docs/dev-specs/overview.md), which maps every PRD requirement to the spec file that implements it and provides an architecture summary.
 
----
+| Document | Description |
+|---|---|
+| [docs/pm-prd/PRD.md](docs/pm-prd/PRD.md) | Product Requirements — user perspective features, behavior, acceptance criteria, changelog |
+| [docs/dev-specs/overview.md](docs/dev-specs/overview.md) | **Start here** — technical spec index, PRD-to-spec mapping, architecture summary, design decisions |
+| [docs/dev-specs/architecture.md](docs/dev-specs/architecture.md) | System architecture — module map, Zbus channels, SYS_INIT boot sequence, memory budget |
+| [docs/dev-specs/&lt;module&gt;-module.md](docs/dev-specs/) | &lt;Module&gt; module — &lt;brief description&gt; |
 
 ## Methodology
 
@@ -204,20 +212,16 @@ This project was developed using the [chsh-ncs-workflow](https://github.com/chsh
 
 | Phase | Focus | Skill | Output |
 |-------|-------|-------|--------|
-| 1 — Product Definition | What the device should do, for whom, and why | `chsh-pm-prd` | `docs/PRD.md` |
-| 2 — Technical Design | Translate PRD into engineering specs | `chsh-dev-spec` | `docs/specs/*.md` |
+| 1 — Product Definition | What the device should do, for whom, and why | `chsh-pm-prd` | `docs/pm-prd/PRD.md` |
+| 2 — Technical Design | Translate PRD into engineering specs | `chsh-dev-spec` | `docs/dev-specs/*.md` |
 | 3 — Implementation | Implement code from approved specs | `chsh-dev-project` | `src/`, passing build |
-| 4 — QA & Test | Validate the build against PRD criteria | `chsh-qa-test` | `TEST-*.md`, `QA-*.md` |
+| 4 — QA & Test | Validate the build against PRD criteria | `chsh-qa-test` | `docs/qa-test/QA-*.md` |
 
 Each phase feeds the next: requirements drive specs, specs drive code, code drives tests. Issues loop back to the right phase — code bugs to Phase 3, spec gaps to Phase 2, new requirements to Phase 1.
-
-Supporting skills: `chsh-dev-commit` (logical git history), `chsh-dev-mem-opt` (flash/RAM analysis).
 
 ---
 
 ## License
-
-Copyright (c) &lt;year&gt; Nordic Semiconductor ASA
 
 [SPDX-License-Identifier: LicenseRef-Nordic-5-Clause](LICENSE)
 
@@ -242,8 +246,8 @@ Use when the device exposes an HTTP REST API or other machine-readable interface
 
 Use when common failure modes are known and documented.
 
-- &lt;Symptom&gt;: &lt;cause and resolution&gt;
-- &lt;Symptom&gt;: &lt;cause and resolution&gt;
+- <Symptom>: <cause and resolution>
+- <Symptom>: <cause and resolution>
 
 ### References
 

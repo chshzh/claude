@@ -20,7 +20,7 @@ Template: [`PRD_TEMPLATE.md`](PRD_TEMPLATE.md)
 Check what exists in the project:
 
 ```bash
-cat docs/PRD.md 2>/dev/null           # existing PRD (check Revision History)
+cat docs/pm-prd/PRD.md 2>/dev/null           # existing PRD (check Revision History)
 git log --oneline -10 -- src/ prj.conf CMakeLists.txt    # recent code changes
 ```
 
@@ -104,7 +104,7 @@ Examples: "no cloud connectivity in v1", "no iOS app", "no OTA updates yet".
 
 ## Mode B — Add Feature
 
-1. Read `docs/PRD.md` and check the current **Revision History**.
+1. Read `docs/pm-prd/PRD.md` and check the current **Revision History**.
 2. Show the current feature list (Sections 2 and 3) as a brief summary.
 3. Ask: *"What feature would you like to add?"*
 4. For the new feature, ask:
@@ -119,7 +119,7 @@ Examples: "no cloud connectivity in v1", "no iOS app", "no OTA updates yet".
 
 ## Mode C — Change Feature
 
-1. Read `docs/PRD.md` and check the current **Revision History**.
+1. Read `docs/pm-prd/PRD.md` and check the current **Revision History**.
 2. List the current functional requirements (FR-xxx) with one-line titles.
 3. Ask: *"Which requirement would you like to change?"*
 4. Show the current text, then ask what should change:
@@ -137,7 +137,7 @@ Use this when the developer has made code changes but the PRD has not been updat
 
 ### D1. Find the gap
 
-Read the **Revision History** table in `docs/PRD.md` to get the last PRD revision date.
+Read the **Revision History** table in `docs/pm-prd/PRD.md` to get the last PRD revision date.
 
 ```bash
 PRD_DATE=<last revision date from table>
@@ -172,7 +172,7 @@ Proceed to **Generate Output**.
 
 After any mode:
 
-1. Update `docs/PRD.md` using `PRD_TEMPLATE.md` as the structure.
+1. Update `docs/pm-prd/PRD.md` using `PRD_TEMPLATE.md` as the structure.
 2. Add a new row to the **Revision History** table at the bottom of the document:
    ```markdown
    | YYYY-MM-DD-HH-MM | <one-line summary of changes> |
@@ -213,7 +213,7 @@ Before handing off, verify the PRD meets these criteria.
 
 After saving the PRD, always ask:
 
-> "The PRD is updated at `docs/PRD.md` (see Revision History for this change).
+> "The PRD is updated at `docs/pm-prd/PRD.md` (see Revision History for this change).
 >
 > Would you like to hand off to **chsh-dev-spec** to update the engineering specs,
 > or to **chsh-dev-ncs-project** to implement or update the code?

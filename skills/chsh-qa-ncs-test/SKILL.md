@@ -15,7 +15,7 @@ well-built (QA Report) and behaves as the PRD requires (Test Report).
 > | Part A — Functional Test | "Does it behave as the PRD says?" | Yes — run on board | **Always** — after every implementation cycle |
 > | Part B — Code Quality | "Is the code well-built?" | No — AI reviews code | **Release/demo only** — optional otherwise |
 >
-> Both sections go into a single dated file: `docs/TEST-YYYY-MM-DD-HH-MM.md`
+> Both sections go into a single dated file: `docs/qa-test/QA-YYYY-MM-DD-HH-MM.md`
 > For routine cycles, fill Part A and mark Part B sections `[SKIP]`.
 
 ---
@@ -25,8 +25,8 @@ well-built (QA Report) and behaves as the PRD requires (Test Report).
 Before starting, verify:
 
 ```bash
-cat docs/PRD.md                          # acceptance criteria source
-ls docs/specs/overview.md                # spec version reference
+cat docs/pm-prd/PRD.md                          # acceptance criteria source
+ls docs/dev-specs/overview.md                # spec version reference
 grep "SPECS_VERSION" src/main.c          # firmware spec version
 west build --build-dir build/ 2>&1 | tail -5   # confirm build is clean
 ```
@@ -51,7 +51,7 @@ Open a serial monitor and capture the boot log.
 
 ### A2. Map PRD acceptance criteria to test cases
 
-Read `docs/PRD.md`. For every FR and NFR:
+Read `docs/pm-prd/PRD.md`. For every FR and NFR:
 - Extract all acceptance criteria lines
 - Assign each a TC ID: `TC-<FR number>-<sequence>` (e.g. `TC-001-01`)
 - List them in the Test Report before starting any testing
@@ -68,9 +68,9 @@ For failures, record expected vs actual behaviour and suggest routing:
 - Spec gap → Phase 2
 - Missing PRD requirement → Phase 1
 
-### A4. Generate `docs/TEST-YYYY-MM-DD-HH-MM.md`
+### A4. Generate `docs/qa-test/QA-YYYY-MM-DD-HH-MM.md`
 
-Use `TEST_TEMPLATE.md` as the base. Fill in:
+Use `QA_TEMPLATE.md` as the base. Fill in:
 - Document Information (PRD Version, Specs Version, firmware build timestamp)
 - Changelog entry for this run
 - Part A: Summary table (total / passed / failed / blocked)
@@ -116,7 +116,7 @@ Score each category:
 
 ### B2. Fill in Part B of the report
 
-Open the `docs/TEST-YYYY-MM-DD-HH-MM.md` already created in Part A.
+Open the `docs/qa-test/QA-YYYY-MM-DD-HH-MM.md` already created in Part A.
 Replace the `[SKIP]` placeholders in Part B with the actual review content.
 Record the overall score (0–100) and verdict (PASS / PASS WITH ISSUES / REWORK / FAIL).
 
@@ -176,15 +176,15 @@ Then ask:
 
 ## Document Conventions
 
-- **Phase 4 Report**: `docs/TEST-YYYY-MM-DD-HH-MM.md` — dated snapshot containing Part A always, Part B when running a release/demo review
+- **Phase 4 Report**: `docs/qa-test/QA-YYYY-MM-DD-HH-MM.md` — dated snapshot containing Part A always, Part B when running a release/demo review
 - Keep all runs for history
 - Both Parts include PRD Version and Specs Version in Document Information for traceability
 
 ## Related Skills
 
 - `chsh-dev-ncs-workflow` — full lifecycle orchestrator; routes back here after Phase 3
-- `chsh-pm-ncs-prd` — update `docs/PRD.md` if requirements need changing
-- `chsh-dev-spec` — update `docs/specs/` if design gaps are found
+- `chsh-pm-ncs-prd` — update `docs/pm-prd/PRD.md` if requirements need changing
+- `chsh-dev-spec` — update `docs/dev-specs/` if design gaps are found
 - `chsh-dev-ncs-project` — fix code for P0 issues
 
 ## Self-Update Policy

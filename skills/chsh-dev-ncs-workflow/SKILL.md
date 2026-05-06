@@ -22,7 +22,7 @@ status dashboard, and guides you through each phase — invoking the right skill
 │  • Success metrics and release criteria                        │
 │                                                                 │
 │  Input:  stakeholder ideas, user feedback, bug reports         │
-│  Output: docs/PRD.md  (Changelog updated)             │
+│  Output: docs/pm-prd/PRD.md  (Changelog updated)             │
 └───────────────────────────┬────────────────────────────────────┘
                             │ PRD approved → triggers Phase 2
                             ▼
@@ -31,13 +31,13 @@ status dashboard, and guides you through each phase — invoking the right skill
 │                                                                 │
 │  Developer Engineer translates PRD into technical specs:       │
 │  • Architecture choice (SMF+Zbus or multi-threaded)            │
-│  • docs/specs/overview.md                          │
-│  • docs/specs/architecture.md                      │
-│  • docs/specs/<module>.md (one per feature)        │
-│  • docs/specs/config.yaml (optional project context)           │
+│  • docs/dev-specs/overview.md                          │
+│  • docs/dev-specs/architecture.md                      │
+│  • docs/dev-specs/<module>.md (one per feature)        │
+│  • docs/dev-specs/config.yaml (optional project context)           │
 │                                                                 │
-│  Input:  docs/PRD.md                                   │
-│  Output: docs/specs/*.md (PRD Version field set)   │
+│  Input:  docs/pm-prd/PRD.md                                   │
+│  Output: docs/dev-specs/*.md (PRD Version field set)   │
 └───────────────────────────┬────────────────────────────────────┘
                             │ Specs approved → triggers Phase 3
                             ▼
@@ -50,7 +50,7 @@ status dashboard, and guides you through each phase — invoking the right skill
 │  • Build verified: west build -p -b <board>                    │
 │  • SPECS_VERSION in main.c matches overview.md Changelog       │
 │                                                                 │
-│  Input:  docs/specs/*.md                           │
+│  Input:  docs/dev-specs/*.md                           │
 │  Output: code, passing build, UART log evidence                │
 └───────────────────────────┬────────────────────────────────────┘
                             │ Implementation done → triggers Phase 4
@@ -60,11 +60,11 @@ status dashboard, and guides you through each phase — invoking the right skill
 │                                                                 │
 │  Test Report (always):                                         │
 │  • One TC per PRD acceptance criterion, UART evidence          │
-│  • Output: docs/TEST-YYYY-MM-DD-HH-MM.md                   │
+│  • Output: docs/qa-test/QA-YYYY-MM-DD-HH-MM.md                   │
 │                                                                 │
 │  QA Report (release/demo only):                                │
 │  • Code quality: structure, config, standards, security        │
-│  • Output: docs/QA-YYYY-MM-DD-HH-MM.md (0–100 score)       │
+│  • Output: docs/qa-test/QA-YYYY-MM-DD-HH-MM.md (0–100 score)       │
 │                                                                 │
 │  Issues loop back:                                             │
 │  • P0 code bug → Phase 3   • Spec gap → Phase 2               │
@@ -80,10 +80,9 @@ Run this before anything else. Provide the project path if not already in it.
 
 ```bash
 # Documents
-ls docs/PRD.md 2>/dev/null              && echo "PRD: YES"     || echo "PRD: NO"
-ls docs/specs/overview.md 2>/dev/null && echo "SPECS: YES" || echo "SPECS: NO"
-ls docs/QA-*.md 2>/dev/null | sort | tail -1   && echo "QA: YES"    || echo "QA: NO"
-ls docs/TEST-*.md 2>/dev/null | sort | tail -1  && echo "TEST: YES"  || echo "TEST: NO"
+ls docs/pm-prd/PRD.md 2>/dev/null              && echo "PRD: YES"     || echo "PRD: NO"
+ls docs/dev-specs/overview.md 2>/dev/null && echo "SPECS: YES" || echo "SPECS: NO"
+ls docs/qa-test/QA-*.md 2>/dev/null | sort | tail -1   && echo "QA: YES"    || echo "QA: NO"
 
 # Code
 ls src/main.c 2>/dev/null    && echo "CODE: YES"    || echo "CODE: NO"
@@ -105,8 +104,7 @@ Present the project status dashboard to the user:
   Phase 1 — PRD        [ YES / NO / STALE ]
   Phase 2 — Specs      [ YES / NO / STALE ]
   Phase 3 — Code       [ YES / NO / STALE ]
-  Phase 4 — QA         [ YES / NO ]
-           — Test      [ YES / NO ]
+  Phase 4 — QA/Test    [ YES / NO ]
 ═══════════════════════════════════════════════
   → Recommended next step: <phase + reason>
 ```
@@ -129,7 +127,7 @@ Ask: *"Where would you like to start?"* — or proceed with the recommended step
 
 **Run:** Load skill **chsh-pm-ncs-prd** and follow its workflow.
 
-**Output:** `docs/PRD.md` with new Changelog entry
+**Output:** `docs/pm-prd/PRD.md` with new Changelog entry
 
 **On completion**, ask:
 > "PRD is updated. Proceed to **Phase 2 — Specs** with chsh-dev-ncs-spec? (yes / stop)"
@@ -145,9 +143,9 @@ Ask: *"Where would you like to start?"* — or proceed with the recommended step
 **Run:** Load skill **chsh-dev-ncs-spec** and follow its workflow.
 
 **Outputs:**
-- `docs/specs/overview.md` — spec index, PRD-to-spec mapping
-- `docs/specs/architecture.md` — module map, Zbus channels, memory budget
-- `docs/specs/<module>.md` — one per feature module
+- `docs/dev-specs/overview.md` — spec index, PRD-to-spec mapping
+- `docs/dev-specs/architecture.md` — module map, Zbus channels, memory budget
+- `docs/dev-specs/<module>.md` — one per feature module
 
 Each spec's `PRD Version` field must match the latest PRD Changelog timestamp.
 
@@ -195,8 +193,8 @@ A user saying "start implementation" does **not** bypass this guard.
 
 | Document | When | Hardware? |
 |----------|------|-----------|
-| `TEST-YYYY-MM-DD-HH-MM.md` | **Always** — every cycle | Yes |
-| `QA-YYYY-MM-DD-HH-MM.md` | **Release / demo only** | No |
+| `QA-YYYY-MM-DD-HH-MM.md` | **Always** — every cycle (Part A: functional test) | Yes |
+| `QA-YYYY-MM-DD-HH-MM.md` | **Release / demo only** (Part B: code quality) | No |
 
 **Feedback routing after Phase 4:**
 
@@ -234,8 +232,7 @@ Changes are tracked in a built-in Changelog table:
 QA and Test reports are **point-in-time snapshots**. Each run creates a new dated file:
 
 ```
-docs/TEST-2026-04-09-14-30.md
-docs/QA-2026-04-09-14-30.md
+docs/qa-test/QA-2026-04-09-14-30.md
 ```
 
 ---
@@ -244,12 +241,11 @@ docs/QA-2026-04-09-14-30.md
 
 | Document | Location | Owned by | Answers |
 |----------|----------|----------|---------|
-| `PRD.md` | `docs/` | Product Manager | What & why — features, behaviour, success metrics |
-| `overview.md` | `docs/specs/` | Developer | Spec index, PRD-to-spec map, design decisions |
-| `architecture.md` | `docs/specs/` | Developer | System design, module map, memory budget |
-| `<module>.md` | `docs/specs/` | Developer | State machines, Kconfig, APIs |
-| `TEST-*.md` | `docs/` | Tester / PM | PRD acceptance criteria pass/fail, UART evidence |
-| `QA-*.md` | `docs/` | Reviewer / PM | Code quality score (0–100), issues |
+| `PRD.md` | `docs/pm-prd/` | Product Manager | What & why — features, behaviour, success metrics |
+| `overview.md` | `docs/dev-specs/` | Developer | Spec index, PRD-to-spec map, design decisions |
+| `architecture.md` | `docs/dev-specs/` | Developer | System design, module map, memory budget |
+| `<module>.md` | `docs/dev-specs/` | Developer | State machines, Kconfig, APIs |
+| `QA-*.md` | `docs/qa-test/` | Tester / PM + Reviewer | PRD acceptance criteria pass/fail, UART evidence, code quality score |
 
 **Division of responsibility:**
 - PRD: behaviour in user terms — no Kconfig flags, no memory numbers.
@@ -282,10 +278,10 @@ docs/QA-2026-04-09-14-30.md
 | Skill | Invoke when | Output |
 |-------|-------------|--------|
 | `chsh-dev-ncs-workflow` | **Starting any project work** | Status dashboard + phase guidance |
-| `chsh-pm-ncs-prd` | Defining or updating product requirements | `docs/PRD.md` |
-| `chsh-dev-ncs-spec` | Translating PRD to engineering specs | `docs/specs/*.md` |
+| `chsh-pm-ncs-prd` | Defining or updating product requirements | `docs/pm-prd/PRD.md` |
+| `chsh-dev-ncs-spec` | Translating PRD to engineering specs | `docs/dev-specs/*.md` |
 | `chsh-dev-ncs-project` | Implementing code from specs | `src/`, `prj.conf`, passing build |
-| `chsh-qa-ncs-test` | Validating a build against PRD and specs | `TEST-*.md` + `QA-*.md` |
+| `chsh-qa-ncs-test` | Validating a build against PRD and specs | `docs/qa-test/QA-*.md` |
 | `chsh-dev-git-commit` | Preparing git commits | Clean, logical commit history |
 | `chsh-dev-ncs-memory` | Diagnosing memory usage | Heap / stack recommendations |
 

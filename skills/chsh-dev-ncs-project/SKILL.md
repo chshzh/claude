@@ -1,14 +1,14 @@
 ---
 name: chsh-dev-ncs-project
-description: Implement NCS project code from engineering specs in docs/specs/. Scaffolds new projects, implements modules, and updates code when specs change. Use when specs are ready and the user needs to write or update code. For generating specs, use chsh-dev-spec first.
+description: Implement NCS project code from engineering specs in docs/dev-specs/. Scaffolds new projects, implements modules, and updates code when specs change. Use when specs are ready and the user needs to write or update code. For generating specs, use chsh-dev-spec first.
 ---
 
 # chsh-dev-ncs-project — Code Implementation Workflow
 
-Implements NCS project code from the engineering specs in `docs/specs/`.
+Implements NCS project code from the engineering specs in `docs/dev-specs/`.
 Specs are the contract — **always read the spec before writing code**.
 
-> **Prerequisite**: `docs/specs/architecture.md` and at least one module spec must exist.
+> **Prerequisite**: `docs/dev-specs/architecture.md` and at least one module spec must exist.
 > If specs are missing, run **chsh-dev-spec** first.
 
 ---
@@ -18,8 +18,8 @@ Specs are the contract — **always read the spec before writing code**.
 Check what exists before choosing a mode:
 
 ```bash
-cat docs/specs/architecture.md    # architecture overview
-ls docs/specs/*.md                # all module specs
+cat docs/dev-specs/architecture.md    # architecture overview
+ls docs/dev-specs/*.md                # all module specs
 ls src/modules/ 2>/dev/null                   # existing modules
 git log --oneline -5                          # recent commits
 ```
@@ -39,13 +39,13 @@ Ask the user to confirm the mode before proceeding.
 ### A1. Read all specs
 
 Load:
-1. `docs/specs/architecture.md` — module map, Zbus channels, boot order, memory budget
-2. Each `docs/specs/<module>.md`
+1. `docs/dev-specs/architecture.md` — module map, Zbus channels, boot order, memory budget
+2. Each `docs/dev-specs/<module>.md`
 
 ### A2. Create project scaffold
 
 ```bash
-mkdir -p src/modules docs/specs
+mkdir -p src/modules docs/dev-specs
 
 # Base templates
 cp ~/.claude/skills/chsh-dev-ncs-project/templates/LICENSE .
@@ -104,11 +104,11 @@ Contains all shared Zbus message structs from `architecture.md`.
 
 ### A4b. Record spec version in `src/main.c`
 
-Read the latest version timestamp from `docs/specs/overview.md`'s Changelog
+Read the latest version timestamp from `docs/dev-specs/overview.md`'s Changelog
 table and embed it as a startup log line so every UART capture is traceable to its spec:
 
 ```c
-/* Spec version from docs/specs/overview.md */
+/* Spec version from docs/dev-specs/overview.md */
 #define SPECS_VERSION "YYYY-MM-DD-HH-MM"
 
 /* In main() or SYS_INIT entry: */
@@ -138,7 +138,7 @@ Fix build errors. Verify that UART output matches the test points listed in each
 Compare the spec's **Revision History** table against the last time code was updated:
 
 ```bash
-git log --oneline -- docs/specs/    # spec commit history
+git log --oneline -- docs/dev-specs/    # spec commit history
 git log --oneline -- src/modules/              # code commit history
 ```
 
