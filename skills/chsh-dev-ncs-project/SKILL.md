@@ -374,7 +374,6 @@ Copy these from the `ncs-project-logo` reference project:
 
 | Reference file | Purpose |
 |---|---|
-| [debug/SKILL.md](debug/SKILL.md) | Debugging crashes, RTT logging, GDB (reference only — load when needed) |
 | [architecture/SKILL.md](architecture/SKILL.md) | Architecture patterns, SMF+Zbus vs multi-threaded (reference only — load when needed) |
 
 | Loadable skill | When to load |
@@ -382,6 +381,7 @@ Copy these from the `ncs-project-logo` reference project:
 | `chsh-dev-ncs-project/protocols` | MQTT, CoAP, HTTP, TCP/UDP details |
 | `chsh-dev-ncs-project/protocols/webserver` | Static HTTP server, REST API patterns |
 | `chsh-dev-ncs-project/wifi` | Wi-Fi STA/SoftAP/P2P implementation details |
+| `chsh-dev-ncs-debug` | Debugging crashes, UART capture, GDB, loop tests — load when a build fails or behavior is unexpected |
 
 ## Critical Requirements (NCS Wi-Fi projects)
 

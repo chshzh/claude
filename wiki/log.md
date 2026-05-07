@@ -126,3 +126,9 @@
 - Updated embedded-system-general-debugging Lesson 10: prefer nordicsemi_uart_monitor.py over manual Python serial
 - Updated SCHEMA.md: document markdown link convention instead of wikilinks
 - Added wiki/raw/ to .gitignore (51MB hardware PDFs/Altium — not for git)
+
+## [2026-05-07] skills-restructure | chsh-dev-git-release, chsh-ag-skill-create, chsh-ag-skill-review, chsh-dev-ncs-project
+- Created `chsh-dev-git-release`: release tagging, GitHub CI watch, firmware download/flash/verify loop
+- Renamed `cursor-create-skill` → `chsh-ag-skill-create` (updated frontmatter name)
+- Created `chsh-ag-skill-review`: daily skill health audit — structure, size, dedup, dead links, cross-ref gaps, brainstorm section for future expansion
+- Cleaned up `chsh-dev-ncs-project`: removed stale `debug/SKILL.md` (duplicated chsh-dev-ncs-debug), removed stale INDEX.md, README.md, ENHANCEMENT_SUMMARY.md (referenced non-existent files); updated SKILL.md sub-skills reference table

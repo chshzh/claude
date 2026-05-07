@@ -1,5 +1,5 @@
 ---
-name: cursor-create-skill
+name: chsh-ag-skill-create
 description: >-
   Guides users through creating effective Agent Skills. Use when you want to
   create, write, or author a new skill, or asks about skill structure, best
