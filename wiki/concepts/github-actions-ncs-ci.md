@@ -72,7 +72,7 @@ gh run rerun <run-id> --repo <owner>/<repo> --failed
 | `git am` silently skipped patch | `--check` fails on shallow clone | Remove `--check`; run `git am` directly, detect "already applied" by checking commit log subject line |
 | `git am` fails with "already applied" | Patch cached with repos | Abort `git am`, check log for subject line; if found, skip — otherwise exit 1 |
 | `git am` "already applied" check false-negative | Patch Subject wraps AND has `[nrf *]` tag; `sed head -1` misses continuation and keeps tag prefix that git strips | Use `awk` to unfold RFC 2822 Subject and strip `[nrf *]` tags (see Section 9) |
-| `west build` fails with "unknown command" on cache hit | `.west/config` not cached; `[zephyr] base` missing after init-only restore | Add `workspace/.west` to cache path (see Section 7) |
+| `west build` fails with "unknown command" on cache hit | `.west/config` not cached; `[zephyr] base` missing after init-only restore | Add `workspace/.west` to cache path AND guard `west init -l` to not overwrite existing config (see Section 7) |
 | `gh release delete-asset` silently does nothing | `gh` CLI not in NCS toolchain container; `2>/dev/null \|\| true` hides failure | Use `curl` + REST API + single-line `python3 -c` to delete the asset by ID (see Section 10) |
 | YAML parse error on multi-line `python3 -c` | Unindented Python lines inside `run: \|` block break YAML block scalar parsing | Use `python3 -c \` continuation on one line (see Section 10) |
 | `merged.hex not found` | No MCUboot in sysbuild | Fall back to `zephyr/zephyr.hex`; check sysbuild.conf |
@@ -204,7 +204,15 @@ repos are re-cloned at the base tag and the new patch is applied cleanly.
 
 **Cache the `.west` directory too** — include `workspace/.west` in the cache path. After `west update`, `.west/config` contains `[zephyr] base = zephyr` which is required for `west build` to locate ZEPHYR_BASE. Without it, `west build` fails with `unknown command "build"; workspace does not define this extension command` on cache hits. Caching `.west` alongside the repos restores the full config.
 
-**After a cache hit**: west's `.west/` config directory is now cached. The restore step `west init -l <app> 2>/dev/null || true` is kept as a fallback guard for edge cases.
+**Do NOT unconditionally `west init -l` on cache hit** — `west init -l` overwrites `.west/config` and removes the `[zephyr] base = zephyr` entry. Guard it:
+
+```bash
+# Only init if [zephyr] base is missing (partial/corrupt cache edge case)
+grep -q 'base = zephyr' .west/config 2>/dev/null || \
+  west init -l nordic-wifi-shell-sqspi 2>/dev/null || true
+```
+
+**After a cache hit**: `.west/config` is restored from cache with the full config. The init guard above handles edge cases.
 
 ---
 
