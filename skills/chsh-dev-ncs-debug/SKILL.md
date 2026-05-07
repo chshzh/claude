@@ -50,6 +50,7 @@ Required information:
 | Co-processor / VPR hang | D — Barrier debugging |
 | Memory overflow, stack corruption | E — Memory analysis → use **chsh-dev-ncs-memory** |
 | Intermittent failure (not always) | F — Loop test |
+| CI build fails / pre-built firmware broken | G — GitHub Actions monitoring + firmware test |
 
 ---
 
@@ -345,6 +346,77 @@ nrfutil device list
 
 ---
 
+## Mode G — GitHub Actions Monitoring and Pre-Built Firmware Test
+
+Use when a CI build fails, the pre-built firmware is broken, or you need to verify the CI
+→ flash → test loop end-to-end.
+
+### G1. Monitor GitHub Actions runs
+
+```bash
+# List recent runs
+gh run list --repo <owner>/<repo> --limit 5
+
+# Watch until completion (updates every 30 seconds)
+gh run watch <run-id> --repo <owner>/<repo> --interval 30
+
+# Get failed step logs
+gh run view <run-id> --repo <owner>/<repo> --log-failed
+```
+
+### G2. Common CI failure patterns
+
+| Failure | Root cause | Fix |
+|---------|-----------|-----|
+| `curl: (22) 404` on nrfutil | URL no longer valid | Switch to `ghcr.io/nrfconnect/sdk-nrf-toolchain:<ver>` container |
+| `west: command not found` | Toolchain not in container PATH | Use container image, not manual install |
+| `git am` fails "already applied" | Patch cached with repos | Add idempotent check: `git am --check "$p" && git am "$p"` |
+| `merged.hex not found` | No MCUboot sysbuild | Fallback to `zephyr/zephyr.hex`; check `sysbuild.conf` |
+| Permission denied on git ops | UID mismatch in container | Add `git config --global --add safe.directory '*'` |
+| Release step fails | Missing `permissions: contents: write` | Add at workflow top level |
+
+### G3. Download and flash pre-built firmware
+
+```bash
+# Download latest release artifact
+gh release download latest --repo <owner>/<repo> --pattern "*.hex" -D /tmp/fw/
+
+# Flash
+west flash --hex-file /tmp/fw/merged.hex --recover --dev-id <SN>
+```
+
+Or use **nRF Connect for Desktop → Programmer** (no local toolchain needed).
+
+### G4. Verify boot over UART
+
+```bash
+# Always use nordicsemi_uart_monitor.py (prefer over raw serial)
+python3 nordicsemi_uart_monitor.py --port /dev/cu.usbmodem... --baud 115200
+```
+
+Expected sequence:
+1. `*** Booting nRF Connect SDK` — MCUboot + firmware running
+2. Module init lines — confirm sQSPI / WiFi driver loading
+3. `uart:~$` — shell ready
+
+Quick functional check:
+```sh
+uart:~$ wifi scan
+uart:~$ wifi status
+uart:~$ kernel threads
+```
+
+### G5. Fix-push-verify loop
+
+```
+edit → commit → push → gh run watch → (pass) → gh release download latest → west flash → verify
+                                     → (fail) → gh run view --log-failed → fix → repeat
+```
+
+Minimum loop time with caching: ~5 min. Without cache: ~20 min.
+
+---
+
 ## Related Skills and Resources
 
 | Task | Go to |
@@ -355,3 +427,4 @@ nrfutil device list
 | Commit after fixing | `chsh-dev-git-commit` |
 | mcp.nrflow tools reference | wiki: `mcp-nrflow-tools` |
 | General embedded debug patterns | wiki: `embedded-system-general-debugging` |
+| CI/CD for NCS firmware | wiki: `github-actions-ncs-ci` |

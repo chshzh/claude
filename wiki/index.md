@@ -2,11 +2,11 @@
 
 > Content catalog. Every wiki page listed under its type with a one-line summary.
 > Read this first to find relevant pages for any query.
-> Last updated: 2026-05-07 | Total pages: 15
+> Last updated: 2026-05-07 | Total pages: 16
 
 ## Entities
 
-- [hermes-setup-on-linux-with-nas-nfs-backup](concepts/hermes-setup-on-linux-with-nas-nfs-backup.md) — NAS NFS architecture: Hermes data on UGreen NAS, recovery by mounting NFS, zero reconfig
+- [hermes-setup-on-linux-with-nas-nfs-backup](entities/hermes-setup-on-linux-with-nas-nfs-backup.md) — NAS NFS architecture: Hermes data on UGreen NAS, recovery by mounting NFS, zero reconfig
 
 ## Concepts
 
@@ -15,6 +15,7 @@
 - [memfault-version-requirements](concepts/memfault-version-requirements.md) — Memfault's allowed characters, ordering algorithm, and `v`-prefix caveat
 - [embedded-system-general-debugging](concepts/embedded-system-general-debugging.md) — Debugging lessons from sQSPI driver implementation: barriers, multi-device testing, loop scripts
 - [mcp-nrflow-tools](concepts/mcp-nrflow-tools.md) — Introduction to mcp.nrflow MCP tools and best practices for NCS build/flash/UART workflows
+- [github-actions-ncs-ci](concepts/github-actions-ncs-ci.md) — GitHub Actions CI for NCS firmware: Docker container approach, rolling releases, pre-built firmware test loop
 
 ### AI / Dev Tools
 - [deepseek-claude-code](concepts/deepseek-claude-code.md) — DeepSeek Anthropic API 兼容层直连 Claude Code：配置、模型策略、验证

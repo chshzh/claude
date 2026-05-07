@@ -3,7 +3,12 @@
 > Chronological record of all wiki actions. Append-only.
 > Actions: ingest, update, query, lint, create, archive, delete
 
-## [2026-05-05] create | DeepSeek → Claude Code 直连配置
+## [2026-05-07] create | GitHub Actions CI for NCS firmware
+- **Created:** concepts/github-actions-ncs-ci.md — Docker container approach, rolling "latest" release, pre-built firmware test loop, common failure patterns, caching strategy, west.yml manifest
+- **Updated:** index.md (pages 15→16)
+- **Updated:** skills/chsh-dev-ncs-debug/SKILL.md — added Mode G (GHA monitoring + pre-built firmware test loop), updated Related Skills table
+
+
 - **Created:** concepts/deepseek-claude-code.md — DeepSeek Anthropic API 兼容层配置，V4-Pro/V4-Flash 模型策略，验证方法
 - **Updated:** index.md (pages 10→11)
 
