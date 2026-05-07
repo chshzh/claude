@@ -73,6 +73,7 @@ gh run rerun <run-id> --repo <owner>/<repo> --failed
 | `git am` fails with "already applied" | Patch cached with repos | Abort `git am`, check log for subject line; if found, skip — otherwise exit 1 |
 | `git am` "already applied" check false-negative | Patch Subject wraps AND has `[nrf *]` tag; `sed head -1` misses continuation and keeps tag prefix that git strips | Use `awk` to unfold RFC 2822 Subject and strip `[nrf *]` tags (see Section 9) |
 | `west build` fails with "unknown command" on cache hit | `.west/config` not cached; `[zephyr] base` missing after init-only restore | Add `workspace/.west` to cache path (see Section 7) |
+| `gh release delete-asset` silently does nothing | `gh` CLI not in NCS toolchain container; `2>/dev/null \|\| true` hides failure | Use `curl` + REST API + `python3` to delete the asset by ID (see Section 10) |
 | `merged.hex not found` | No MCUboot in sysbuild | Fall back to `zephyr/zephyr.hex`; check sysbuild.conf |
 | `permission denied` on git operations in container | UID mismatch | Add `git config --global --add safe.directory '*'` |
 | Release creation fails | Missing `permissions: contents: write` | Add to workflow top-level |
@@ -330,16 +331,30 @@ body: |
 
 ### Remove stale release assets after renaming
 
-When a hex file is renamed (e.g., `merged.hex` → descriptive name), old assets remain attached to the rolling release. Delete them with:
+When a hex file is renamed (e.g., `merged.hex` → descriptive name), old assets remain attached to the rolling release. The `gh` CLI is NOT available inside the NCS toolchain container (`ghcr.io/nrfconnect/sdk-nrf-toolchain:*`) — use the GitHub REST API via `curl` + `python3` instead:
 
 ```yaml
 - name: Remove stale merged.hex from release
   if: github.ref == 'refs/heads/main'
   run: |
-    gh release delete-asset latest merged.hex --yes 2>/dev/null || true
+    # gh CLI is not in the NCS toolchain container — use the GitHub REST API.
+    RELEASE=$(curl -sf -H "Authorization: token $GITHUB_TOKEN" \
+      "https://api.github.com/repos/$GITHUB_REPOSITORY/releases/tags/latest")
+    ASSET_ID=$(echo "$RELEASE" | python3 -c "
+import sys, json
+assets = json.load(sys.stdin).get('assets', [])
+ids = [a['id'] for a in assets if a['name'] == 'merged.hex']
+print(ids[0] if ids else '')
+")
+    if [ -n "$ASSET_ID" ]; then
+      curl -sf -X DELETE -H "Authorization: token $GITHUB_TOKEN" \
+        "https://api.github.com/repos/$GITHUB_REPOSITORY/releases/assets/$ASSET_ID"
+      echo "Deleted stale merged.hex (asset id $ASSET_ID)"
+    else
+      echo "merged.hex not present in release — nothing to delete"
+    fi
   env:
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    GH_REPO: ${{ github.repository }}
 ```
 
-The `|| true` guard prevents the step from failing when the stale asset no longer exists.
+> **Pitfall**: `gh release delete-asset ... 2>/dev/null || true` silently succeeds (exit 0) when `gh` is not installed inside the container. Always use `curl` for REST API calls in toolchain containers.
