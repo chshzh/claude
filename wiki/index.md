@@ -15,7 +15,7 @@
 - [memfault-version-requirements](concepts/memfault-version-requirements.md) — Memfault's allowed characters, ordering algorithm, and `v`-prefix caveat
 - [embedded-system-general-debugging](concepts/embedded-system-general-debugging.md) — Debugging lessons from sQSPI driver implementation: barriers, multi-device testing, loop scripts
 - [mcp-nrflow-tools](concepts/mcp-nrflow-tools.md) — Introduction to mcp.nrflow MCP tools and best practices for NCS build/flash/UART workflows
-- [github-actions-ncs-ci](concepts/github-actions-ncs-ci.md) — GitHub Actions CI for NCS firmware: Docker container approach, rolling releases, pre-built firmware test loop
+- [github-actions-ncs-ci](concepts/github-actions-ncs-ci.md) — GitHub Actions CI for NCS firmware: Docker container approach, rolling releases, pre-built firmware test loop, idempotent git am, artifact naming, manifest pitfalls
 
 ### AI / Dev Tools
 - [deepseek-claude-code](concepts/deepseek-claude-code.md) — DeepSeek Anthropic API 兼容层直连 Claude Code：配置、模型策略、验证

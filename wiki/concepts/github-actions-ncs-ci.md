@@ -68,10 +68,16 @@ gh run rerun <run-id> --repo <owner>/<repo> --failed
 | `curl: (22) 404` when installing nrfutil | nrfutil download URL changed | Use `ghcr.io/nrfconnect/sdk-nrf-toolchain:<ncs-version>` Docker container instead |
 | `west: command not found` | Missing toolchain in PATH | Container approach puts everything in PATH automatically |
 | `west init` fails with "already initialized" | Cache hit restores repos but not `.west/` | Re-run `west init -l` with `|| true` guard after cache restore |
-| `git am` fails with "already applied" | Patch cached with repos | Add idempotent check before `git am` |
+| `git am` fails with "no identity" | Container root has no git config | Add `git config --global user.email "ci@github-actions"` + `user.name` before `git am` |
+| `git am` silently skipped patch | `--check` fails on shallow clone | Remove `--check`; run `git am` directly, detect "already applied" by checking commit log subject line |
+| `git am` fails with "already applied" | Patch cached with repos | Abort `git am`, check log for subject line; if found, skip — otherwise exit 1 |
 | `merged.hex not found` | No MCUboot in sysbuild | Fall back to `zephyr/zephyr.hex`; check sysbuild.conf |
 | `permission denied` on git operations in container | UID mismatch | Add `git config --global --add safe.directory '*'` |
 | Release creation fails | Missing `permissions: contents: write` | Add to workflow top-level |
+| `No shield 'nrf7002eb2_mspi'` | Explicit `zephyr:` entry in west.yml overrides nrf's import allowlist | Remove explicit `zephyr` and `nrfxlib` entries from west.yml; let `nrf: import: true` handle them |
+| Many repos fail to update | `west update --narrow` skips transitive imports | Use full `west update -o=--depth=1 -n` without `--narrow`; use `ci-skip` group filter for optional repos |
+| `expected one argument` for group filter | `--group-filter -ci-skip` parsed as new flag | Use `west config manifest.group-filter -- -ci-skip,-benchmark` before `west update` |
+| `invalid version 0.1` in west.yml | YAML parses `0.10` as float `0.1` | Quote the version: `version: "0.10"` |
 
 ---
 
@@ -201,15 +207,99 @@ If your app does not have a `west.yml`, add a minimal one so `west init -l` work
 
 ```yaml
 manifest:
-  version: 0.10
+  version: "0.10"   # MUST be quoted — bare 0.10 is a YAML float → parsed as 0.1
   projects:
     - name: nrf
       url: https://github.com/nrfconnect/sdk-nrf
       revision: v3.3.0  # pin NCS version
-      import: true       # imports all NCS transitive deps
+      import: true       # imports ALL transitive deps including zephyr, hal_nordic, etc.
   self:
     path: <your-app-folder-name>
 ```
 
-This makes the app a self-contained west manifest project. CI and local developers can
-both use `west init -l <app>` to set up a complete workspace from scratch.
+**Critical**: Do NOT add explicit `zephyr` or `nrfxlib` entries alongside `nrf: import: true`.
+nrf's import uses an allowlist that adds the correct `west-commands:` and provides `hal_nordic`.
+Overriding it breaks `west build` and causes missing modules.
+
+**For optional repos** (wfa-qt-control-app, coremark, etc.) that fail shallow fetches: assign them to a `ci-skip` group and filter it out:
+
+```yaml
+    - name: wfa-qt-control-app
+      ...
+      groups: [ci-skip]
+```
+
+```yaml
+# In CI, before west update:
+west config manifest.group-filter -- -ci-skip,-benchmark
+west update -o=--depth=1 -n
+```
+
+The `--` separator is required so `-ci-skip` is not parsed as a new flag.
+The `-n` flag tells west to skip SHA resolution for repos not in the manifest (speeds up shallow clones).
+
+---
+
+## 9. Idempotent `git am` Pattern for Cached Repos
+
+When repos are cached, patches may already be applied. A naive `git am` will fail with "already applied".
+Use this pattern for graceful handling:
+
+```bash
+apply_patch() {
+  local repo="$1"
+  local patch="$2"
+  if git -C "$repo" am "$patch" 2>&1; then
+    echo "Patch applied to $repo"
+  else
+    git -C "$repo" am --abort 2>/dev/null || true
+    local subject
+    subject=$(sed -n 's/^Subject: \[PATCH[^]]*\] //p' "$patch" | head -1)
+    if git -C "$repo" log --oneline | grep -qF "$subject"; then
+      echo "Already applied — skipping"
+    else
+      echo "ERROR: patch failed and is not already applied"
+      exit 1
+    fi
+  fi
+}
+```
+
+**Key**: Always configure git identity in the container before calling `git am`:
+```bash
+git config --global user.email "ci@github-actions"
+git config --global user.name "GitHub Actions"
+git config --global --add safe.directory '*'
+```
+
+Do NOT use `git am --check` to pre-flight on shallow clones — it may fail even for valid patches.
+
+---
+
+## 10. Pre-Built Firmware Artifact Naming
+
+Use a descriptive, versioned filename instead of a generic `merged.hex`:
+
+```
+<project>-<board>-<shield>-ncs<version>.hex
+# Example:
+nordic-wifi-shell-sqspi-nrf54lm20dk-nrf7002ebii-ncs3.3.0.hex
+```
+
+In build.yml:
+```yaml
+- name: Collect artifacts
+  run: |
+    mkdir -p artifacts
+    HEX="workspace/<app>/build/merged.hex"
+    [ ! -f "$HEX" ] && HEX="workspace/<app>/build/<app>/zephyr/zephyr.hex"
+    [ ! -f "$HEX" ] && HEX="workspace/<app>/build/zephyr/zephyr.hex"
+    cp "$HEX" artifacts/<descriptive-name>.hex
+```
+
+The release body should link to the Evaluator Quick Start section, not repeat instructions inline:
+```yaml
+body: |
+  For setup and flashing instructions, see the **[Evaluator Quick Start](https://github.com/<org>/<repo>#evaluator-quick-start)** in the README.
+  > Requires hardware modification and Board Configurator setup.
+```
