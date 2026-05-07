@@ -88,10 +88,13 @@ For the "loop until succeeded" pattern (user says "fix, commit, check CI, repeat
 2. Commit and push
 3. Watch CI with `gh run watch`
 4. On failure: read `--log-failed`, diagnose, fix, repeat from step 1
-5. On success: proceed to flash pre-built firmware and verify (see `chsh-dev-ncs-debug` Mode G)
+5. On success: proceed to flash pre-built firmware and verify
 
 > **Rule**: CI green is not enough for firmware repos — always flash the pre-built artifact
 > and verify `uart:~$` appears on the correct VCOM port before marking done.
+> For the full release flow (tag → CI → release artifact → flash → verify),
+> use **chsh-dev-git-release**. For ad-hoc flash + UART debug after a CI run,
+> use **chsh-dev-ncs-debug** Mode G.
 
 ## Commit Message Formats
 

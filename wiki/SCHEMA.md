@@ -21,13 +21,18 @@ created: YYYY-MM-DD
 updated: YYYY-MM-DD
 type: entity | concept | comparison | guide | query | summary
 tags: [from taxonomy below]
-sources: [raw/articles/source-name.md]
+sources: [raw/articles/source-name.md, https://example.com/article]
 # Optional quality signals:
 confidence: high | medium | low
 contested: true
 contradictions: [other-page-slug]
 ---
 ```
+
+`sources:` accepts either a `raw/...` path (preferred — content stored
+locally, deduplicated by sha256) or an external URL when the source was not
+saved locally. URLs are valid but skip drift detection. Use `sources: []`
+for first-hand notes or pages synthesized without a single citable source.
 
 ### raw/ Frontmatter
 ```yaml

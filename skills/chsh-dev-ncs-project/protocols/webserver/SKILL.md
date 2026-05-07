@@ -1,8 +1,6 @@
-````skill
 ---
-name: chsh-dev-ncs-project/protocols/webserver
-description: Static web server with HTML/CSS/JS, REST APIs, and WebSockets for Nordic NCS
-parent: ncs-protocols
+name: chsh-dev-ncs-project-protocols-webserver
+description: Static HTTP server pattern for Nordic NCS — serve HTML/CSS/JS from flash, expose REST APIs, and bridge to WebSockets. Use when building an on-device web UI or configuration portal hosted directly from the firmware.
 ---
 
 # Static Web Server Subskill
@@ -127,9 +125,8 @@ Configure heap: `CONFIG_HEAP_MEM_POOL_SIZE=90000`
 - **Smart Home Controls**: Device control panels
 - **Debug Consoles**: Development and diagnostics
 
-For complete implementation details, see [STATIC_WEBSERVER_GUIDE.md](protocols/webserver/STATIC_WEBSERVER_GUIDE.md)
+For complete implementation details, see [STATIC_WEBSERVER_GUIDE.md](STATIC_WEBSERVER_GUIDE.md)
 
-````
 ## Self-Update Policy
 
 At the **end of each conversation**, review what was discovered and check whether any facts in this skill are new, corrected, or outdated (e.g. new HTTP server patterns, REST API conventions, static file handling).

@@ -132,3 +132,22 @@
 - Renamed `cursor-create-skill` → `chsh-ag-skill-create` (updated frontmatter name)
 - Created `chsh-ag-skill-review`: daily skill health audit — structure, size, dedup, dead links, cross-ref gaps, brainstorm section for future expansion
 - Cleaned up `chsh-dev-ncs-project`: removed stale `debug/SKILL.md` (duplicated chsh-dev-ncs-debug), removed stale INDEX.md, README.md, ENHANCEMENT_SUMMARY.md (referenced non-existent files); updated SKILL.md sub-skills reference table
+
+## [2026-05-07] skills-audit | ran chsh-ag-skill-review on ~/.claude/skills
+- 28 skills reviewed, 17 real issues (P0=4, P1=2, P2=11)
+- P0 fixes applied: restored YAML frontmatter to 4 sub-skills under chsh-dev-ncs-project (architecture/, protocols/, protocols/webserver/, wifi/) — frontmatter was either missing or wrapped in ```` ```skill ```` code fence so Cursor couldn't parse it; fixed dead links to relative paths
+- P1 fixes applied: added `chsh-dev-git-release` to Related Skills tables of chsh-dev-git-commit, chsh-dev-ncs-debug, chsh-dev-ncs-workflow, chsh-qa-ncs-test
+- Report: skills/chsh-ag-skill-review/report-2026-05-07.md
+
+## [2026-05-07] rename | llm-wiki → chsh-ag-llm-wiki
+- Renamed personal skill `llm-wiki` to `chsh-ag-llm-wiki` (consistent `chsh-ag-*` naming for agent-management skills)
+- Rewrote frontmatter description to include WHEN trigger (was just one-liner)
+- Created companion audit skill `chsh-ag-llm-wiki-review`: schema validation, broken/orphan link audit, index completeness, staleness, source drift via sha256, page-size split candidates, contradiction surface
+
+## [2026-05-07] lint | wiki audit, 5 issues found, all auto-fixed
+- P0: added missing `sources:` field to deepseek-claude-code.md, wireguard-openwrt-china-tunnel.md
+- P1 + schema clarification: SCHEMA.md now explicitly allows URLs and `[]` in `sources:` (was previously raw/ paths only)
+- P1: cleaned `sources: [wireguard.com]` → `[https://www.wireguard.com/]` on wireguard-comprehensive-guide.md
+- P2: fixed invalid date `updated: 2026-05-07v2` on embedded-system-general-debugging.md
+- 6 oversized pages (>200L) and 6 orphans surfaced as info-only — no auto-fixes
+- Report: skills/chsh-ag-llm-wiki-review/report-2026-05-07.md

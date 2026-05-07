@@ -1,8 +1,6 @@
-````skill
 ---
-name: chsh-dev-ncs-project/protocols
-description: Network protocols for Nordic NCS - MQTT, HTTP, CoAP, UDP, TCP, WebServer
-parent: ncs-project
+name: chsh-dev-ncs-project-protocols
+description: Network protocol patterns for Nordic NCS — MQTT, HTTP, CoAP, UDP, TCP, and the WebServer sub-skill. Use when adding network connectivity (cloud telemetry, REST clients, lightweight messaging) to an NCS project.
 ---
 
 # Network Protocols Subskill
@@ -106,9 +104,9 @@ west build -p -b nrf7002dk/nrf5340/cpuapp -- \
 | **TCP** | Reliable custom | Low | Via TLS sockets |
 | **UDP** | Real-time data | Very Low | Via DTLS |
 
-For complete details, see [FEATURE_SELECTION.md](../../../../ProductManager/ncs/features/FEATURE_SELECTION.md)
+For protocol-specific overlays, see the per-protocol overlay files in
+`~/.claude/skills/chsh-dev-ncs-project/overlays/`.
 
-````
 ## Self-Update Policy
 
 At the **end of each conversation**, review what was discovered and check whether any facts in this skill are new, corrected, or outdated (e.g. new protocol patterns, security recommendations, NCS API changes).

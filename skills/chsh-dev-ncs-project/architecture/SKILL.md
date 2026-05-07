@@ -1,4 +1,9 @@
-# Architecture Patterns Reference  
+---
+name: chsh-dev-ncs-project-architecture
+description: Reference for choosing between Simple Multi-Threaded and SMF+zbus architecture patterns in Nordic NCS projects. Includes ready-to-copy templates for both. Use when designing a new NCS project, deciding which architecture pattern fits the use case, or scaffolding modules from templates.
+---
+
+# Architecture Patterns Reference
 
 Choose the right architecture for your Nordic NCS project.
 
@@ -51,7 +56,7 @@ cp ~/.claude/skills/chsh-pm-ncs-prd/overlays/overlay-smf-zbus.conf .
 
 ## 📖 Comprehensive Guide
 
-**[ARCHITECTURE_PATTERNS.md](architecture/guides/ARCHITECTURE_PATTERNS.md)** (~20,000 tokens)
+**[ARCHITECTURE_PATTERNS.md](guides/ARCHITECTURE_PATTERNS.md)** (~20,000 tokens)
 - Deep comparison of both patterns
 - Decision tree for choosing
 - Full implementation examples
@@ -150,7 +155,7 @@ your_project/
             └── Kconfig.sensor
 ```
 
-For complete details and decision guidance, see [ARCHITECTURE_PATTERNS.md](architecture/guides/ARCHITECTURE_PATTERNS.md)
+For complete details and decision guidance, see [ARCHITECTURE_PATTERNS.md](guides/ARCHITECTURE_PATTERNS.md)
 
 ````
 ## Self-Update Policy

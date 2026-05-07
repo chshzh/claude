@@ -256,6 +256,7 @@ Then ask:
 - `chsh-pm-ncs-prd` — update `docs/pm-prd/PRD.md` if requirements need changing
 - `chsh-dev-spec` — update `docs/dev-specs/` if design gaps are found
 - `chsh-dev-ncs-project` — fix code for P0 issues
+- `chsh-dev-git-release` — once tests pass, tag and publish a release
 
 ## Self-Update Policy
 

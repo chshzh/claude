@@ -283,6 +283,7 @@ docs/qa-test/QA-2026-04-09-14-30.md
 | `chsh-dev-ncs-project` | Implementing code from specs | `src/`, `prj.conf`, passing build |
 | `chsh-qa-ncs-test` | Validating a build against PRD and specs | `docs/qa-test/QA-*.md` |
 | `chsh-dev-git-commit` | Preparing git commits | Clean, logical commit history |
+| `chsh-dev-git-release` | Tagging a release, publishing firmware, downloading and flashing pre-built `.hex` | GitHub release with verified artifact |
 | `chsh-dev-ncs-memory` | Diagnosing memory usage | Heap / stack recommendations |
 
 ## Self-Update Policy

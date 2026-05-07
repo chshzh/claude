@@ -4,7 +4,7 @@ created: 2026-05-01
 updated: 2026-05-01
 type: concept
 tags: [networking, vpn, wireguard, openwrt, embedded, guide]
-sources: [wireguard.com]
+sources: [https://www.wireguard.com/]
 ---
 
 # WireGuard 全面指南

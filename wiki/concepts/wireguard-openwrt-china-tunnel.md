@@ -1,9 +1,11 @@
 ---
 title: OpenWrt WireGuard 翻墙隧道
 created: 2026-04-30
-updated: 2026-04-30
+updated: 2026-05-07
 type: guide
 tags: [wireguard, openwrt, vpn, networking, troubleshooting, china, multi-device]
+sources: []
+confidence: high
 ---
 
 # OpenWrt WireGuard 翻墙隧道

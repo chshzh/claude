@@ -1,14 +1,10 @@
 ---
-name: llm-wiki
-description: "Karpathy's LLM Wiki: build/query interlinked markdown KB."
-version: 2.1.0
-author: Hermes Agent
-license: MIT
-metadata:
-  hermes:
-    tags: [wiki, knowledge-base, research, notes, markdown, rag-alternative]
-    category: research
-    related_skills: [obsidian, arxiv]
+name: chsh-ag-llm-wiki
+description: >-
+  Build, ingest into, query, and lint a persistent Karpathy-style LLM Wiki —
+  a directory of interlinked markdown files acting as a compounding knowledge
+  base. Use when initializing a wiki, adding a source (URL, paper, transcript),
+  asking a domain question backed by the wiki, or running a wiki health audit.
 ---
 
 # Karpathy's LLM Wiki

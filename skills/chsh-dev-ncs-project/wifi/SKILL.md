@@ -1,8 +1,6 @@
-````skill
 ---
-name: chsh-dev-ncs-project/wifi
-description: Wi-Fi development for Nordic nRF Connect SDK - station, SoftAP, P2P, and raw packet modes
-parent: ncs-project
+name: chsh-dev-ncs-project-wifi
+description: Wi-Fi implementation patterns for Nordic nRF70-series — Station, SoftAP, P2P, and raw packet modes, plus reconnection patterns. Use when implementing Wi-Fi connectivity, picking a Wi-Fi mode, or wiring up event handlers in an NCS project.
 ---
 
 # Wi-Fi Development Subskill
@@ -92,9 +90,9 @@ west build -p -b nrf7002dk/nrf5340/cpuapp -- \
   -DEXTRA_CONF_FILE="wifi-sta.conf"
 ```
 
-For complete details, see [WIFI_GUIDE.md](wifi/guides/WIFI_GUIDE.md)
+For complete details, see [guides/WIFI_GUIDE.md](guides/WIFI_GUIDE.md)
+and [guides/RECONNECTION_PATTERNS.md](guides/RECONNECTION_PATTERNS.md).
 
-````
 ## Self-Update Policy
 
 At the **end of each conversation**, review what was discovered and check whether any facts in this skill are new, corrected, or outdated (e.g. new Wi-Fi driver APIs, SoftAP/STA patterns, nRF70 quirks, board overlay examples).

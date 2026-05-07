@@ -1,9 +1,11 @@
 ---
 title: DeepSeek → Claude Code 直连配置
 created: 2026-05-05
-updated: 2026-05-05
+updated: 2026-05-07
 type: concept
 tags: [ai, llm, guide, reference]
+sources: []
+confidence: medium
 ---
 
 # DeepSeek → Claude Code 直连配置

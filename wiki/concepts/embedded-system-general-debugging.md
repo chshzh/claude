@@ -1,7 +1,7 @@
 ---
 title: Embedded System General Debugging
 created: 2026-05-07
-updated: 2026-05-07v2
+updated: 2026-05-07
 type: concept
 tags: [debugging, embedded, ncs, zephyr, vpr, spi, mspi, uart]
 sources: []
