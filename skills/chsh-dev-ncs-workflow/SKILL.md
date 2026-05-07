@@ -284,6 +284,7 @@ docs/qa-test/QA-2026-04-09-14-30.md
 | `chsh-qa-ncs-test` | Validating a build against PRD and specs | `docs/qa-test/QA-*.md` |
 | `chsh-dev-git-commit` | Preparing git commits | Clean, logical commit history |
 | `chsh-dev-git-release` | Tagging a release, publishing firmware, downloading and flashing pre-built `.hex` | GitHub release with verified artifact |
+| `chsh-dev-ncs-migrate` | Upgrading the project to a newer NCS version (single hop or multi-hop) | Migrated app, clean build, verified on hardware |
 | `chsh-dev-ncs-memory` | Diagnosing memory usage | Heap / stack recommendations |
 
 ## Self-Update Policy

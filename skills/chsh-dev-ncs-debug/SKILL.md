@@ -433,6 +433,7 @@ Minimum loop time with caching: ~5 min. Without cache: ~20 min.
 | QA and test reporting | `chsh-qa-ncs-test` |
 | Commit after fixing | `chsh-dev-git-commit` |
 | Tag and publish a release after CI passes | `chsh-dev-git-release` |
+| Migrate to a newer NCS version | `chsh-dev-ncs-migrate` |
 | mcp.nrflow tools reference | wiki: `mcp-nrflow-tools` |
 | General embedded debug patterns | wiki: `embedded-system-general-debugging` |
 | CI/CD for NCS firmware | wiki: `github-actions-ncs-ci` |

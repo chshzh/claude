@@ -144,6 +144,13 @@
 - Rewrote frontmatter description to include WHEN trigger (was just one-liner)
 - Created companion audit skill `chsh-ag-llm-wiki-review`: schema validation, broken/orphan link audit, index completeness, staleness, source drift via sha256, page-size split candidates, contradiction surface
 
+## [2026-05-07] create | chsh-dev-ncs-migrate skill
+- New skill: NCS version migration (single-hop and multi-hop)
+- Workflow: baseline (build+flash+test on source) → plan hops → per-hop (toolchain switch, west.yml bump, apply migration guide, build clean, flash, smoke test, commit) → final functional verification
+- Authoritative sources: Nordic release notes + per-version migration guides (URLs in skill)
+- Includes Decision Gates table — when the migration guide doesn't cover something, STOP and ask via AskQuestion (out-of-tree patches, third-party SHA pins, functional regressions)
+- Cross-referenced from chsh-dev-ncs-workflow Skill Reference and chsh-dev-ncs-debug Related table
+
 ## [2026-05-07] lint | wiki audit, 5 issues found, all auto-fixed
 - P0: added missing `sources:` field to deepseek-claude-code.md, wireguard-openwrt-china-tunnel.md
 - P1 + schema clarification: SCHEMA.md now explicitly allows URLs and `[]` in `sources:` (was previously raw/ paths only)
