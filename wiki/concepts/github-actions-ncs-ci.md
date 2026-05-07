@@ -73,7 +73,8 @@ gh run rerun <run-id> --repo <owner>/<repo> --failed
 | `git am` fails with "already applied" | Patch cached with repos | Abort `git am`, check log for subject line; if found, skip — otherwise exit 1 |
 | `git am` "already applied" check false-negative | Patch Subject wraps AND has `[nrf *]` tag; `sed head -1` misses continuation and keeps tag prefix that git strips | Use `awk` to unfold RFC 2822 Subject and strip `[nrf *]` tags (see Section 9) |
 | `west build` fails with "unknown command" on cache hit | `.west/config` not cached; `[zephyr] base` missing after init-only restore | Add `workspace/.west` to cache path (see Section 7) |
-| `gh release delete-asset` silently does nothing | `gh` CLI not in NCS toolchain container; `2>/dev/null \|\| true` hides failure | Use `curl` + REST API + `python3` to delete the asset by ID (see Section 10) |
+| `gh release delete-asset` silently does nothing | `gh` CLI not in NCS toolchain container; `2>/dev/null \|\| true` hides failure | Use `curl` + REST API + single-line `python3 -c` to delete the asset by ID (see Section 10) |
+| YAML parse error on multi-line `python3 -c` | Unindented Python lines inside `run: \|` block break YAML block scalar parsing | Use `python3 -c \` continuation on one line (see Section 10) |
 | `merged.hex not found` | No MCUboot in sysbuild | Fall back to `zephyr/zephyr.hex`; check sysbuild.conf |
 | `permission denied` on git operations in container | UID mismatch | Add `git config --global --add safe.directory '*'` |
 | Release creation fails | Missing `permissions: contents: write` | Add to workflow top-level |
@@ -340,12 +341,8 @@ When a hex file is renamed (e.g., `merged.hex` → descriptive name), old assets
     # gh CLI is not in the NCS toolchain container — use the GitHub REST API.
     RELEASE=$(curl -sf -H "Authorization: token $GITHUB_TOKEN" \
       "https://api.github.com/repos/$GITHUB_REPOSITORY/releases/tags/latest")
-    ASSET_ID=$(echo "$RELEASE" | python3 -c "
-import sys, json
-assets = json.load(sys.stdin).get('assets', [])
-ids = [a['id'] for a in assets if a['name'] == 'merged.hex']
-print(ids[0] if ids else '')
-")
+    ASSET_ID=$(echo "$RELEASE" | python3 -c \
+      "import sys,json; a=[x['id'] for x in json.load(sys.stdin).get('assets',[]) if x['name']=='merged.hex']; print(a[0] if a else '')")
     if [ -n "$ASSET_ID" ]; then
       curl -sf -X DELETE -H "Authorization: token $GITHUB_TOKEN" \
         "https://api.github.com/repos/$GITHUB_REPOSITORY/releases/assets/$ASSET_ID"
@@ -358,3 +355,5 @@ print(ids[0] if ids else '')
 ```
 
 > **Pitfall**: `gh release delete-asset ... 2>/dev/null || true` silently succeeds (exit 0) when `gh` is not installed inside the container. Always use `curl` for REST API calls in toolchain containers.
+
+> **YAML pitfall**: Do NOT use a multi-line `python3 -c "..."` heredoc inside a `run: |` block — unindented Python lines break YAML block scalar parsing. Use a single-line `python3 -c \` continuation instead.
