@@ -71,6 +71,7 @@ gh run rerun <run-id> --repo <owner>/<repo> --failed
 | `git am` fails with "no identity" | Container root has no git config | Add `git config --global user.email "ci@github-actions"` + `user.name` before `git am` |
 | `git am` silently skipped patch | `--check` fails on shallow clone | Remove `--check`; run `git am` directly, detect "already applied" by checking commit log subject line |
 | `git am` fails with "already applied" | Patch cached with repos | Abort `git am`, check log for subject line; if found, skip — otherwise exit 1 |
+| `git am` "already applied" check false-negative | Patch Subject wraps AND has `[nrf *]` tag; `sed head -1` misses continuation and keeps tag prefix that git strips | Use `awk` to unfold RFC 2822 Subject and strip `[nrf *]` tags (see Section 9) |
 | `merged.hex not found` | No MCUboot in sysbuild | Fall back to `zephyr/zephyr.hex`; check sysbuild.conf |
 | `permission denied` on git operations in container | UID mismatch | Add `git config --global --add safe.directory '*'` |
 | Release creation fails | Missing `permissions: contents: write` | Add to workflow top-level |
@@ -254,9 +255,21 @@ apply_patch() {
     echo "Patch applied to $repo"
   else
     git -C "$repo" am --abort 2>/dev/null || true
+    # Extract subject: unfold RFC 2822 multi-line Subject, strip [PATCH*] and [nrf *] tags.
+    # A wrapped Subject has continuation lines starting with whitespace.
     local subject
-    subject=$(sed -n 's/^Subject: \[PATCH[^]]*\] //p' "$patch" | head -1)
-    if git -C "$repo" log --oneline | grep -qF "$subject"; then
+    subject=$(awk '
+      /^Subject:/ {
+        sub(/^Subject: /, "")
+        sub(/^\[PATCH[^]]*\] /, "")
+        sub(/^\[nrf [^]]*\] /, "")
+        line = $0
+        while ((getline cont) > 0 && cont ~ /^ /) { line = line cont }
+        print line
+        exit
+      }
+    ' "$patch")
+    if [ -n "$subject" ] && git -C "$repo" log --oneline | grep -qF "$subject"; then
       echo "Already applied — skipping"
     else
       echo "ERROR: patch failed and is not already applied"
@@ -274,6 +287,12 @@ git config --global --add safe.directory '*'
 ```
 
 Do NOT use `git am --check` to pre-flight on shallow clones — it may fail even for valid patches.
+
+**Subject extraction pitfalls**:
+- Subject lines in `git format-patch` output can wrap (RFC 2822 folding) — continuation lines start with a space
+- NCS patches have `[nrf noup]` / `[nrf fromlist]` prefixes in the Subject that do NOT appear in the git commit title (git strips them)
+- `sed -n 's/^Subject: \[PATCH[^]]*\] //p' | head -1` misses both: it captures only the first line (missing the continuation) AND keeps the `[nrf *]` prefix
+- Use the `awk` pattern above which unfolds multi-line subjects and strips both `[PATCH*]` and `[nrf *]` tags
 
 ---
 
