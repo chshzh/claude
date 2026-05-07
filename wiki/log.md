@@ -102,3 +102,22 @@
 - **Created:** concepts/hermes-file-map-customization.md — Physical file layout: where repos live, which files to customize (config.yaml, .env, SOUL.md, webui .env, systemd units) vs auto-managed
 - **Updated:** entities/hermes-setup-on-linux-with-nas-nfs-backup.md — Fixed stale `webui-state/` → `webui/` references (3 locations: table, .env example, text)
 - **Updated:** index.md (pages 9→10)
+
+## [2026-05-07] create | concepts/memfault-version-requirements.md
+- Sourced from: Memfault docs (https://docs.memfault.com/docs/platform/software-version-hardware-version)
+- Covers: allowed characters, natsort ordering, v-prefix caveat, OTA ordering across NCS bumps
+
+## [2026-05-07] create | concepts/embedded-system-general-debugging.md
+- Sourced from: sQSPI/MSPI driver debugging session (NCS v3.3.0, nRF54LM20DK + nRF7002 EB-II)
+- Covers: baseline testing, variable isolation, multi-device comparison, barrier patterns, loop testing, nordicsemi_uart_monitor.py best practice
+
+## [2026-05-07] create | concepts/mcp-nrflow-tools.md
+- Sourced from: mcp_nrflow_nordicsemi_workflow_ncs resource content
+- Covers: tool inventory, resource descriptions, comparison vs manual scripting, multi-device best practices
+
+## [2026-05-07] update | index.md + concepts/*.md + SCHEMA.md
+- Fixed [[wikilinks]] to GitHub-compatible markdown links in all concept pages and index (15 total pages)
+- Fixed VCOM0/VCOM1 mapping: UART30 = VCOM0 on nRF54LM20DK (not VCOM1)
+- Updated embedded-system-general-debugging Lesson 10: prefer nordicsemi_uart_monitor.py over manual Python serial
+- Updated SCHEMA.md: document markdown link convention instead of wikilinks
+- Added wiki/raw/ to .gitignore (51MB hardware PDFs/Altium — not for git)

@@ -41,7 +41,7 @@ as different strings — the `v` prefixed versions sort lexically before the bar
 ones, which can cause unexpected OTA behavior.
 
 **Convention:** strip `v` from the firmware string; keep `v` on git tags only.
-See [[ncs-app-versioning]] for the full convention.
+See [ncs-app-versioning](ncs-app-versioning.md) for the full convention.
 
 ## OTA Implications
 
@@ -64,7 +64,7 @@ Memfault recommends SemVer 2.0 with exactly three groups for releases:
 `1.0.0`, `1.0.0-rc.1`, `1.0.0-nightly.20220123`.
 
 Four-segment (`3.3.0.1`) deviates from strict SemVer but is fully supported
-by natsort and is the chosen convention for NCS projects here. See [[ncs-app-versioning]].
+by natsort and is the chosen convention for NCS projects here. See [ncs-app-versioning](ncs-app-versioning.md).
 
 ## Testing Version Order Locally
 

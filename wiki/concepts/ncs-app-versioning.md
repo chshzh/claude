@@ -67,7 +67,7 @@ Firmware string: 3.3.0.1   ← what Memfault receives (no leading v)
 
 The `v` is stripped in the firmware because Memfault's sorting algorithm treats
 it lexically and Memfault's own documentation never uses a `v` prefix in examples.
-See [[memfault-version-requirements]].
+See [memfault-version-requirements](memfault-version-requirements.md).
 
 ## CMake Injection Pattern (webdash example)
 
@@ -97,4 +97,4 @@ endif()
 
 ## Related
 
-- [[memfault-version-requirements]] — platform constraints that shape this decision
+- [memfault-version-requirements](memfault-version-requirements.md) — platform constraints that shape this decision
