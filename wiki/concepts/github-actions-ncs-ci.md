@@ -72,6 +72,7 @@ gh run rerun <run-id> --repo <owner>/<repo> --failed
 | `git am` silently skipped patch | `--check` fails on shallow clone | Remove `--check`; run `git am` directly, detect "already applied" by checking commit log subject line |
 | `git am` fails with "already applied" | Patch cached with repos | Abort `git am`, check log for subject line; if found, skip — otherwise exit 1 |
 | `git am` "already applied" check false-negative | Patch Subject wraps AND has `[nrf *]` tag; `sed head -1` misses continuation and keeps tag prefix that git strips | Use `awk` to unfold RFC 2822 Subject and strip `[nrf *]` tags (see Section 9) |
+| `west build` fails with "unknown command" on cache hit | `.west/config` not cached; `[zephyr] base` missing after init-only restore | Add `workspace/.west` to cache path (see Section 7) |
 | `merged.hex not found` | No MCUboot in sysbuild | Fall back to `zephyr/zephyr.hex`; check sysbuild.conf |
 | `permission denied` on git operations in container | UID mismatch | Add `git config --global --add safe.directory '*'` |
 | Release creation fails | Missing `permissions: contents: write` | Add to workflow top-level |
@@ -187,6 +188,7 @@ Cache the cloned NCS repos to cut CI time from ~15 min → ~3 min on cache hits:
   uses: actions/cache@v4
   with:
     path: |
+      workspace/.west
       workspace/nrf
       workspace/zephyr
       workspace/modules
@@ -198,8 +200,9 @@ Cache the cloned NCS repos to cut CI time from ~15 min → ~3 min on cache hits:
 **Cache key must include patches** — if a patch changes, invalidate the cache so the
 repos are re-cloned at the base tag and the new patch is applied cleanly.
 
-**After a cache hit**: west's `.west/` config directory is not cached. Re-run
-`west init -l <app> 2>/dev/null || true` to restore it before calling `west build`.
+**Cache the `.west` directory too** — include `workspace/.west` in the cache path. After `west update`, `.west/config` contains `[zephyr] base = zephyr` which is required for `west build` to locate ZEPHYR_BASE. Without it, `west build` fails with `unknown command "build"; workspace does not define this extension command` on cache hits. Caching `.west` alongside the repos restores the full config.
+
+**After a cache hit**: west's `.west/` config directory is now cached. The restore step `west init -l <app> 2>/dev/null || true` is kept as a fallback guard for edge cases.
 
 ---
 
