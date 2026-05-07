@@ -72,8 +72,10 @@ import serial
 ser = serial.Serial("/dev/cu.usbmodem...", 115200, rtscts=True)  # rtscts for HWFC
 ```
 
-> **nRF54LM20DK note**: UART30 = VCOM0 (Port 0, P0.6/P0.7). Run `nrfutil device list` to see
-> all VCOM assignments. UART30 requires `hw-flow-control` in DTS and `rtscts=True` in Python.
+> **nRF54LM20DK note**: Run `nrfutil device list` to see all VCOM assignments and their physical
+> ports. For the sQSPI shield (`nrf7002eb2_mspi`): UART20 (P1.16/P1.17) = VCOM1 (app console,
+> no HWFC). UART30 (P0.6/P0.7) = VCOM0 (debug UART, hw-flow-control in DTS — use `rtscts=True`).
+> Always connect to VCOM1 for the shell prompt `uart:~$`.
 
 ### A2. Reset and capture boot log
 
@@ -246,12 +248,16 @@ python3 <app>/loop_test.py 20      # 20 for release
 
 The script:
 1. Resets the board via `nrfutil device reset`
-2. Opens serial with HWFC (`rtscts=True`)
+2. Opens serial (**HWFC = depends on UART** — see note below)
 3. Waits for shell prompt (`uart:~$`)
 4. Sends `wifi connect` command
 5. Waits for `Connected`
 6. Verifies IP via `wifi status`
 7. Reports pass/fail per iteration + summary
+
+> **HWFC note**: On nRF54LM20DK, UART20/VCOM1 (default app console, no `hw-flow-control`
+> in DTS) does **not** use hardware flow control — use `rtscts=False`. UART30/VCOM0 uses
+> hw-flow-control — use `rtscts=True`. Always check the DTS overlay.
 
 ### F2. Script customization
 
@@ -380,9 +386,10 @@ gh run view <run-id> --repo <owner>/<repo> --log-failed
 ```bash
 # Download latest release artifact
 gh release download latest --repo <owner>/<repo> --pattern "*.hex" -D /tmp/fw/
+ls /tmp/fw/   # confirm filename — use descriptive name, not merged.hex
 
-# Flash
-west flash --hex-file /tmp/fw/merged.hex --recover --dev-id <SN>
+# Flash (nRF54LM20DK needs --recover)
+west flash --hex-file /tmp/fw/<project>-<board>-<shield>-ncs<version>.hex --recover --dev-id <SN>
 ```
 
 Or use **nRF Connect for Desktop → Programmer** (no local toolchain needed).

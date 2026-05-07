@@ -159,11 +159,40 @@ When the user says "change, commit, check github action result, loop until succe
 1. Implement the fix
 2. Commit and push (use `chsh-dev-git-commit`)
 3. Watch CI: `gh run watch <run-id>` or `gh run list --limit 3`
-4. If CI fails: read failure output, diagnose, fix, repeat from step 1
-5. When CI passes: flash pre-built firmware and verify boot + expected shell output
-6. Mark complete
+4. If CI fails: read failure output (`gh run view <run-id> --log-failed`), diagnose, fix, repeat from step 1
+5. When CI passes: download the pre-built firmware and flash it (see **Pre-firmware flash test** below)
+6. Verify boot + expected shell output on the correct VCOM
+7. Mark complete
 
 See [wiki: github-actions-ncs-ci](../../wiki/concepts/github-actions-ncs-ci.md) for the full CI debugging loop patterns.
+
+### Pre-firmware flash and VCOM test
+After CI passes and a firmware artifact is released, always flash and verify:
+
+```bash
+# 1. Identify correct VCOM port
+nrfutil device list
+# Output shows both VCOM ports with their physical /dev/tty paths
+# VCOM1 = UART20 (app console) on nRF54LM20DK with sQSPI shield
+
+# 2. Download released firmware
+gh release download latest --repo <owner>/<repo> --pattern "*.hex" -D /tmp/fw/
+ls /tmp/fw/   # confirm the descriptive filename exists
+
+# 3. Flash
+cd <ncs-workspace> && nrfutil sdk-manager toolchain launch --ncs-version=v3.3.0 -- \
+  west flash --hex-file /tmp/fw/<name>.hex --recover --dev-id <SN>
+
+# 4. Connect to correct VCOM and verify shell prompt
+python3 nordicsemi_uart_monitor.py --port /dev/tty.usbmodem<VCOM1> --baud 115200
+# expect: uart:~$
+```
+
+**Key**: The VCOM port for the app console depends on the shield overlay:
+- nRF54LM20DK + nRF7002eb2_mspi (sQSPI): **UART20 = VCOM1** (no HWFC, `rtscts=False`)
+- nRF7002DK: **UART0 = single VCOM** (hw-flow-control, `rtscts=True`)
+
+When uncertain, run `nrfutil device list` and try the second port first.
 
 ### "Improve after learning from X" pattern
 1. Read X completely (XML, text file, or URL)
@@ -171,11 +200,27 @@ See [wiki: github-actions-ncs-ci](../../wiki/concepts/github-actions-ncs-ci.md) 
 3. Apply it concretely: update code, docs, or wiki
 4. Do NOT just summarize — always produce a concrete artifact
 
-### "Give proper name" pattern
+### "Give proper name" / rename artifact pattern
 When renaming artifacts (e.g., `merged.hex` → `nordic-wifi-shell-sqspi-nrf54lm20dk-nrf7002ebii-ncs3.3.0.hex`):
-- Update the source (build.yml collect step)
+- Update the source (build.yml collect step `cp "$HEX" artifacts/<descriptive-name>.hex`)
 - Update the release `files:` field
 - Update any README references to the old filename
+- Add a `gh release delete-asset latest merged.hex --yes 2>/dev/null || true` step to remove stale assets from the rolling release
+
+### "Review and improve README, do not change structure" pattern
+When the user says to improve the README without changing structure:
+1. Read the full README
+2. Check for: stale firmware filenames, wrong UART/VCOM references, missing Serial Monitor section, missing target users, outdated commands
+3. Use `multi_replace_string_in_file` for targeted fixes — do NOT rewrite sections
+4. Add missing sections (e.g., "Serial Monitor") in the same style as existing sections
+5. Verify with `grep` after edits
+
+### Release body: keep it short
+Release bodies should only:
+1. State what the build contains and the commit SHA
+2. Link to the README Evaluator Quick Start for setup instructions
+
+Do NOT repeat hardware modification steps, Board Configurator steps, or version requirements in the release body — these duplicate the README and drift out of sync.
 
 ### Skill/wiki improvement after a session
 After completing project tasks, always:
@@ -194,7 +239,7 @@ After completing project tasks, always:
 |------|-----|
 | Build / flash / west commands | `chsh-dev-ncs-env` |
 | Debug CI failures, pre-built firmware test | `chsh-dev-ncs-debug` (Mode G) |
-| Git commits with Conventional Commits style | `chsh-dev-git-commit` |
+| Git commits with Conventional Commits style | `chsh-dev-git-commit` (includes CI watch step) |
 | Generate or update specs | `chsh-dev-ncs-spec` |
 | README template reference | `/Users/chsh/.claude/skills/chsh-dev-ncs-project/templates/README_TEMPLATE.md` |
 | CI debugging loop patterns | wiki: `concepts/github-actions-ncs-ci.md` |

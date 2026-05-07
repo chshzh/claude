@@ -66,6 +66,33 @@ EOF
 )"
 ```
 
+### Step 5 — Push and verify CI (for repos with GitHub Actions)
+
+After pushing, always check that CI passes before declaring the task done:
+
+```bash
+git push origin <branch>
+
+# Get the run ID of the new run (may take a few seconds to appear)
+gh run list --repo <owner>/<repo> --limit 3
+
+# Watch until completion
+gh run watch <run-id> --repo <owner>/<repo> --interval 30
+
+# If CI fails, get logs of failing step:
+gh run view <run-id> --repo <owner>/<repo> --log-failed
+```
+
+For the "loop until succeeded" pattern (user says "fix, commit, check CI, repeat"):
+1. Fix the issue
+2. Commit and push
+3. Watch CI with `gh run watch`
+4. On failure: read `--log-failed`, diagnose, fix, repeat from step 1
+5. On success: proceed to flash pre-built firmware and verify (see `chsh-dev-ncs-debug` Mode G)
+
+> **Rule**: CI green is not enough for firmware repos — always flash the pre-built artifact
+> and verify `uart:~$` appears on the correct VCOM port before marking done.
+
 ## Commit Message Formats
 
 ### Detect repo type first

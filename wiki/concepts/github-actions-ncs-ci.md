@@ -141,7 +141,8 @@ Or manually from the Releases page.
 ### Step 2 — Flash with west
 
 ```bash
-west flash --hex-file /tmp/fw/merged.hex --recover --dev-id <BOARD_SERIAL>
+# Filename uses the descriptive naming convention (see Section 10)
+west flash --hex-file /tmp/fw/<project>-<board>-<shield>-ncs<version>.hex --recover --dev-id <BOARD_SERIAL>
 ```
 
 Or use **nRF Connect for Desktop → Programmer** (no local toolchain needed).
@@ -301,5 +302,22 @@ The release body should link to the Evaluator Quick Start section, not repeat in
 ```yaml
 body: |
   For setup and flashing instructions, see the **[Evaluator Quick Start](https://github.com/<org>/<repo>#evaluator-quick-start)** in the README.
-  > Requires hardware modification and Board Configurator setup.
 ```
+
+> Do not duplicate hardware modification or Board Configurator steps in the release body — they are already documented in the README Quick Start. Keeping the body short reduces drift.
+
+### Remove stale release assets after renaming
+
+When a hex file is renamed (e.g., `merged.hex` → descriptive name), old assets remain attached to the rolling release. Delete them with:
+
+```yaml
+- name: Remove stale merged.hex from release
+  if: github.ref == 'refs/heads/main'
+  run: |
+    gh release delete-asset latest merged.hex --yes 2>/dev/null || true
+  env:
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    GH_REPO: ${{ github.repository }}
+```
+
+The `|| true` guard prevents the step from failing when the stale asset no longer exists.
