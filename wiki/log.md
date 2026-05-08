@@ -158,3 +158,20 @@
 - P2: fixed invalid date `updated: 2026-05-07v2` on embedded-system-general-debugging.md
 - 6 oversized pages (>200L) and 6 orphans surfaced as info-only — no auto-fixes
 - Report: skills/chsh-ag-llm-wiki-review/report-2026-05-07.md
+
+## [2026-05-08] skills-restructure | renamed all chsh-* skills to chsh-sk-* prefix
+- Renamed 17 skill folders (chsh-ag-*, chsh-dev-*, chsh-pm-*, chsh-qa-*, chsh-txt-*) to chsh-sk-* prefix
+- gitnexus-* skills kept as-is (intentional separate namespace)
+- Moved subagent chsh-ag-git from ~/.cursor/agents/ to ~/.claude/agents/ (Cursor supports both paths)
+- Updated all frontmatter name: fields and internal skill cross-references (comprehensive sed pass)
+- Fixed 4 sub-skill frontmatter names under chsh-sk-ncs-project (P0: were still chsh-dev-*)
+- Report: skills/chsh-sk-skill-review/report-2026-05-08.md
+
+## [2026-05-08] lint | wiki audit, 0 issues found
+- No old skill refs in wiki pages
+- All 16 pages pass frontmatter validation
+- Index complete (16 pages on disk = 16 in index)
+- Log: 160 lines, well under rotation threshold
+- 12 orphan pages (info only — expected for young wiki)
+- 6 oversized pages (info only — no auto-fix)
+- Tag taxonomy in SCHEMA.md is informal (defers to log.md) — flagged for future formalization
