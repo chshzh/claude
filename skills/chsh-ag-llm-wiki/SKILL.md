@@ -295,6 +295,39 @@ When the user provides a source (URL, file, paste), integrate it into the wiki:
 A single source can trigger updates across 5-15 wiki pages. This is normal
 and desired — it's the compounding effect.
 
+#### Quick Ingest Pattern (fetch_and_save)
+
+For URL-based sources, follow this exact 3-tool-call sequence to capture
+content to `raw/` with proper frontmatter in one flow:
+
+```text
+Tool 1: web_extract("<URL>")
+       → returns body text (you'll write to raw/)
+
+Tool 2: Terminal: echo -n "<body text>" | sha256sum | cut -d' ' -f1
+       → returns hash (you'll put in frontmatter)
+
+Tool 3: write_file(
+         path="<WIKI_PATH>/raw/articles/<descriptive-name>.md",
+         content="---\nsource_url: <URL>\ningested: $(date +%Y-%m-%d)\nsha256: <hash>\n---\n\n<body text>"
+       )
+```
+
+On re-ingest of the same URL, read the existing raw file first. Recompute
+sha256 of the new body. If identical, skip the ingest and report "unchanged".
+If different, update the file (bump `ingested`, update sha256) and flag
+the drift in the log entry. This catches silent content changes.
+
+For PDFs and local files, skip `web_extract` — use `read_file` or terminal
+tools (pdftotext, pandoc) to extract body, then follow the same
+sha256 + write_file pattern.
+
+**Agent note on ingest-vs-query coupling:** Ingest and Query are kept in one
+skill because they're coupled in practice — every ingest requires checking
+what already exists (a query pass). Splitting them forces duplicate lookup
+logic across two files. The natural split is Ingest+Query vs Lint (the latter
+already extracted as `chsh-ag-llm-wiki-review`).
+
 ### 2. Query
 
 When the user asks a question about the wiki's domain:
@@ -469,6 +502,84 @@ sudo loginctl enable-linger $USER
 This lets the agent write to `~/wiki` on a server while you browse the same
 vault in Obsidian on your laptop/phone — changes appear within seconds.
 
+## Raw Folder Maintenance (multi-machine sync)
+
+When the wiki is tracked in git (e.g., cloned on both NAS and Mac), `raw/`
+contains a mix of small text files and large binaries. A blanket `.gitignore`
+for `wiki/raw/` silently orphans source material on clones that don't have
+the directory locally.
+
+### What to track vs ignore
+
+| Content | Size | Track in git? |
+|---------|------|---------------|
+| `raw/articles/*.md` | <50KB text | **Yes** — always track |
+| `raw/papers/*.md` (extracted notes) | <50KB text | **Yes** — always track |
+| `raw/assets/*.svg` | <15KB | **Yes** — negligible |
+| `raw/assets/*.png`, `*.jpg` | 100KB–1MB | **Yes** — manageable |
+| `raw/papers/*.pdf` | 1–50MB | **Git LFS** or ignore |
+| `raw/assets/*.pptx` | 300KB+ | **Git LFS** or ignore |
+| `raw/assets/*.mhtml`, `*.html` | varies | **Git LFS** or ignore |
+
+Replace the blanket `wiki/raw/` ignore with targeted ignores:
+
+```gitignore
+# Instead of: wiki/raw/
+# Use specific ignores for large binary types:
+wiki/raw/papers/*.pdf
+wiki/raw/assets/*.pptx
+wiki/raw/assets/*.mhtml
+wiki/raw/assets/__MACOSX/
+```
+
+### Option A: Git LFS (recommended for large files)
+
+Track everything in git, store large blobs outside the repo via LFS:
+
+```bash
+git lfs install
+git lfs track "*.pdf"
+git lfs track "*.pptx"
+git lfs track "*.mhtml"
+git add .gitattributes
+```
+
+Works transparently with GitHub/GitLab. Zero workflow change day-to-day.
+Requires `git lfs install` on both NAS and Mac.
+
+### Option B: External sync (no LFS)
+
+Keep `wiki/raw/` fully ignored. Sync raw/ separately:
+
+```bash
+# From Mac, pull raw/ alongside git clone:
+rsync -av user@nas:/path/to/wiki/raw/ ./wiki/raw/
+```
+
+Or mount the NAS directory directly via NFS/SMB and symlink:
+
+```bash
+ln -s /mnt/nas/wiki-raw ./wiki/raw
+```
+
+### Integrity check after clone
+
+After cloning on a new machine, verify raw/ integrity:
+
+```bash
+cd <wiki_repo>
+for f in wiki/raw/**/*.md; do
+  body=$(sed '1,/^---$/d' "$f")
+  expected=$(grep '^sha256:' "$f" | cut -d' ' -f2)
+  actual=$(echo -n "$body" | sha256sum | cut -d' ' -f1)
+  if [ "$expected" != "$actual" ]; then
+    echo "DRIFT: $f (expected $expected, got $actual)"
+  fi
+done
+```
+
+Empty output = all sources intact.
+
 ## Pitfalls
 
 - **Never modify files in `raw/`** — sources are immutable. Corrections go in wiki pages.
@@ -491,6 +602,10 @@ vault in Obsidian on your laptop/phone — changes appear within seconds.
   The agent should check log size during lint.
 - **Handle contradictions explicitly** — don't silently overwrite. Note both claims with dates,
   mark in frontmatter, flag for user review.
+- **Don't blanket-ignore `raw/` in git** — text sources (`raw/articles/*.md`) should
+  be tracked alongside wiki pages. Only ignore large binaries (PDFs, PPTXs, MHTML)
+  or use Git LFS for them. A blanket `wiki/raw/` ignore orphans source material on
+  clones that lack the directory.
 
 ## Related Tools
 
