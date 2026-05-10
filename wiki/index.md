@@ -2,7 +2,7 @@
 
 > Content catalog. Every wiki page listed under its type with a one-line summary.
 > Read this first to find relevant pages for any query.
-> Last updated: 2026-05-07 | Total pages: 16
+> Last updated: 2026-05-10 | Total pages: 17
 
 ## Entities
 
@@ -11,6 +11,7 @@
 ## Concepts
 
 ### Nordic / NCS
+- [eedp-platform](concepts/eedp-platform.md) — Embodied Embedded Development Platform：AI 操控物理硬件（按键/LED/JLink/Saleae/路由器）的嵌入式开发平台
 - [ncs-app-versioning](concepts/ncs-app-versioning.md) — Four-field `MAJOR.MINOR.PATCH.APP` versioning scheme for NCS workspace apps
 - [memfault-version-requirements](concepts/memfault-version-requirements.md) — Memfault's allowed characters, ordering algorithm, and `v`-prefix caveat
 - [embedded-system-general-debugging](concepts/embedded-system-general-debugging.md) — Debugging lessons from sQSPI driver implementation: barriers, multi-device testing, loop scripts

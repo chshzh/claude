@@ -51,6 +51,8 @@ Required information:
 | Memory overflow, stack corruption | E — Memory analysis → use **chsh-sk-ncs-memory** |
 | Intermittent failure (not always) | F — Loop test |
 | CI build fails / pre-built firmware broken | G — GitHub Actions monitoring + firmware test |
+| Need protocol-level insight (SPI, I2C) | H — External Debug Tools via MCP (Saleae LA, JLink) |
+| Manual debug insufficient; need automated HIL | I — Physical Test Harness (future: actuators + sensors) |
 
 ---
 
@@ -424,6 +426,114 @@ Minimum loop time with caching: ~5 min. Without cache: ~20 min.
 
 ---
 
+## Mode H — External Debug Tools via MCP (Saleae, JLink, Serial-Agent)
+
+Use when UART logs alone aren't enough — you need protocol-level insight (SPI traces),
+direct debug-probe control, or richer serial tooling. Three MCP servers bridge the gap
+between AI and physical debug hardware.
+
+> **Prerequisite**: MCP servers must be configured in `~/.hermes/config.yaml` (or the
+> equivalent for Claude Code / Cursor's MCP config). See **native-mcp** skill for config
+> format. The `references/mcp-debug-tools.md` file in this skill has ready-to-use config.
+
+### H1. Saleae Logic Analyzer (protocol capture + decode)
+
+```yaml
+# ~/.hermes/config.yaml (Hermes) or claude_desktop_config.json (Claude Code)
+mcp_servers:
+  saleae:
+    command: "npx"
+    args: ["-y", "wegitor/logic-analyzer-ai-mcp"]
+```
+
+Available tool pattern: `mcp_saleae_*` — start capture, decode SPI/I2C/UART/GPIO,
+export data. Use for:
+- Looking at SPI flash transactions during sQSPI barrier hangs
+- Verifying Wi-Fi enable/disable GPIO sequences
+- Decoding UART traffic at the electrical level (baud mismatch?)
+
+Alternatives with fewer stars but may suit specific needs:
+- `AkiyukiOkayasu/saleae-logic2-automation-mcp` (★1)
+- `ril3y/SaleaeMCP` (★0)
+
+### H2. JLink Debug Probe (memory, flash, GDB)
+
+```yaml
+mcp_servers:
+  jlink:
+    command: "npx"
+    args: ["-y", "cyj0920/jlink_mcp"]
+```
+
+Available tool pattern: `mcp_jlink_*` — flash firmware, read/write memory,
+halt/resume CPU, inspect registers. Use for:
+- Flashing test firmware without manual `west flash`
+- Reading crash-state memory remotely
+- Programming multiple boards in sequence during loop testing
+
+Other options:
+- `Klievan/jlink-mcp` (★5) — embedded probe MCP
+- `es617/dbgprobe-mcp-server` (★4) — generic debug probe (JLink, CMSIS-DAP, ST-Link)
+- `the78mole/jlink-ppk2-mcp` (★0) — JLink + Nordic PPK2 combo
+
+### H3. Serial-Agent (richer UART + editor integration)
+
+```yaml
+mcp_servers:
+  serial-agent:
+    command: "npx"
+    args: ["-y", "Rance-OwO/Serial-Agent"]
+```
+
+Available tool pattern: `mcp_serial_agent_*` — auto-scan ports, HEX TX/RX,
+timestamps, auto-reconnect. Alternative to the raw `nordicsemi_uart_monitor.py`
+approach, with editor integration for VSCode.
+
+### H4. Memfault Cloud (crash analytics + OTA)
+
+Memfault has a full REST API at `api.memfault.com` — no MCP server currently exists,
+but you can either:
+1. Call the REST API directly via `curl` with an API key
+2. Build a lightweight MCP wrapper (20-30 lines):
+```python
+# memfault_mcp.py — minimal MCP server for Memfault API
+import json, urllib.request
+# ... wrap /api/v0/organizations, /api/v0/projects, /api/v0/events
+
+```
+
+> For full API reference: https://api-docs.memfault.com
+
+### H5. Router Control (Wi-Fi test orchestration)
+
+For testing Wi-Fi connectivity, control the testbed router via SSH:
+
+```bash
+# Merlin firmware
+ssh admin@router "service restart_wireless"
+ssh admin@router "arp -a"
+ssh admin@router "nvram get wl0_ssid"
+
+# OpenWRT
+ssh root@router "wifi down && sleep 2 && wifi up"
+ssh root@router "ubus call iwinfo scan '{'device':'wlan0'}'"
+```
+
+Router config: ASUS BE92U with Asuswrt-Merlin (current); can switch to OpenWRT
+for richer `ubus`/`uci` control. See `references/mcp-debug-tools.md` for full
+SSH command reference.
+
+---
+
+## Mode I — Physical Test Harness (Future / In-Design)
+
+For fully automated hardware-in-the-loop testing without human hands. Covers the
+physical interface layer that Mode H's MCP tools don't provide.
+
+**Concept**: A controller (ESP32-S3) exposes a REST API + MCP endpoint for:\n- `/press/{fixture}/{button}` — energize stepper/solenoid to physically press a button\n- `/read/{fixture}/{led}` — read LED state via TCS34725 RGB sensor or LA probe\n- `/reset/{fixture}` — trigger board reset\n\n**Architecture**: AI-agnostic — HTTP REST API usable by Claude Code, Cursor, Cline,\nor any MCP-capable agent. The EEDP controller is a standalone service.\n\n**Full reference**: See **chsh-sk-eedp** skill for architecture, component selection,\nBOM, software design, and MCP integration patterns.
+
+---
+
 ## Related Skills and Resources
 
 | Task | Go to |
@@ -434,6 +544,7 @@ Minimum loop time with caching: ~5 min. Without cache: ~20 min.
 | Commit after fixing | `chsh-sk-git` |
 | Tag and publish a release after CI passes | `chsh-sk-git-release` |
 | Migrate to a newer NCS version | `chsh-sk-ncs-migrate` |
+| Physical button/LED test automation | `references/eedp-gpio-shell-approach.md` — zero-firmware GPIO shell approach |
 | mcp.nrflow tools reference | wiki: `mcp-nrflow-tools` |
 | General embedded debug patterns | wiki: `embedded-system-general-debugging` |
 | CI/CD for NCS firmware | wiki: `github-actions-ncs-ci` |

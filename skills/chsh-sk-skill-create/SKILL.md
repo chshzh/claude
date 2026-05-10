@@ -367,7 +367,24 @@ Use the v2 API endpoint.
 </details>
 ```
 
-### 4. Inconsistent Terminology
+### 4. Frontmatter `name` Must Match Directory Name
+
+The SKILL.md frontmatter `name:` field and the skill's directory name **must be identical**. Hermes discovers skills by scanning directories and loading `SKILL.md` — if the directory name differs from `name:`, the skill may not surface correctly.
+
+**Pitfall when renaming via file manager or WebUI:**
+Renaming a skill directory through the WebUI workspace or a file manager only changes the **directory name**. The `name:` field inside `SKILL.md` frontmatter stays as the old value. After renaming via WebUI, you MUST also edit SKILL.md to update the `name:` field:
+
+```yaml
+# directory: chsh-sk-new-name/
+# SKILL.md frontmatter:
+---
+name: chsh-sk-new-name     # ← Must match directory name
+---
+```
+
+To rename safely, use `skill_manage` action=patch to update the `name:` field after a directory rename.
+
+### 5. Inconsistent Terminology
 Choose one term and use it throughout:
 - ✅ Always "API endpoint" (not mixing "URL", "route", "path")
 - ✅ Always "field" (not mixing "box", "element", "control")

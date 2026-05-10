@@ -3,7 +3,16 @@
 > Chronological record of all wiki actions. Append-only.
 > Actions: ingest, update, query, lint, create, archive, delete
 
-## [2026-05-07] create | GitHub Actions CI for NCS firmware
+## [2026-05-10] update | EEDP platform — added implementation strategy
+- **Updated:** concepts/eedp-platform.md — added "实施策略" section: 3-layer architecture (CLAUDE.md + scripts/ + on-demand MCP), file structure, startup self-test flow, load table. Bumped to v0.4.
+- **Asset:** wiki/raw/assets/eedp-architecture-v0.3.svg — standalone SVG for GitHub/Obsidian rendering
+
+## [2026-05-10] create | EEDP platform concept
+- **Created:** concepts/eedp-platform.md — Embodied Embedded Development Platform: AI-driven hardware control via GPIO shell (nRF7002DK), JLink debug, Saleae LA, router control, Memfault API. 5-module architecture, 3× nRF54LM20DK+nRF7002EB2.
+- **Assets:** /mnt/CharlieII/eedp-architecture-v0.3.html (detailed SVG diagram)
+- **Updated:** index.md (pages 16→17)
+- **Decision:** nRF7002DK Zephyr GPIO Shell + direct GPIO wiring to target boards (replaces earlier solenoid/servo approach). EEDP Controller on PC, not embedded. AI-agent agnostic (not Hermes-dependent). Named "Embodied" for physical interaction parity.
+
 - **Created:** concepts/github-actions-ncs-ci.md — Docker container approach, rolling "latest" release, pre-built firmware test loop, common failure patterns, caching strategy, west.yml manifest
 - **Updated:** index.md (pages 15→16)
 - **Updated:** skills/chsh-dev-ncs-debug/SKILL.md — added Mode G (GHA monitoring + pre-built firmware test loop), updated Related Skills table
