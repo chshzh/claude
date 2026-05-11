@@ -11,13 +11,12 @@ This skill documents the complete installation layout for Charlie's self-hosted 
 
 ```
                             UGREEN DX4600 NAS (192.168.75.10)
-                            ├── Lucky (万吉) v2.27.2 — reverse proxy, TLS, DDNS
                             └── NFS share /volume1/CharlieII → /mnt/CharlieII (VM mount)
 
                             Ubuntu 24.04 VM (192.168.75.30)
                             ├── Hermes Agent — core AI agent
                             ├── Hermes WebUI — browser UI
-                            └── noVNC (port 9999) + ttyd (port 8080)
+                            └── ttyd (port 8080)
 ```
 
 ## Hermes Agent
@@ -29,7 +28,7 @@ This skill documents the complete installation layout for Charlie's self-hosted 
 | **Code repo** | `/home/charlie/hermes-agent/` |
 | **Python venv** | `/home/charlie/hermes-agent/.venv/` |
 | **HERMES_HOME** (config, sessions, skills) | `/mnt/CharlieII/hermes/` |
-| **Agent config** | `~/.hermes/config.yaml` + `~/.hermes/.env` |
+| **Agent config** | `/mnt/CharlieII/hermes/config.yaml` + `/mnt/CharlieII/hermes/.env` |
 | **Session DB** | `/mnt/CharlieII/hermes/state.db` |
 | **Skills** | `/mnt/CharlieII/hermes/skills/` |
 | **Logs** | `~/.hermes/logs/` |
@@ -109,17 +108,6 @@ systemctl --user is-enabled hermes-webui && systemctl --user is-active hermes-we
 curl -s http://localhost:8787/health  # → {"status": "ok"}
 ss -tlnp | grep 8787                  # → LISTEN 0.0.0.0:8787
 ```
-
-## Lucky (万吉) Reverse Proxy
-
-- **Version**: 2.27.2 (latest, up to date)
-- **Running on**: NAS (192.168.75.10)
-- **Listening**: port 443 with Let's Encrypt TLS (`*.chsh.uk`)
-- **Admin panel**: https://lucky.chsh.uk (port 16601 on NAS)
-- **Lucky = 万吉** — same project, Chinese name vs English name
-- **Reverse proxy rules** for: hermes.chsh.uk, nas.chsh.uk, lucky.chsh.uk, haos.chsh.uk, nav.chsh.uk, router.chsh.uk, vm.chsh.uk, etc.
-- **DDNS**: Cloudflare
-- **Upgrade**: via Lucky admin → "上传新版本" button
 
 ## Update Management
 
@@ -224,3 +212,88 @@ All config and runtime data lives on the NFS mount `/mnt/CharlieII/`, NOT in the
 ```
 
 This makes the stack survive repo re-clones, OS reinstalls, and machine migrations — only the NFS mount and the thin shell config need to be preserved.
+
+## Backup & Version Control
+
+The `$HERMES_HOME` directory can be version-controlled to back up critical config and session data. The NFS share is already NAS-backed, but git gives you point-in-time recovery and diff history.
+
+### Cleanup before init
+
+Before initializing git, remove ephemeral artifacts:
+
+```bash
+cd /mnt/CharlieII/hermes
+rm -f auth.lock gateway.lock gateway.pid processes.json
+rm -f interrupt_debug.log .update_check .restart_last_processed.json
+rm -f state.db-wal state.db-shm
+rm -rf pastes/ plans/ hooks/ pairing/ workspace/  # empty/unused dirs
+rm -f config.yaml.bak.*  # stale backup snapshots
+```
+
+### What to track vs ignore
+
+| Track (critical) | Ignore (ephemeral/secrets) |
+|---|---|
+| `config.yaml` | `.env` — **API keys, NEVER commit** |
+| `SOUL.md` | `auth.json` — OAuth tokens |
+| `channel_directory.json` | `cache/` — model caches (123MB) |
+| `gateway_state.json` | `audio_cache/` — TTS audio (4MB) |
+| `memories/` | `logs/` — agent/gateway logs |
+| `state.db` — session store (74MB) | `bin/` — binaries |
+| `sessions/` — session JSONL (56MB) | `webui/` — auto-managed WebUI state |
+| `checkpoints/` — conversation checkpoints (13MB) | `profiles/` — auto-generated model profiles |
+| `kanban.db`, `response_store.db` | `images/`, `image_cache/` |
+| `cron/`, `scripts/`, `plugins/` | `.local/` — XDG local state |
+| `skills/` (agent-managed, but worth snapshotting) | `sandboxes/`, `skins/` |
+
+### Setup git
+
+```bash
+cd /mnt/CharlieII/hermes
+git init
+cp /mnt/CharlieII/claude/skills/chsh-sk-hermes-setup/references/hermes-backup-gitignore .gitignore
+git add .
+git commit -m "Initial backup: hermes runtime config + sessions"
+```
+
+### Push to GitHub (private repo)
+
+```bash
+# Create repo (one-time)
+gh repo create chshzh/hermes --private --description "HERMES_HOME runtime data backup"
+
+# Push
+git branch -m main
+git remote add origin https://github.com/chshzh/hermes.git
+git push -u origin main
+```
+
+### Updating (periodic backup)
+
+```bash
+cd /mnt/CharlieII/hermes
+rm -f state.db-wal state.db-shm          # remove transient WAL before add
+git add -A
+git commit -m "backup $(date +%F)"
+git push
+```
+
+### NFS permission pitfall
+
+Checkpoint HEAD files and some skill/plugin files may have `0000` (no-read) permissions from NFS. Fix before add:
+
+```bash
+find checkpoints skills plugins -type f ! -perm -400 -exec chmod 644 {} +
+```
+
+### Pitfalls
+
+- **`.env` contains API keys.** Add it to `.gitignore` before the first commit. If you accidentally commit it, use `git filter-branch` or `git rm --cached` + force push (if remote exists).
+- **`state.db` is 74MB binary SQLite.** Git handles it as a single blob — every clone pulls the full file. For remote repos, consider Git LFS. For local NAS backup, plain git is fine.
+- **`state.db-wal` and `state.db-shm`** are SQLite WAL files that only exist while the agent is running. Remove them before init to avoid committing transient state.
+- **Don't gitignore `state.db` itself.** The user explicitly wants session data backed up. If you need to exclude it temporarily (e.g. for a fast push), use `git update-index --skip-worktree state.db` instead of gitignore.
+
+## Related Wiki Pages
+
+- [[hermes-architecture]] — Source code internals: agent loop, tools, gateway, skills system
+- [[hermes-setup-on-linux-with-nas-nfs-backup]] — NAS NFS architecture and machine recovery procedure

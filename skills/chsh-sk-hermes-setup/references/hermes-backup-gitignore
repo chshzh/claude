@@ -1,0 +1,41 @@
+# ─── Secrets ─────────────────────────────────────────────────
+.env
+auth.json
+
+# ─── SQLite WAL / temp ───────────────────────────────────────
+*.db-wal
+*.db-shm
+
+# ─── NFS stale file handles ──────────────────────────────────
+.nfs*
+
+# ─── Stale process artifacts ─────────────────────────────────
+*.lock
+*.pid
+
+# ─── Temporary / auto-generated ──────────────────────────────
+*.bak
+*.log
+*.pyc
+__pycache__/
+.update_check
+.restart_last_processed.json
+processes.json
+
+# ─── Caches (reproducible / disposable) ──────────────────────
+/cache/
+/audio_cache/
+/image_cache/
+/images/
+/models_dev_cache.json
+/.skills_prompt_snapshot.json
+
+# ─── Runtime and generated directories ───────────────────────
+/bin/
+/logs/
+/webui/
+/profiles/
+/sandboxes/
+/skins/
+/.local/
+/platforms/
