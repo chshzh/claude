@@ -32,11 +32,29 @@ Required information:
 - **Board HW**: board name + version (e.g., `nRF54LM20DK PCA10173 v0.7.0`)
 - **NCS version**: e.g., `v3.3.0`
 - **Firmware version**: git tag or commit hash
-- **UART port**: correct VCOM (e.g., UART30 = VCOM0 on nRF54LM20DK with nRF7002 EB-II sQSPI shield)
+- **UART port**: correct VCOM (e.g., nRF54LM20DK+nRF7002EB2: UART30/VCOM0, `rtscts=True` — UART20 disabled by shield overlay)
 - **Second reference board** (if available): same HW with known-good firmware
 
 > **Rule**: If you have two boards, assign one as **reference** (known-good firmware)
 > and one as **test** (under investigation). Compare their logs at the first divergence.
+
+### Step 0.5 — Resolve Test Target (Required Before Any Serial Action)
+
+Before invoking `chsh-ag-terminal` for any serial operation, the test target must be
+unambiguously known. If the board and port are not already clear from the conversation
+context, use `AskQuestion` to confirm:
+
+```
+Board options to present:
+  A) nRF54LM20DK+nRF7002EB2 — VCOM0 port (suffix ...1, rtscts=True)  e.g. /dev/cu.usbmodem0010518696871
+  B) nRF7002DK   — port unknown, needs nrfutil device list
+  C) Other       — specify board name and port
+
+Pre-filled default when context is silent: option A.
+```
+
+Only proceed with serial operations once **both** Board and Port are confirmed.
+Do not guess the port — a wrong port produces misleading output silently.
 
 ---
 
@@ -58,45 +76,52 @@ Required information:
 
 ## Mode A — Serial Capture and Reset
 
-### A1. Connect to UART
+> **Serial operations in this mode are delegated to `chsh-ag-terminal`.**
+> Resolve the test target (Step 0.5) first, then invoke the subagent.
 
-**Preferred — always use `nordicsemi_uart_monitor.py`**:
-```bash
-# Load the script via mcp.nrflow:
-# call mcp_nrflow_nordicsemi_workflow_ncs, read the nordicsemi_uart_monitor.py resource
-python3 nordicsemi_uart_monitor.py --port /dev/cu.usbmodem... --baud 115200
+### A1. Connect to UART and capture boot log
+
+Delegate to `chsh-ag-terminal` with the confirmed test target:
+
 ```
-This script handles reconnection, timestamps, and log capture automatically.
+Task(
+  subagent_type="chsh-ag-terminal",
+  description="Capture boot log",
+  prompt="""
+  Board: <confirmed board>
+  Port:  <confirmed port>
 
-**Manual fallback** (only if mcp resource is unavailable):
-```python
-import serial
-ser = serial.Serial("/dev/cu.usbmodem...", 115200, rtscts=True)  # rtscts for HWFC
-```
-
-> **nRF54LM20DK note**: Run `nrfutil device list` to see all VCOM assignments and their physical
-> ports. For the sQSPI shield (`nrf7002eb2_mspi`): UART20 (P1.16/P1.17) = VCOM1 (app console,
-> no HWFC). UART30 (P0.6/P0.7) = VCOM0 (debug UART, hw-flow-control in DTS — use `rtscts=True`).
-> Always connect to VCOM1 for the shell prompt `uart:~$`.
-
-### A2. Reset and capture boot log
-
-```bash
-nrfutil device reset --serial-number <SN>
+  1. Reset the board via nrfutil device reset
+  2. Capture serial output until uart:~$ appears (30 s timeout)
+  3. Return: full boot log + first error line if any
+  """
+)
 ```
 
-Capture output for at least 10 seconds. Key things to look for:
-- `*** Booting nRF Connect SDK` — firmware is running
-- Module init log lines — which modules started
-- First error line — what failed and when in boot sequence
-- `uart:~$` — shell is available
+The subagent handles port selection, HWFC (rtscts), reconnection, and timestamping
+internally. Do not run pyserial or nordicsemi_uart_monitor.py directly.
+
+> **nRF54LM20DK + nRF7002EB2 HWFC reference** (for context — the subagent applies this automatically):
+> The nrf7002eb2 shield overlay disables UART20 (SPI pin conflict) and sets `zephyr,shell-uart = &uart30`.
+> UART30/VCOM0 (shell `uart:~$`) → `rtscts=True`. UART20/VCOM1 → **disabled, do not use**.
+> Always use VCOM0 for the shell prompt when nRF7002EB2 is active.
+
+### A2. Interpret the returned boot log
+
+Key lines to look for in the subagent's response:
+
+| Line | Meaning |
+|------|---------|
+| `*** Booting nRF Connect SDK` | Firmware started |
+| `uart:~$` | Shell ready |
+| `RPU boot signature check failed` | VPR/co-processor failure |
+| `UMAC init timed out` | Cascaded from earlier failure |
 
 ### A3. Compare logs between reference and test boards
 
-If a reference board is available:
-1. Reset both boards simultaneously
-2. Capture boot logs from both serial ports
-3. Find the first line that differs — that is the failure boundary
+If a reference board is available, invoke `chsh-ag-terminal` twice (or in parallel
+with `run_in_background=True`) — once per board. The first divergent log line is the
+failure boundary.
 
 ---
 
@@ -121,11 +146,24 @@ nrfutil sdk-manager toolchain launch --ncs-version=v3.3.0 -- \
 
 ### B2. Connect, reset, capture, issue commands
 
-```bash
-uart:~$ wifi scan
-uart:~$ wifi connect -s <SSID> -k 1 -p <password>
-uart:~$ wifi status
-uart:~$ net iface
+> **Delegate to `chsh-ag-terminal`** — do not run serial commands manually.
+
+```
+Task(
+  subagent_type="chsh-ag-terminal",
+  description="WiFi debug — capture log + run commands",
+  prompt="""
+  Board: <confirmed board>
+  Port:  <confirmed port>
+
+  1. Reset the board, capture boot log until uart:~$
+  2. Send: wifi scan
+  3. Send: wifi connect -s <SSID> -k 1 -p <password>
+  4. Send: wifi status
+  5. Send: net iface
+  6. Return: full output for each command
+  """
+)
 ```
 
 ### B3. Interpret common WiFi error patterns
@@ -235,70 +273,49 @@ void abort_transfer(void) {
 Use a scripted loop test whenever a failure is intermittent or after any fix to confirm
 stability. The rule of thumb: **10 passes minimum, 20 for a release claim**.
 
-### F1. Use the loop test template
+### F1. Run the loop test via chsh-ag-terminal
 
-A production-ready template lives in this skill at:
+> **Delegate to `chsh-ag-terminal`** — it contains the full loop test template
+> and handles HWFC, reset, and per-iteration pass/fail reporting.
+
 ```
-~/.claude/skills/chsh-sk-ncs-debug/scripts/loop_test.py
-```
+Task(
+  subagent_type="chsh-ag-terminal",
+  description="Loop test — N iterations",
+  run_in_background=True,   # loop tests are long; keep working while it runs
+  prompt="""
+  Board: <confirmed board>
+  Port:  <confirmed port>
+  SSID:  <ssid>
+  PSK:   <password>
+  KEY_MGMT: 1   # 1=WPA2-PSK, 3=WPA3-SAE
 
-Copy it to your app, edit the constants at the top, then run:
-```bash
-python3 <app>/loop_test.py 10      # 10 iterations
-python3 <app>/loop_test.py 20      # 20 for release
-```
-
-The script:
-1. Resets the board via `nrfutil device reset`
-2. Opens serial (**HWFC = depends on UART** — see note below)
-3. Waits for shell prompt (`uart:~$`)
-4. Sends `wifi connect` command
-5. Waits for `Connected`
-6. Verifies IP via `wifi status`
-7. Reports pass/fail per iteration + summary
-
-> **HWFC note**: On nRF54LM20DK, UART20/VCOM1 (default app console, no `hw-flow-control`
-> in DTS) does **not** use hardware flow control — use `rtscts=False`. UART30/VCOM0 uses
-> hw-flow-control — use `rtscts=True`. Always check the DTS overlay.
-
-### F2. Script customization
-
-Edit the constants at the top of `loop_test.py`:
-
-```python
-SERIAL_PORT = "/dev/cu.usbmodem..."
-BAUD = 115200
-BOARD_SERIAL = "1051869687"
-SSID = "YOUR_SSID"
-PSK = "YOUR_PASSWORD"
-KEY_MGMT = 1       # 1=WPA2-PSK, 2=WPA3-SAE
-ITERATIONS = 10    # default, overrideable via argv
-BOOT_TIMEOUT = 30
-CONNECT_TIMEOUT = 30
+  Run a loop test with <N> iterations (10 = acceptance, 20 = release).
+  For each iteration: reset board, wait for uart:~$, send wifi connect, verify Connected + IP.
+  Write per-iteration results to /tmp/loop_test_results.txt.
+  Return: pass rate summary (X/N passed) and any failure details.
+  """
+)
 ```
 
-Override iterations from command line:
-```bash
-python3 loop_test.py 5    # quick smoke test
-python3 loop_test.py 20   # release validation
-```
+After the task completes, read `/tmp/loop_test_results.txt` for the full per-iteration log.
+
+> **HWFC reference** (applied automatically by the subagent):
+> nRF54LM20DK+nRF7002EB2: UART20/VCOM1 → **disabled**. UART30/VCOM0 → `rtscts=True` (shell).
+
+### F2. Iteration counts
+
+| Count | Purpose |
+|-------|---------|
+| 5 | Quick smoke test |
+| 10 | Acceptance gate (minimum) |
+| 20 | Release gate |
 
 ### F3. Multi-device loop test
 
-To test both reference and test boards in the same loop:
-
-```python
-# Run loop_test.py on both boards in parallel
-import subprocess, sys
-
-ref = subprocess.Popen(["python3", "loop_test.py", "10",
-                        "--port", "/dev/cu.ref_port",
-                        "--serial", "ref_sn"])
-test = subprocess.Popen(["python3", "loop_test.py", "10",
-                         "--port", "/dev/cu.test_port",
-                         "--serial", "test_sn"])
-ref.wait(); test.wait()
-```
+Invoke `chsh-ag-terminal` twice with `run_in_background=True`, once per board, then
+wait for both results. Supply each with its own board/port/SN. Compare pass rates
+to isolate whether the failure is hardware-specific or firmware-general.
 
 ---
 
@@ -398,22 +415,30 @@ Or use **nRF Connect for Desktop → Programmer** (no local toolchain needed).
 
 ### G4. Verify boot over UART
 
-```bash
-# Always use nordicsemi_uart_monitor.py (prefer over raw serial)
-python3 nordicsemi_uart_monitor.py --port /dev/cu.usbmodem... --baud 115200
+> **Delegate to `chsh-ag-terminal`** after flashing.
+
+```
+Task(
+  subagent_type="chsh-ag-terminal",
+  description="Post-flash boot verification",
+  prompt="""
+  Board: <confirmed board>
+  Port:  <confirmed port>
+
+  1. Reset the board
+  2. Capture boot log until uart:~$ (30 s timeout)
+  3. Send: wifi scan
+  4. Send: wifi status
+  5. Send: kernel threads
+  6. Return: full output; confirm 'Booting nRF Connect SDK' and uart:~$ appeared
+  """
+)
 ```
 
-Expected sequence:
+Expected sequence in the returned log:
 1. `*** Booting nRF Connect SDK` — MCUboot + firmware running
 2. Module init lines — confirm sQSPI / WiFi driver loading
 3. `uart:~$` — shell ready
-
-Quick functional check:
-```sh
-uart:~$ wifi scan
-uart:~$ wifi status
-uart:~$ kernel threads
-```
 
 ### G5. Fix-push-verify loop
 
@@ -538,6 +563,7 @@ physical interface layer that Mode H's MCP tools don't provide.
 
 | Task | Go to |
 |------|-------|
+| Serial terminal — capture logs, send commands, loop test | `chsh-ag-terminal` subagent |
 | First-time NCS setup | `chsh-sk-ncs-env` |
 | Optimize RAM/Flash | `chsh-sk-ncs-memory` |
 | QA and test reporting | `chsh-sk-ncs-test` |
