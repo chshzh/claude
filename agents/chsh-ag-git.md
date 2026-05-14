@@ -145,18 +145,18 @@ type(scope): short summary
 
 Body explaining what and why (optional but use for non-trivial changes).
 
-Assisted-by: CursorAgent/claude-sonnet-4.6   (if AI-assisted)
+Assisted-by: AgentName/Model   (if AI-assisted)
 Signed-off-by: Full Name <email>
 ```
 
 Types: `feat`, `fix`, `refactor`, `docs`, `chore`, `test`, `style`, `build`, `ci`, `perf`. Title ≤ 72 chars.
 
-`Assisted-by` trailer format: `<agent>/<model>` — e.g. `CursorAgent/claude-sonnet-4.6`. Records that an AI agent contributed to the commit. Include whenever the delegating prompt passes `AI-assisted: yes`.
+`Assisted-by` trailer format: `<agent>/<model>` — examples: `Cursor/claude-sonnet-4.6`, `GitHubCopilot/gpt-5.3-codex`, `Hermes/gpt-4.1`, `ClaudeCode/claude-4.5-sonnet`, `Codex/gpt-5.3-codex`. Records that an AI agent contributed to the commit. Include whenever the delegating prompt passes `AI-assisted: yes`.
 
 > **Note:** Use the model from the *delegating context* (the parent agent that wrote the code), not this agent's own model. This agent only runs git commands; it did not write the code.
-> - If the prompt says `AI-assisted: yes — CursorAgent/claude-sonnet-4.6`, use exactly that string.
-> - If the prompt says only `AI-assisted: yes` without a model, use `CursorAgent/claude-sonnet-4.6` as the default.
-> - Never write just `Assisted-by: Claude`.
+> - If the prompt says `AI-assisted: yes — AgentName/Model`, use exactly that string.
+> - If the prompt says only `AI-assisted: yes` without agent/model, use `UnknownAgent/unknown-model`.
+> - Never write ambiguous trailers such as `Assisted-by: Claude`.
 
 ### Zephyr style (NCS/Zephyr repos)
 
@@ -167,7 +167,7 @@ Body explaining what, why, assumptions, and how it was verified.
 
 Upstream PR #: NNNNN          (if porting from upstream)
 Ref: NCSDK-XXXXX              (if tracking a ticket)
-Assisted-by: CursorAgent/claude-sonnet-4.6   (if AI-assisted; use the parent agent's model, not this agent's own model)
+Assisted-by: AgentName/Model   (if AI-assisted; use the parent agent's model, not this agent's own model)
 Signed-off-by: Full Name <email>
 ```
 

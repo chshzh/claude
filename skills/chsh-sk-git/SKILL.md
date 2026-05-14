@@ -17,7 +17,7 @@ Scan the conversation for these signals before delegating:
 | Reasons / decisions ("doing X because Y") | Commit body |
 | Rejected alternatives ("tried Z, didn't work because…") | Body, if non-trivial |
 | Ticket / PR refs (`NCSDK-xxxxx`, `Upstream PR #xxxxxx`) | `Ref:` / `Upstream PR #:` |
-| AI-assisted substantial code | `Assisted-by: CursorAgent/claude-sonnet-4.6` |
+| AI-assisted substantial code | `Assisted-by: AgentName/Model` (for example `Cursor/claude-sonnet-4.6`, `GitHubCopilot/gpt-5.3-codex`, `Hermes/gpt-4.1`, `ClaudeCode/claude-4.5-sonnet`, `Codex/gpt-5.3-codex`) |
 
 Do not invent rationale. If the conversation has none, pass an empty context field and let the subagent write diff-derived messages.
 
@@ -28,7 +28,7 @@ Use chsh-ag-git to commit [and push].
 
 Context: <1–2 sentence summary of what was built/fixed and why — or omit if none>
 References: <NCSDK-xxxxx / Upstream PR #xxxxxx / etc. — or omit>
-AI-assisted: <yes — CursorAgent/claude-sonnet-4.6 / no>
+AI-assisted: <yes — AgentName/Model / no>
 ```
 
 Omit `Push target` entirely — the subagent will always ask via `AskQuestion`.
@@ -42,7 +42,7 @@ Context: Fixed Wi-Fi STA reconnection hang after AP disconnect — root
 cause was missing WIFI_DISCONNECTED handler in wifi_module.c.
 Tried net_mgmt callback first but it fired before STA state cleared.
 References: NCSDK-12345
-AI-assisted: yes — CursorAgent/claude-sonnet-4.6
+AI-assisted: yes — GitHubCopilot/gpt-5.3-codex
 ```
 
 ## Step 3 — Hand off and stop
@@ -73,6 +73,8 @@ Only skip the subagent if:
 - `chsh-ag-git` is unavailable
 
 For inline execution, follow the workflow in `~/.claude/agents/chsh-ag-git.md` directly — that file is the canonical reference for inspection, planning, approval gates, formats, and grouping rules.
+
+The skill should stay concise and delegation-focused; commit trailer format details and fallback behavior are source-of-truth in `~/.claude/agents/chsh-ag-git.md`.
 
 ## Self-Update Policy
 
