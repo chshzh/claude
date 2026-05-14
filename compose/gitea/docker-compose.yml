@@ -1,0 +1,28 @@
+version: "3.9"
+
+services:
+  gitea:
+    image: gitea/gitea:latest
+    container_name: gitea
+    restart: unless-stopped
+    ports:
+      - "3000:3000"   # Web UI
+      - "2222:22"     # SSH (host port 2222 to avoid conflict)
+    volumes:
+      - /mnt/CharlieII/gitea:/data   # All Gitea data on NFS
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+      - GITEA__server__HTTP_PORT=3000
+      - GITEA__server__SSH_PORT=22
+      - GITEA__server__DOMAIN=git.chsh.uk
+      - GITEA__server__ROOT_URL=https://git.chsh.uk
+      - GITEA__database__DB_TYPE=sqlite3
+      - GITEA__server__LFS_START_SERVER=true     # Enable Git LFS
+      - GITEA__server__MAX_FILE_SIZE=200         # MB, allows state.db etc.
+    networks:
+      - gitea-net
+
+networks:
+  gitea-net:
+    driver: bridge
