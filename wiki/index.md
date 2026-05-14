@@ -2,7 +2,7 @@
 
 > Content catalog. Every wiki page listed under its type with a one-line summary.
 > Read this first to find relevant pages for any query.
-> Last updated: 2026-05-10 | Total pages: 17
+> Last updated: 2026-05-13 | Total pages: 20
 
 ## Entities
 
@@ -17,8 +17,10 @@
 - [embedded-system-general-debugging](concepts/embedded-system-general-debugging.md) — Debugging lessons from sQSPI driver implementation: barriers, multi-device testing, loop scripts
 - [mcp-nrflow-tools](concepts/mcp-nrflow-tools.md) — Introduction to mcp.nrflow MCP tools and best practices for NCS build/flash/UART workflows
 - [github-actions-ncs-ci](concepts/github-actions-ncs-ci.md) — GitHub Actions CI for NCS firmware: Docker container approach, rolling releases, pre-built firmware test loop, idempotent git am, artifact naming, manifest pitfalls
+- [west-update-internals](concepts/west-update-internals.md) — How `west update` works: workspace discovery, manifest resolution, manifest-rev branch, detached HEAD semantics, floating vs pinned revisions
 
 ### AI / Dev Tools
+- [cursor-skills-and-agents](concepts/cursor-skills-and-agents.md) — Skills vs agents: invocation model, delegation pattern, design rules for `SKILL.md` and `~/.claude/agents/`
 - [deepseek-claude-code](concepts/deepseek-claude-code.md) — DeepSeek Anthropic API 兼容层直连 Claude Code：配置、模型策略、验证
 - [svg-pptx-agent-generation](concepts/svg-pptx-agent-generation.md) — AI Agent 视觉内容生成完整工作流：SVG（纯 XML 手写）→ PPTX（PptxGenJS），以电车运行管理 PPT 为案例
 
@@ -33,5 +35,7 @@
 - [wireguard-openwrt-china-tunnel](concepts/wireguard-openwrt-china-tunnel.md) — OpenWrt WireGuard 翻墙隧道：完整配置 + 5 排坑 + 多设备扩展
 
 ## Comparisons
+
+- [cracen-vs-oberon-tls](comparisons/cracen-vs-oberon-tls.md) — CRACEN (hardware, nRF54LM20DK) vs Oberon software mbedTLS (nRF7002DK): execution model, stack depth, KMU, speed trade-offs for TLS
 
 ## Queries

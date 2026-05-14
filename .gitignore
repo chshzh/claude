@@ -42,4 +42,4 @@ sessions/
 file-history/
 
 # Wiki hardware reference files — 51MB of PDFs/Altium/BOM, not for git
-wiki/raw/
+wiki/

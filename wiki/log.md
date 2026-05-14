@@ -176,6 +176,22 @@
 - Fixed 4 sub-skill frontmatter names under chsh-sk-ncs-project (P0: were still chsh-dev-*)
 - Report: skills/chsh-sk-skill-review/report-2026-05-08.md
 
+## [2026-05-12] create | west-update-internals
+- Created concepts/west-update-internals.md — How `west update` works
+- Topics: workspace discovery (.west/config), active manifest resolution, per-project git sequence (fetch → update-ref → checkout), manifest-rev branch mechanics, floating vs pinned revisions, detached HEAD "from" vs "at" semantics, self-project exclusion, common pitfalls
+- Source: live debugging session (west update from inside project, dirty working tree, git status "from 6999f26" vs rev-parse HEAD = 1bcfaeb)
+- Cross-references: github-actions-ncs-ci, ncs-app-versioning, embedded-system-general-debugging
+- index.md: added entry under Nordic/NCS, bumped total to 18
+
+## [2026-05-13] create | cracen-vs-oberon-tls
+- Created comparisons/cracen-vs-oberon-tls.md
+- Source: live exploration session — NCS nrf_security Kconfig + nordic-wifi-memfault board conf files
+- Topics: PSA driver auto-selection (HAS_HW_NRF_CRACEN), CRACEN LITE variant on nRF54LM20A,
+  interrupt-wait execution model vs synchronous Oberon, stack depth deltas (+600 B AES, +1500 B ECC),
+  per-thread stack table, KMU hardware key storage, TRNG, TLS handshake timing, CPU offload benefit
+- Cross-references: embedded-system-general-debugging, memfault-version-requirements
+- index.md: added entry under Comparisons, bumped total to 19
+
 ## [2026-05-08] lint | wiki audit, 0 issues found
 - No old skill refs in wiki pages
 - All 16 pages pass frontmatter validation
@@ -184,3 +200,13 @@
 - 12 orphan pages (info only — expected for young wiki)
 - 6 oversized pages (info only — no auto-fix)
 - Tag taxonomy in SCHEMA.md is informal (defers to log.md) — flagged for future formalization
+
+## [2026-05-13] create | cursor-skills-and-agents
+- Created concepts/cursor-skills-and-agents.md
+- Source: live design session (skills/agents discussion, chsh-sk-memfault refactor, chsh-ag-memfault creation)
+- Topics: skill vs agent distinction, invocation model (auto vs explicit), skill→agent delegation pattern (when justified vs redundant), agent design rules (hard rules, Step 0, AskQuestion gates, scope boundaries, API pitfall docs), skill design rules (500-line limit, Self-Update Policy, Related Skills table, name/directory match)
+- Key finding: skill wrapper over agent is only justified when the skill does real pre-processing work (build decisions, env setup); if it only relays, the agent's description field suffices
+- Key finding: GET /releases/{VER} on Memfault does NOT return activations — must fetch via GET /deployments filtered by status=done
+- Cross-references: mcp-nrflow-tools, hermes-architecture, eedp-platform
+- index.md: added entry under AI/Dev Tools, bumped total to 20
+- Tags added: cursor (new)
