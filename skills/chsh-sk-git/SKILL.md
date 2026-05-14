@@ -17,7 +17,7 @@ Scan the conversation for these signals before delegating:
 | Reasons / decisions ("doing X because Y") | Commit body |
 | Rejected alternatives ("tried Z, didn't work because…") | Body, if non-trivial |
 | Ticket / PR refs (`NCSDK-xxxxx`, `Upstream PR #xxxxxx`) | `Ref:` / `Upstream PR #:` |
-| AI-assisted substantial code | `Assisted-by: Claude:claude-sonnet-4.6` |
+| AI-assisted substantial code | `Assisted-by: CursorAgent/claude-sonnet-4.6` |
 
 Do not invent rationale. If the conversation has none, pass an empty context field and let the subagent write diff-derived messages.
 
@@ -28,21 +28,21 @@ Use chsh-ag-git to commit [and push].
 
 Context: <1–2 sentence summary of what was built/fixed and why — or omit if none>
 References: <NCSDK-xxxxx / Upstream PR #xxxxxx / etc. — or omit>
-AI-assisted: <yes / no>
-Push target: <branch name — or "skip push">
+AI-assisted: <yes — CursorAgent/claude-sonnet-4.6 / no>
 ```
+
+Omit `Push target` entirely — the subagent will always ask via `AskQuestion`.
 
 Real example:
 
 ```
-Use chsh-ag-git to commit and push.
+Use chsh-ag-git to commit.
 
 Context: Fixed Wi-Fi STA reconnection hang after AP disconnect — root
 cause was missing WIFI_DISCONNECTED handler in wifi_module.c.
 Tried net_mgmt callback first but it fired before STA state cleared.
 References: NCSDK-12345
-AI-assisted: yes
-Push target: feature/wifi-reconnect
+AI-assisted: yes — CursorAgent/claude-sonnet-4.6
 ```
 
 ## Step 3 — Hand off and stop

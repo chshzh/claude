@@ -92,6 +92,23 @@ CONFIG_THREAD_NAME=y
 
 ### 3. Apply margin and update `prj.conf`
 
+**Multi-board projects:** measure on **all** target boards and use the worst-case value across them. Stack usage can differ significantly between SoCs for the same thread (e.g., `mqtt_helper_thread` measured 2728 B on nRF5340 but 4040 B on nRF54LM20A — a 48 % difference that caused 95 % utilisation on the second board).
+
+**Flat formula (preferred for consistency):**
+
+```
+new_size = floor(max_usage / 0.9)   # 10 % headroom
+```
+
+Embed the rationale directly in `prj.conf` so future readers can verify the math:
+
+```
+# Max usage 4040/0.9=4488
+CONFIG_MQTT_HELPER_STACK_SIZE=4488
+```
+
+**Type-based guidelines (use when no measurement is available):**
+
 | Thread type | Margin |
 |---|---|
 | Simple worker | 1.2–1.3× |
@@ -99,17 +116,11 @@ CONFIG_THREAD_NAME=y
 | Heavy logging | 1.5–2.0× |
 | Touched by ISRs | ≥1.5× |
 
-Example (from the output above):
-- `net_socket_service`: 2140 × 1.5 ≈ 3210 → round up to 3.5 KB
-- `rx_q[0]`: 940 × 1.5 ≈ 1410 → 2 KB is sufficient
-- `hostap_handler`: 5668 × 1.6 ≈ 9070 → keep 8 KB or bump to 9 KB
+**Network I/O queues (`rx_q`, `tx_q`) — exception:** Do not apply the formula blindly. Measured usage reflects idle/steady-state only; a burst of fragmented packets can spike the stack temporarily. Keep `NET_RX_STACK_SIZE` and `NET_TX_STACK_SIZE` at ≥2048 B regardless of measured values and add a comment explaining why:
 
 ```
-# prj.conf — stack sizing (keep rationale in comments)
-CONFIG_MAIN_STACK_SIZE=2048
+# Max usage 1168/0.9=1297; kept at 2048 for network burst headroom
 CONFIG_NET_RX_STACK_SIZE=2048
-CONFIG_NET_TX_STACK_SIZE=2048
-CONFIG_HTTP_SERVER_STACK_SIZE=3072
 ```
 
 Re-run the analyzer after every significant feature change.
@@ -140,14 +151,23 @@ grep "HEAP_MEM_POOL_ADD_SIZE" build/zephyr/.config
 ### Size production heap from measured peak
 
 1. Enable `heap_monitor` module (copy from `ncs-project-logo`, see [reference/heap-monitor.md](reference/heap-monitor.md))
-2. Flash and exercise all code paths
-3. Record the highest peak value from UART logs
-4. Production heap = peak × 1.5 (or at minimum 1.2×)
+2. Flash and exercise all code paths on **all target boards**
+3. Read the `peak=` field from UART logs — **not** `used=` (live snapshot). Use the worst-case peak across all boards.
+4. Production heap = `floor(peak / 0.8)` minimum (1.25× headroom); 1.5× if flash budget allows
 
 ```
 <inf> heap_monitor: System Heap: used=51712/98304 (52%) peak=64752/98304 (65%)
 <wrn> heap_monitor: System Heap: used=86500/98304 (88%) peak=86500/98304 (88%)
 ```
+
+Formula with embedded rationale in `prj.conf`:
+
+```
+# Max usage 57928/0.8=72410
+CONFIG_HEAP_MEM_POOL_SIZE=72410
+```
+
+> ⚠ If `peak` is above 85 % of the current ceiling you are one allocation spike away from exhaustion — raise the ceiling before the next measurement cycle.
 
 ---
 

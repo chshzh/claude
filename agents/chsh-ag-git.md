@@ -59,20 +59,28 @@ Present a markdown table:
 | 2 | `prj.conf` | Enables Kconfig for feature 1 | grouped with #1, or separate if user prefers |
 | 3 | `docs/README.md` | Doc update unrelated to #1 | `docs: clarify build instructions` |
 
-Then state explicitly: **"Approve this plan, edit messages, re-group, or cancel?"**
+**MANDATORY: call the `AskQuestion` tool immediately after the table.** Do NOT ask in plain text. Do NOT skip this step. Do NOT call `git commit` before receiving an answer.
 
-Do not call `git commit` yet.
+```
+AskQuestion:
+  prompt: "How would you like to proceed with this commit plan?"
+  options:
+    - "Approve — commit as planned"
+    - "Edit commit messages"
+    - "Merge all into one commit"
+    - "Re-group the commits"
+    - "Cancel"
+    - "Other — describe what you want"
+```
 
-### Step 4 — Wait for approval
+### Step 4 — Handle the response
 
-Use the `AskQuestion` tool with these options:
+- **Approve**: execute as planned.
+- **Edit / Re-group / Merge**: revise the plan, re-present the table, and call `AskQuestion` again.
+- **Other**: ask a single follow-up question to clarify, then re-propose.
+- **Cancel**: stop immediately.
 
-- "Approve — commit as planned"
-- "Edit commit messages first"
-- "Re-group the commits"
-- "Cancel"
-
-Only "Approve" permits execution. Anything else means revise and re-propose.
+Only an explicit "Approve" response permits execution.
 
 ### Step 5 — Execute commits
 
@@ -134,9 +142,21 @@ Do **not** open a PR. Do **not** run CI checks. Do **not** watch GitHub Actions.
 
 ```
 type(scope): short summary
+
+Body explaining what and why (optional but use for non-trivial changes).
+
+Assisted-by: CursorAgent/claude-sonnet-4.6   (if AI-assisted)
+Signed-off-by: Full Name <email>
 ```
 
-Types: `feat`, `fix`, `refactor`, `docs`, `chore`, `test`, `style`, `build`, `ci`, `perf`. Title ≤ 72 chars. Body optional but use it for non-trivial changes.
+Types: `feat`, `fix`, `refactor`, `docs`, `chore`, `test`, `style`, `build`, `ci`, `perf`. Title ≤ 72 chars.
+
+`Assisted-by` trailer format: `<agent>/<model>` — e.g. `CursorAgent/claude-sonnet-4.6`. Records that an AI agent contributed to the commit. Include whenever the delegating prompt passes `AI-assisted: yes`.
+
+> **Note:** Use the model from the *delegating context* (the parent agent that wrote the code), not this agent's own model. This agent only runs git commands; it did not write the code.
+> - If the prompt says `AI-assisted: yes — CursorAgent/claude-sonnet-4.6`, use exactly that string.
+> - If the prompt says only `AI-assisted: yes` without a model, use `CursorAgent/claude-sonnet-4.6` as the default.
+> - Never write just `Assisted-by: Claude`.
 
 ### Zephyr style (NCS/Zephyr repos)
 
@@ -147,7 +167,7 @@ Body explaining what, why, assumptions, and how it was verified.
 
 Upstream PR #: NNNNN          (if porting from upstream)
 Ref: NCSDK-XXXXX              (if tracking a ticket)
-Assisted-by: Claude:claude-sonnet-4.6   (if AI-assisted)
+Assisted-by: CursorAgent/claude-sonnet-4.6   (if AI-assisted; use the parent agent's model, not this agent's own model)
 Signed-off-by: Full Name <email>
 ```
 
