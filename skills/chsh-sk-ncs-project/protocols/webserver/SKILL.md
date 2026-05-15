@@ -65,7 +65,7 @@ west build -p -b nrf7002dk/nrf5340/cpuapp -- \
 
 ## 📖 Complete Documentation
 
-**[STATIC_WEBSERVER_GUIDE.md](protocols/webserver/STATIC_WEBSERVER_GUIDE.md)** (~15,000 tokens)
+**[STATIC_WEBSERVER_GUIDE.md](STATIC_WEBSERVER_GUIDE.md)** (~15,000 tokens)
 - Complete walkthrough
 - Static resource embedding
 - Dynamic REST API implementation

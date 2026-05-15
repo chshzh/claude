@@ -164,7 +164,7 @@ git checkout v0.51.XX                        # latest semver tag
 
 Then restart the WebUI: `systemctl --user restart hermes-webui`
 
-## Cron Jobs (release-tag pinning)
+## Cron Jobs
 
 ### Weekly release update
 
@@ -188,6 +188,29 @@ The script:
    > 📅 Release Update Report — 2026-05-15 17:00
    > 🤖 Agent: already at latest v2026.5.7 ✅
    > 🌐 WebUI: v0.51.33 → v0.51.34 ✅ (service restarted)
+
+### claude-repo-sync (daily skill health)
+
+A cron job runs daily at 04:00 to sync the Claude repo and run a quick skill health scan.
+
+| Field | Value |
+|-------|-------|
+| **Job name** | `claude-repo-sync` |
+| **Job ID** | `5b0826ef78cb` |
+| **Schedule** | `0 4 * * *` (daily 04:00) |
+| **Mode** | Agent-driven (loads `chsh-ag-skill-review`) |
+| **Delivery** | `telegram:8614941405` (brief inline summary) |
+| **Toolsets** | `terminal`, `file`, `search`, `web` |
+
+Flow:
+1. Run `sync-claude.sh` — git pull, commit, push local changes
+2. Quick skill scan: structure + dead links + sizing
+3. Deliver brief Telegram message with findings
+4. No `.md` files written — user decides what to fix
+
+### Claude skills are source of truth
+
+Skills live at `/mnt/CharlieII/claude/skills/` and are synced to GitHub via `sync-claude.sh`. The Hermes skill registry copies are secondary — always edit the originals under the Claude repo.
 
 ### Pitfall: script path must be relative
 
@@ -280,10 +303,14 @@ git push
 
 ### NFS permission pitfall
 
-Checkpoint HEAD files and some skill/plugin files may have `0000` (no-read) permissions from NFS. Fix before add:
+Checkpoint HEAD files, `.git/COMMIT_EDITMSG`, and `.md` report files created by cron jobs (e.g. `report-YYYY-MM-DD.md`) may get `0000` (no-read) permissions from NFS or file-creation race conditions. This causes `fatal: could not open file: Permission denied` on `git add -A` and `git commit`.
+
+Fix before add:
 
 ```bash
+find /mnt/CharlieII/claude -name "report-*.md" -exec chmod 644 {} +
 find checkpoints skills plugins -type f ! -perm -400 -exec chmod 644 {} +
+chmod 644 /mnt/CharlieII/claude/.git/COMMIT_EDITMSG 2>/dev/null || true
 ```
 
 ### Pitfalls

@@ -164,7 +164,7 @@ When the user says "change, commit, check github action result, loop until succe
 6. Verify boot + expected shell output on the correct VCOM
 7. Mark complete
 
-See [wiki: github-actions-ncs-ci](../../wiki/concepts/github-actions-ncs-ci.md) for the full CI debugging loop patterns.
+See the CI debugging loop patterns in the project wiki (section not yet published).
 
 ### Pre-firmware flash and VCOM test
 After CI passes and a firmware artifact is released, always flash and verify:

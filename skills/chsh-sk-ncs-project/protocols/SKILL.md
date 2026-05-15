@@ -12,12 +12,12 @@ Complete protocol support for Nordic NCS projects.
 ### Static Web Server (NEW!)
 **Full-featured HTTP server with static resources, REST APIs, and WebSockets**
 
-- **[WebServer Subskill](protocols/webserver/SKILL.md)**: Complete web server implementation
+- **[WebServer Subskill](webserver/SKILL.md)**: Complete web server implementation
 - Based on Nordic Thingy91x Suitcase Demo
 - Static HTML/CSS/JS with gzip compression  
 - Dynamic REST API endpoints
 - WebSocket real-time communication
-- See [STATIC_WEBSERVER_GUIDE.md](protocols/webserver/STATIC_WEBSERVER_GUIDE.md) for complete guide
+- See [STATIC_WEBSERVER_GUIDE.md](webserver/STATIC_WEBSERVER_GUIDE.md) for complete guide
 
 ### MQTT
 Industrial IoT messaging protocol

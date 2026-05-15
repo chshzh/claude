@@ -88,7 +88,9 @@ For each duplicate pair, suggest:
 
 ## Step 4 — Dead Link Check
 
-For each skill with file references (links in the form `[text](path.md)`):
+Check every relative markdown link in every SKILL.md resolves to an existing file.
+
+### Quick Scan (per skill, bash)
 
 ```bash
 # From the skill's directory, check that each linked file exists
@@ -97,7 +99,32 @@ grep -oP '\[.*?\]\(\K[^)]+' SKILL.md | while read -r f; do
 done
 ```
 
-Report dead links with the skill name and broken path.
+### Comprehensive Scan (all skills, Python)
+
+Run the reusable script at `scripts/check-deadlinks.py` from the skill directory:
+
+```bash
+python3 scripts/check-deadlinks.py
+```
+
+Or directly from the skills root:
+
+```bash
+python3 ~/.claude/skills/chsh-sk-skill-review/scripts/check-deadlinks.py
+```
+
+The script extracts every relative link, resolves it against the SKILL.md's own directory, and reports broken targets. It also marks links inside code blocks as likely-intentional examples.
+
+### Pitfalls
+
+- **Doubled-path links**: When a SKILL.md lives in a subdirectory (e.g. `protocols/SKILL.md`), a link like `(protocols/webserver/SKILL.md)` resolves to `protocols/protocols/webserver/SKILL.md` — the author mistakenly wrote the path from the repo root instead of relative to the file's own directory. The correct link is `(webserver/SKILL.md)`.
+- **Code-block false positives**: Links inside triple-backtick code blocks or `inline code` are illustrative examples, not real references. The scan should flag them but note they are likely intentional.
+- **Cross-repo wiki links**: Links pointing to `../../wiki/...` may reference wiki pages that were never created or were deleted. These should be treated as P0 since the wiki and skills repos may drift independently.
+- **Anchor-only links** (`#section`) are valid and should not be flagged.
+
+### Verification Pass
+
+After fixing dead links, re-run the comprehensive scan and confirm zero broken links remain before declaring the fix complete.
 
 ---
 

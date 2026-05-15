@@ -33,14 +33,14 @@ cp ~/.claude/skills/chsh-sk-ncs-project/wifi/configs/wifi-raw.conf .
 
 ## 📖 Documentation
 
-- **[WIFI_GUIDE.md](wifi/guides/WIFI_GUIDE.md)**: Comprehensive Wi-Fi development guide (~8,000 tokens)
+- **[WIFI_GUIDE.md](guides/WIFI_GUIDE.md)**: Comprehensive Wi-Fi development guide (~8,000 tokens)
   - All Wi-Fi modes explained
   - Memory requirements
   - Configuration details
   - Best practices
   - Troubleshooting
 
-- **[RECONNECTION_PATTERNS.md](wifi/guides/RECONNECTION_PATTERNS.md)**: Network reconnection best practices
+- **[RECONNECTION_PATTERNS.md](guides/RECONNECTION_PATTERNS.md)**: Network reconnection best practices
   - WiFi auto-reconnect after router power cycle
   - Network stack stabilization delays
   - Application protocol state management (MQTT, HTTPS)
