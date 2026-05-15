@@ -319,6 +319,59 @@ to isolate whether the failure is hardware-specific or firmware-general.
 
 ---
 
+## Mode J — Memfault Log File Debugging
+
+Use when: device uploads data to Memfault (last_seen updates) but no Log Files appear
+in the "Log Files" tab on the device page.
+
+### J1. Distinguish chunk upload from log file creation
+
+| Symptom | Cause |
+|---------|-------|
+| `last_seen` updates every ~60s, no log files | Rate limiting (most common) |
+| `last_seen` never updates | Upload failing (DNS, TLS, auth) |
+| Log files from old builds only | Test builds hit rate limit before developer mode enabled |
+| `Memfault upload complete` in serial but no files | Rate limiting (chunks accepted, log file dropped silently) |
+
+### J2. Check for rate limiting first
+
+The Memfault platform silently drops log files that exceed ~1/hour per device.
+The firmware **receives HTTP 202** for all chunk uploads — there is no firmware-side warning.
+
+**How to detect:** Memfault UI → Device page → Developer Mode tab → Processing Errors.
+
+**Fix for testing:** Enable **Server-Side Developer Mode** on the Device page.
+After enabling, log files should appear within 60–90s.
+
+**Production guidance:** Set `CONFIG_MEMFAULT_PERIODIC_UPLOAD_INTERVAL_SECS=3600`
+(1 hour) to stay within the rate limit.
+
+### J3. Check `memfault_log_trigger_collection()` call sites
+
+If `memfault_log_trigger_collection()` is called in `on_connect()`, it freezes the
+log buffer right after reconnect. New logs (including the reconnect success messages)
+are then silently dropped by `prv_try_free_space()` until the upload completes.
+
+```bash
+grep -rn "memfault_log_trigger_collection" src/
+# Should appear ONLY in disconnect handlers, never in on_connect()
+```
+
+### J4. Verify via API
+
+```python
+import requests, base64
+KEY = '<project_key>'
+TOKEN = '<org_token>'
+headers = {'Authorization': f'Bearer {TOKEN}'}
+r = requests.get('https://api.memfault.com/api/v0/organizations/<org>/projects/<proj>'
+                 '/devices/<serial>/log-files', headers=headers)
+files = r.json()['data']
+print(f'Total: {len(files)}, latest: {files[0]["created_date"] if files else "none"}')
+```
+
+---
+
 ## Common Debug Kconfig
 
 ```kconfig
@@ -565,8 +618,7 @@ physical interface layer that Mode H's MCP tools don't provide.
 |------|-------|
 | Serial terminal — capture logs, send commands, loop test | `chsh-ag-terminal` subagent |
 | First-time NCS setup | `chsh-sk-ncs-env` |
-| Optimize RAM/Flash | `chsh-sk-ncs-memory` |
-| QA and test reporting | `chsh-sk-ncs-test` |
+| Optimize RAM/Flash | `chsh-sk-ncs-memory` || Review expected module behavior from spec | `chsh-sk-ncs-spec` || QA and test reporting | `chsh-sk-ncs-test` |
 | Commit after fixing | `chsh-sk-git` |
 | Tag and publish a release after CI passes | `chsh-sk-git-release` |
 | Migrate to a newer NCS version | `chsh-sk-ncs-migrate` |

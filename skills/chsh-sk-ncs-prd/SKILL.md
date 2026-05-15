@@ -220,6 +220,15 @@ After saving the PRD, always ask:
 >
 > Reply **design**, **implement**, or **no** to stop here."
 
+## Related Skills
+
+| Task | Skill |
+|------|-------|
+| Translate PRD to engineering specs | `chsh-sk-ncs-spec` |
+| Implement code from specs | `chsh-sk-ncs-project` |
+| Generate test report from acceptance criteria | `chsh-sk-ncs-test` |
+| Full project lifecycle orchestration | `chsh-sk-ncs-workflow` |
+
 ## Self-Update Policy
 
 At the **end of each conversation**, review what was discovered and check whether any facts in this skill are new, corrected, or outdated (e.g. new PRD section patterns, handoff question wording, revision history conventions).

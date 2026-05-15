@@ -93,11 +93,60 @@ and reporting. Do not duplicate that logic here.
 
 ---
 
+## Pitfalls
+
+### Log File Rate Limiting (silent failure)
+
+Memfault **rate-limits log file ingestion** on the backend — officially "no more than
+once per hour per device" per the docs (`memfault_log_trigger_collection()` guidance).
+
+**Key behaviour:**
+- The firmware **does not see a 429**. Chunks are accepted at `/api/v0/chunks/{serial}`
+  with **HTTP 202** even when the assembled log file is then dropped due to rate limiting.
+- There is **no firmware-side warning** (no serial log, no error code from `post_data()`).
+- `last_seen` continues updating every upload interval — device appears healthy.
+- The only visible evidence is the **Memfault Platform UI → Device page → Developer Mode
+  tab → Processing Errors** section.
+
+**Common trigger:** `CONFIG_MEMFAULT_PERIODIC_UPLOAD_INTERVAL_SECS=60` causes
+`memfault_log_trigger_collection()` to fire 60×/hour — 60× the recommended limit.
+
+**Fix for testing:** Enable **Server-Side Developer Mode** on the Device page
+(bypasses rate limits for that device). Do not use 60s interval in production.
+Production recommendation: `MEMFAULT_PERIODIC_UPLOAD_INTERVAL_SECS=3600`.
+
+### `memfault_log_trigger_collection()` in `on_connect()` is harmful
+
+Calling `memfault_log_trigger_collection()` in the reconnect handler (`on_connect()`)
+**freezes the log buffer immediately after reconnect**, blocking new log writes until
+the upload completes. This causes post-reconnect `LOG_INF` messages to be silently
+dropped by `prv_try_free_space()` (which returns `false` when `triggered=true`).
+
+**Correct pattern:** call `memfault_log_trigger_collection()` **only on disconnect**
+(WiFi deassociation + network-layer loss), never on connect. The periodic upload handles
+log collection for the normal case.
+
+### Confirming logs are flowing
+
+After any Memfault log change, always enable Developer Mode on the device and check:
+```python
+import requests, base64
+KEY = '<project_key>'
+headers = {'Authorization': 'Basic ' + base64.b64encode(f':{KEY}'.encode()).decode()}
+r = requests.get('https://api.memfault.com/api/v0/organizations/<org>/projects/<proj>'
+                 '/devices/<serial>/log-files', headers=headers)
+print(r.json()['data'][:3])  # newest first
+```
+Expected: new entries within 60–90s of device boot (when developer mode is on).
+
+---
+
 ## Related Skills
 
 | Task | Skill |
 |------|-------|
 | Build / flash / west commands | `chsh-sk-ncs-env` |
+| Debug UART logs, capture disconnect traces | `chsh-sk-ncs-debug` |
 | Git commit + push after release | `chsh-sk-git` |
 | Cut a GitHub release with firmware artifacts | `chsh-sk-git-release` |
 

@@ -281,6 +281,7 @@ docs/qa-test/QA-2026-04-09-14-30.md
 | `chsh-sk-ncs-prd` | Defining or updating product requirements | `docs/pm-prd/PRD.md` |
 | `chsh-sk-ncs-spec` | Translating PRD to engineering specs | `docs/dev-specs/*.md` |
 | `chsh-sk-ncs-project` | Implementing code from specs | `src/`, `prj.conf`, passing build |
+| `chsh-sk-ncs-debug` | Debugging firmware failures, UART log analysis | Root cause identified and fixed |
 | `chsh-sk-ncs-test` | Validating a build against PRD and specs | `docs/qa-test/QA-*.md` |
 | `chsh-sk-git` | Preparing git commits | Clean, logical commit history |
 | `chsh-sk-git-release` | Tagging a release, publishing firmware, downloading and flashing pre-built `.hex` | GitHub release with verified artifact |
