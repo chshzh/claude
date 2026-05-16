@@ -102,9 +102,27 @@ print(f'RELEASE {\"\":20s} {VER}  {\"EXISTS\" if exists else \"MISSING\"}')
 "
 ```
 
-If any artefact shows `EXISTS`, use `AskQuestion`:
-- "Re-upload (delete + replace OTA payload)" → run **Cleanup** below, then re-upload
-- "Keep existing — skip this artefact"
+If any artefact shows `EXISTS`, you **MUST** use the `AskQuestion` tool — never
+present choices as plain text. Use this exact structure:
+
+```
+AskQuestion(
+  title: "Symbol/release conflict for <FW_VERSION>",
+  questions: [{
+    id: "symbol_conflict",
+    prompt: "Symbols for <FW_VERSION> already exist on Memfault. What would you like to do?",
+    options: [
+      { id: "reupload",  label: "Re-upload symbols — delete existing via web UI first, then re-upload + replace OTA payload" },
+      { id: "keep",      label: "Keep existing symbols — only replace OTA payload and redeploy" },
+      { id: "cancel",    label: "Cancel — do nothing" }
+    ]
+  }]
+)
+```
+
+- `reupload` → run **B2 Cleanup**, then B3 → B4 → B5
+- `keep`     → skip B2 and B3, run B4 → B5 only
+- `cancel`   → stop and report
 
 ### B2 — Cleanup: delete stale deployment + release
 
@@ -224,7 +242,26 @@ for c in data['data']:
 "
 ```
 
-Use `AskQuestion` to let user pick the cohort, then deploy:
+After listing cohorts, you **MUST** use the `AskQuestion` tool — never present
+choices as plain text. Build options dynamically from the cohort list:
+
+```
+AskQuestion(
+  title: "Deploy <FW_VERSION> — choose cohort(s)",
+  questions: [{
+    id: "deploy_cohort",
+    prompt: "Which cohort(s) should receive version <FW_VERSION>?\n\n<cohort table: slug | devices | active version>",
+    allow_multiple: true,
+    options: [
+      { id: "<slug>", label: "<slug>  (<N> devices, currently <active_version>)" },
+      ... one option per cohort ...,
+      { id: "cancel", label: "Cancel — keep artifacts uploaded but do not deploy" }
+    ]
+  }]
+)
+```
+
+For each selected cohort slug (excluding `cancel`), run:
 
 ```bash
 memfault --org-token $MEMFAULT_ORG_TOKEN --org $MEMFAULT_ORG --project $MEMFAULT_PROJECT \
