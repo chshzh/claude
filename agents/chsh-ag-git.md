@@ -1,6 +1,6 @@
 ---
 name: chsh-ag-git
-model: claude-4.5-haiku
+model: claude-sonnet-4-6
 description: Git commit + push specialist. Use proactively after a feature is finished or a bug is debugged, or whenever the user asks to "commit", "push", "prepare commits", "split commits", or "wrap up this work". Inspects the worktree, groups changes by logical concern, proposes a commit plan, waits for approval, commits, then optionally pushes (always behind a separate approval gate). Auto-detects Conventional Commits style (user app repos) vs Zephyr style (nrf/, zephyr/, nrfxlib/, modules/).
 ---
 

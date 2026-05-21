@@ -32,7 +32,13 @@ Required information:
 - **Board HW**: board name + version (e.g., `nRF54LM20DK PCA10173 v0.7.0`)
 - **NCS version**: e.g., `v3.3.0`
 - **Firmware version**: git tag or commit hash
-- **UART port**: correct VCOM (e.g., nRF54LM20DK+nRF7002EB2: UART30/VCOM0, `rtscts=True` — UART20 disabled by shield overlay)
+- **UART port**: correct VCOM — see table below:
+
+  | Board config | Log VCOM | Port suffix | rtscts |
+  |---|---|---|---|
+  | nRF7002DK | VCOM1 | `...3` e.g. `/dev/tty.usbmodem0010507879623` | False |
+  | nRF54LM20DK + nRF7002EB2 | VCOM0 | `...1` e.g. `/dev/tty.usbmodem0010518067141` | True |
+  | nRF54LM20DK (no shield) | VCOM1 | `...3` e.g. `/dev/tty.usbmodem0010518067143` | False |
 - **Second reference board** (if available): same HW with known-good firmware
 
 > **Rule**: If you have two boards, assign one as **reference** (known-good firmware)
@@ -46,9 +52,10 @@ context, use `AskQuestion` to confirm:
 
 ```
 Board options to present:
-  A) nRF54LM20DK+nRF7002EB2 — VCOM0 port (suffix ...1, rtscts=True)  e.g. /dev/cu.usbmodem0010518696871
-  B) nRF7002DK   — port unknown, needs nrfutil device list
-  C) Other       — specify board name and port
+  A) nRF54LM20DK+nRF7002EB2  — VCOM0 (suffix ...1, rtscts=True)  e.g. /dev/tty.usbmodem0010518067141
+  B) nRF7002DK               — VCOM1 (suffix ...3, rtscts=False) e.g. /dev/tty.usbmodem0010507879623
+  C) nRF54LM20DK (no shield) — VCOM1 (suffix ...3, rtscts=False) e.g. /dev/tty.usbmodem0010518067143
+  D) Other                   — specify board name and port
 
 Pre-filled default when context is silent: option A.
 ```
@@ -101,10 +108,15 @@ Task(
 The subagent handles port selection, HWFC (rtscts), reconnection, and timestamping
 internally. Do not run pyserial or nordicsemi_uart_monitor.py directly.
 
-> **nRF54LM20DK + nRF7002EB2 HWFC reference** (for context — the subagent applies this automatically):
-> The nrf7002eb2 shield overlay disables UART20 (SPI pin conflict) and sets `zephyr,shell-uart = &uart30`.
-> UART30/VCOM0 (shell `uart:~$`) → `rtscts=True`. UART20/VCOM1 → **disabled, do not use**.
-> Always use VCOM0 for the shell prompt when nRF7002EB2 is active.
+> **Board UART/VCOM reference** (for context — the subagent applies this automatically):
+>
+> | Board config | Log VCOM | macOS port suffix | rtscts | Notes |
+> |---|---|---|---|---|
+> | nRF54LM20DK + nRF7002EB2 | VCOM0 | `...1` | True | Shield overlay disables UART20; app logs on UART30/VCOM0 |
+> | nRF54LM20DK (no shield) | VCOM1 | `...3` | False | UART20/VCOM1 is the application log port |
+> | nRF7002DK | VCOM1 | `...3` | False | Application logs on VCOM1; VCOM0 is NET core |
+>
+> Port suffix pattern: VCOM0 → last digit `1`, VCOM1 → last digit `3`.
 
 ### A2. Interpret the returned boot log
 
@@ -301,7 +313,9 @@ Task(
 After the task completes, read `/tmp/loop_test_results.txt` for the full per-iteration log.
 
 > **HWFC reference** (applied automatically by the subagent):
-> nRF54LM20DK+nRF7002EB2: UART20/VCOM1 → **disabled**. UART30/VCOM0 → `rtscts=True` (shell).
+> nRF54LM20DK+nRF7002EB2: VCOM0/suffix `...1` → `rtscts=True` (app logs). UART20/VCOM1 → disabled.
+> nRF7002DK: VCOM1/suffix `...3` → `rtscts=False` (app logs).
+> nRF54LM20DK (no shield): VCOM1/suffix `...3` → `rtscts=False` (app logs).
 
 ### F2. Iteration counts
 
@@ -407,13 +421,14 @@ CONFIG_THREAD_ANALYZER=y
 nrfutil sdk-manager toolchain launch --ncs-version=v3.3.0 -- \
   west build -b <board> -p -d <app>/build <app> -- -DSHIELD=<shield>
 
-# Flash (nRF54LM20DK needs --recover for first flash)
+# Flash (standard — preserves NVS and WiFi credentials)
+nrfutil sdk-manager toolchain launch --ncs-version=v3.3.0 -- \
+  west flash -d <app>/build --dev-id <SN>
+
+# Flash (first-time only, or when AP protection blocks access)
+# WARNING: --recover does a full chip erase — wipes NVS including WiFi credentials
 nrfutil sdk-manager toolchain launch --ncs-version=v3.3.0 -- \
   west flash -d <app>/build --recover --dev-id <SN>
-
-# Flash (nRF7002DK, standard)
-nrfutil sdk-manager toolchain launch --ncs-version=v3.3.0 -- \
-  west flash -d <app>/build --erase --dev-id <SN>
 
 # Reset only
 nrfutil device reset --serial-number <SN>
@@ -460,8 +475,12 @@ gh run view <run-id> --repo <owner>/<repo> --log-failed
 gh release download latest --repo <owner>/<repo> --pattern "*.hex" -D /tmp/fw/
 ls /tmp/fw/   # confirm filename — use descriptive name, not merged.hex
 
-# Flash (nRF54LM20DK needs --recover)
-west flash --hex-file /tmp/fw/<project>-<board>-<shield>-ncs<version>.hex --recover --dev-id <SN>
+# Flash (standard — preserves NVS and WiFi credentials)
+nrfutil sdk-manager toolchain launch --ncs-version=v3.3.0 -- \
+  west flash --hex-file /tmp/fw/<project>-<board>-<shield>-ncs<version>.hex --dev-id <SN>
+
+# Use --recover only for first flash or if AP protection is blocking access
+# WARNING: --recover does a full chip erase — wipes NVS including WiFi credentials
 ```
 
 Or use **nRF Connect for Desktop → Programmer** (no local toolchain needed).

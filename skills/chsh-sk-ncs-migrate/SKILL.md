@@ -191,8 +191,11 @@ Iterate on warnings/errors. For each error:
 ### 2e. Flash and functional smoke test
 
 ```bash
+# Standard flash — preserves NVS and WiFi credentials
 nrfutil sdk-manager toolchain launch --ncs-version=v<target> -- \
-  west flash -d <app>/build --erase --dev-id <SN>   # or --recover for nRF54LM20DK
+  west flash -d <app>/build --dev-id <SN>
+# Use --recover only for first flash or AP protection issues
+# WARNING: --recover/--erase wipe all flash including NVS/WiFi credentials
 ```
 
 Connect via UART (use `mcp_nrflow_nordicsemi_workflow_ncs` for the helper

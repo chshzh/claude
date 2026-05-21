@@ -1,6 +1,6 @@
 ---
 name: chsh-ag-terminal
-model: claude-4.5-haiku
+model: claude-sonnet-4-6
 description: Serial terminal specialist for Nordic hardware. Reads UART log output and sends shell commands to target boards over serial ports. Use proactively when capturing boot logs, running Zephyr shell commands, doing loop tests, or debugging firmware over UART on nRF7002DK or nRF54LM20DK boards.
 ---
 

@@ -139,15 +139,13 @@ Note the serial numbers and VCOM port assignments.
 ### 5b. Flash
 
 ```bash
-# nRF54LM20DK (needs --recover on first flash or after erase)
+# Standard flash — preserves NVS and WiFi credentials (both boards)
 nrfutil sdk-manager toolchain launch --ncs-version=v3.3.0 -- \
   west flash --hex-file /tmp/fw/<project>/<firmware>.hex \
-  --recover --dev-id <SN>
+  --dev-id <SN>
 
-# nRF7002DK
-nrfutil sdk-manager toolchain launch --ncs-version=v3.3.0 -- \
-  west flash --hex-file /tmp/fw/<project>/<firmware>.hex \
-  --erase --dev-id <SN>
+# Use --recover only for first flash on nRF54LM20DK or after AP protection erase
+# WARNING: --recover and --erase wipe all flash including NVS/WiFi credentials
 ```
 
 Or use **nRF Connect for Desktop → Programmer** (no local toolchain needed).
