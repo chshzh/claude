@@ -24,6 +24,31 @@ Orchestrates Memfault symbol upload, OTA release, and deployment tasks for
 
 Project root: `/opt/nordic/ncs/v3.3.0/nordic-wifi-memfault`
 
+### Two Memfault projects — local credentials only cover `nord-project`
+
+CI builds firmware for two Memfault projects: **`nord-project`** (`nrf-test` / `nordic` org)
+and **`terr-project`**. Credentials stored in `overlay-app-memfault-project-info.conf` are
+for `nord-project` only. `terr-project` credentials live exclusively in GitHub Secrets
+(`TERR_KEY`). Unless the user supplies terr-project credentials explicitly, only run
+Workflow B for `nord-project`.
+
+GitHub release artifacts follow this naming pattern:
+```
+nordic-wifi-memfault-{board}-{project}-{version}.{ext}
+```
+Examples for `3.3.0.2`:
+- `nordic-wifi-memfault-nrf7002dk-nord-project-3.3.0.2.elf`
+- `nordic-wifi-memfault-nrf7002dk-nord-project-3.3.0.2.signed.bin`
+- `nordic-wifi-memfault-nrf54lm20dk-nrf7002ebii-nord-project-3.3.0.2.elf`
+- `nordic-wifi-memfault-nrf54lm20dk-nrf7002ebii-nord-project-3.3.0.2.signed.bin`
+
+Download pattern (replace `<VER>` with tag name):
+```bash
+mkdir -p /tmp/fw/memfault-<VER>
+gh release download <VER> --repo chshzh/nordic-wifi-memfault \
+  --pattern "*.elf" --pattern "*.signed.bin" -D /tmp/fw/memfault-<VER>/
+```
+
 ---
 
 ## Quick reference
@@ -50,6 +75,13 @@ Read the user's request and decide:
 ---
 
 ## Step 2 — Rebuild (only if requested or artifacts are missing)
+
+> **CRITICAL — version string must match release version before building.**
+> Before rebuilding, update `overlay-app-memfault-project-info.conf` to set
+> `CONFIG_MEMFAULT_NCS_FW_VERSION="<target-version>"` (e.g. `"3.3.0.1"`).
+> Uploading a binary whose embedded version string differs from the Memfault
+> `--software-version` causes the device to report the wrong version after OTA.
+> Confirm the overlay is correct before starting any build.
 
 If the user asks to rebuild, or if the `.signed.bin` / `.elf` files are absent,
 build both DKs first using `chsh-sk-ncs-env` (toolchain v3.3.0, bundle `0c0f19d91c`):
@@ -115,16 +147,21 @@ once per hour per device" per the docs (`memfault_log_trigger_collection()` guid
 (bypasses rate limits for that device). Do not use 60s interval in production.
 Production recommendation: `MEMFAULT_PERIODIC_UPLOAD_INTERVAL_SECS=3600`.
 
-### `memfault_log_trigger_collection()` in `on_connect()` is harmful
+### `memfault_log_trigger_collection()` — correct usage pattern
 
-Calling `memfault_log_trigger_collection()` in the reconnect handler (`on_connect()`)
-**freezes the log buffer immediately after reconnect**, blocking new log writes until
-the upload completes. This causes post-reconnect `LOG_INF` messages to be silently
-dropped by `prv_try_free_space()` (which returns `false` when `triggered=true`).
+**On disconnect:** do NOT call `memfault_log_trigger_collection()`. Instead, the
+persist-once work item saves the ring-buffer state to external flash after a 10 s delay.
+Calling trigger on disconnect would freeze the RAM buffer for brief reconnects where the
+ring buffer survives intact — unnecessarily dropping new logs.
 
-**Correct pattern:** call `memfault_log_trigger_collection()` **only on disconnect**
-(WiFi deassociation + network-layer loss), never on connect. The periodic upload handles
-log collection for the normal case.
+**On connect (after flash restore only):** call `memfault_log_trigger_collection()` once,
+immediately after `memfault_log_state_restore_on_connect()` returns 0. The ring buffer
+was restored from flash and has no saved trigger watermark (power cycle removed it from
+RAM). This is the only correct place to call it on connect.
+
+**Never call it unconditionally on every connect.** That freezes the buffer immediately
+after reconnect, silently dropping all post-reconnect `LOG_INF` messages until the upload
+completes (via `prv_try_free_space()` returning false while `triggered=true`).
 
 ### Confirming logs are flowing
 

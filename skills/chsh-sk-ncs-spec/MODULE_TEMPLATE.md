@@ -7,7 +7,6 @@
 | Module | |
 | Version | YYYY-MM-DD-HH-MM |
 | PRD Version | YYYY-MM-DD-HH-MM |
-| Author | |
 | Status | Draft |
 
 ---

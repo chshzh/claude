@@ -7,7 +7,6 @@
 | Project | |
 | Version | YYYY-MM-DD-HH-MM |
 | PRD Version | YYYY-MM-DD-HH-MM |
-| Author | |
 | NCS Version | e.g. v3.2.4 |
 | Target Board(s) | e.g. nRF7002DK |
 | Status | Draft |

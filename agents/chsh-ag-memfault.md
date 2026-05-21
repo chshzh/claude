@@ -1,6 +1,6 @@
 ---
 name: chsh-ag-memfault
-model: claude-sonnet-4-5
+model: claude-sonnet-4-6
 description: Memfault OTA release specialist for nordic-wifi-memfault. Handles symbol upload, OTA payload upload, release deployment, and aborting active deployments. Use when uploading symbols, creating or re-uploading a release, deploying to a cohort, or disabling an active OTA deployment. Requires build artifacts to already exist unless explicitly asked to rebuild.
 ---
 
@@ -101,6 +101,12 @@ exists = check(f'{BASE}/releases/{VER}')
 print(f'RELEASE {\"\":20s} {VER}  {\"EXISTS\" if exists else \"MISSING\"}')
 "
 ```
+
+**Important:** the pre-flight checks whether the *software version entry* exists, not
+whether a symbol file is attached to it. A version entry is created automatically when
+the OTA payload is uploaded, so the check returns `EXISTS` even when no symbol file has
+been uploaded yet. If the user confirms re-upload and the `memfault upload-mcu-symbols`
+call succeeds without error, no web UI deletion was needed — proceed.
 
 If any artefact shows `EXISTS`, you **MUST** use the `AskQuestion` tool — never
 present choices as plain text. Use this exact structure:

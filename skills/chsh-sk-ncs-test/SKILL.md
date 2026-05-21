@@ -41,13 +41,20 @@ Document Information of each report.
 **Hardware required. Run firmware on the target board.**
 **Run after every implementation cycle — this is the proof that the PRD is satisfied.**
 
-> For debug-focused testing (barrier hangs, crash analysis, VPR), use **chsh-sk-ncs-debug** alongside this skill.
+> **Related tools and skills**:
+> - **chsh-sk-ncs-debug** — barrier hangs, crash analysis, VPR, loop testing
+> - **chsh-sk-router-control** — AP disconnect simulation, SSID enable/disable for reconnect tests
+> - **chsh-sk-memfault** — symbol upload, cloud log verification, OTA release/deploy
 
 ### A1. Flash the firmware
 
 ```bash
+# Standard flash — preserves NVS and WiFi credentials
 nrfutil sdk-manager toolchain launch --ncs-version=v3.3.0 -- \
-  west flash -d build/ --recover --dev-id <SN>
+  west flash -d build/ --dev-id <SN>
+
+# Use --recover only for first-time flash on nRF54LM20DK or after AP protection erase
+# WARNING: --recover and --erase wipe all flash including NVS/WiFi credentials
 ```
 
 If multiple boards are available, assign roles:
@@ -246,7 +253,7 @@ Then ask:
 ## Document Conventions
 
 - **Phase 4 Report**: `docs/qa-test/QA-YYYY-MM-DD-HH-MM.md` — dated snapshot containing Part A always, Part B when running a release/demo review
-- Keep all runs for history
+- Keep only the **latest** report in `docs/qa-test/`; delete the previous file when creating a new one
 - Both Parts include PRD Version and Specs Version in Document Information for traceability
 
 ## Related Skills
