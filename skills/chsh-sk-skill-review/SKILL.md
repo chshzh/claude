@@ -141,12 +141,6 @@ Run the reusable script at `scripts/check-deadlinks.py` from the skill directory
 python3 scripts/check-deadlinks.py
 ```
 
-Or directly from the skills root:
-
-```bash
-python3 scripts/check-deadlinks.py
-```
-
 The script extracts every relative link, resolves it against the SKILL.md's own directory, and reports broken targets. It also marks links inside code blocks as likely-intentional examples.
 
 ### Pitfalls

@@ -334,13 +334,13 @@ If you have access to the AskQuestion tool, use it for efficient structured gath
 
 Confirm `name:` in the SKILL.md frontmatter **exactly matches** the directory name.
 
-Add the new skill to `~/.claude/skills/REGISTRY.md`:
+Add the new skill to `~/.claude/skills/chsh-sk-skill-review/REGISTRY.md`:
 
 ```
 | `<skill-name>` | <when to invoke, ≤10 words> | <primary output> |
 ```
 
-If `REGISTRY.md` does not exist yet, create it first:
+If `REGISTRY.md` does not exist yet, create it first at `~/.claude/skills/chsh-sk-skill-review/REGISTRY.md`:
 
 ```markdown
 # Skill Registry
@@ -418,7 +418,7 @@ Before finalizing a skill, verify:
 - [ ] Skill has a Gotchas section (even if initially sparse)
 - [ ] No LLM-generated boilerplate — every line encodes real domain expertise
 - [ ] `name:` frontmatter matches directory name exactly
-- [ ] Entry added to `~/.claude/skills/REGISTRY.md`
+- [ ] Entry added to `~/.claude/skills/chsh-sk-skill-review/REGISTRY.md`
 
 ### Structure
 - [ ] File references are one level deep
