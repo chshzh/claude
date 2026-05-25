@@ -21,7 +21,7 @@ smoke test on hardware. Never claim a migration is done without flashing.
 
 > **Prerequisite**: A working baseline of the application on its current NCS
 > version. If the baseline does not build/run, **fix it first** — don't
-> migrate broken code. Use `chsh-sk-ncs-debug` to triage.
+> migrate broken code. Use `chsh-sk-ncs-3.2-debug` to triage.
 
 ---
 
@@ -83,7 +83,7 @@ nrfutil sdk-manager toolchain launch --ncs-version=v<source> -- \
   [-DEXTRA_CONF_FILE="<overlays>"]
 ```
 
-Flash and run a functional smoke test (see **chsh-sk-ncs-test** Part A
+Flash and run a functional smoke test (see **chsh-sk-ncs-4.1-verification** —
 shortcut: boot → shell prompt → one feature command). Save the UART log as
 the baseline reference. **Do not proceed if the baseline fails.**
 
@@ -234,8 +234,8 @@ Otherwise → **Step 3**.
 A smoke test per hop is not enough for a final delivery. After the last hop:
 
 1. Run the loop test for stability (≥ 10 passes for acceptance, 20 for
-   release) — see **chsh-sk-ncs-debug** Mode F
-2. Run the full Phase 4 test from **chsh-sk-ncs-test** Part A against the
+   release) — see **chsh-sk-ncs-3.2-debug** Mode F
+2. Run the full Phase 4 verification from **chsh-sk-ncs-4.1-verification** against the
    PRD acceptance criteria
 3. If a release is expected: tag and publish via **chsh-sk-git-release**
 
@@ -323,9 +323,9 @@ Do **not** modify this skill mid-conversation unless the user explicitly asks.
 | Task | Skill |
 |------|-------|
 | Toolchain install + west command wrapper | `chsh-sk-ncs-env` |
-| Build/runtime debugging during migration | `chsh-sk-ncs-debug` |
-| Functional test against PRD acceptance criteria | `chsh-sk-ncs-test` |
+| Build/runtime debugging during migration | `chsh-sk-ncs-3.2-debug` |
+| Functional test against PRD acceptance criteria | `chsh-sk-ncs-4.1-verification` |
 | Per-hop commit | `chsh-sk-git` |
 | Final release after migration | `chsh-sk-git-release` |
-| Update specs if migration changes architecture | `chsh-sk-ncs-spec` |
-| Optimize after migration (heap/stack defaults change) | `chsh-sk-ncs-memory` |
+| Update specs if migration changes architecture | `chsh-sk-ncs-2-spec` |
+| Optimize after migration (heap/stack defaults change) | `chsh-sk-ncs-3.3-memopt` |

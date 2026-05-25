@@ -30,10 +30,12 @@ BOARDS = {
 }
 
 # ── Router config ──────────────────────────────────────────────────────────
-ROUTER_HOST  = "192.168.92.1"
-ROUTER_USER  = "nRF7x"
-ROUTER_PASS  = "@BillionWIFI"
+ROUTER_INFO_PATH = Path.home() / ".claude" / "skills" / "chsh-sk-router-control" / "config.json"
 ROUTER_IFACE = "wl1.1"
+
+
+def load_router_info():
+    return json.loads(ROUTER_INFO_PATH.read_text())
 
 # ── Detection markers ──────────────────────────────────────────────────────
 # Memfault upload: match any of these (case-insensitive)
@@ -187,9 +189,10 @@ def monitor_board(name, cfg):
 # ── Router control ─────────────────────────────────────────────────────────
 def router_cmd(cmd):
     import paramiko
+    router_info = load_router_info()
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    ssh.connect(ROUTER_HOST, username=ROUTER_USER, password=ROUTER_PASS, timeout=10)
+    ssh.connect(router_info["host"], username=router_info["username"], password=router_info["password"], timeout=10)
     _, stdout, stderr = ssh.exec_command(cmd)
     out = stdout.read().decode().strip()
     err = stderr.read().decode().strip()

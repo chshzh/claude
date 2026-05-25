@@ -1,27 +1,37 @@
 ---
 name: chsh-sk-router-control
-description: Control the ASUS RT-BE92U (Asuswrt-Merlin) router over SSH — enable/disable wireless SSIDs, simulate AP reboots, block/unblock clients, and restart services. Use when writing Wi-Fi reconnection tests, simulating network failures, or controlling the wireless environment for nRF device testing.
+description: Control lab routers (ASUS RT-BE92U / Zyxel EX5700) over SSH — enable/disable wireless SSIDs, simulate AP reboots, block/unblock clients, and restart services. Use when writing Wi-Fi reconnection tests, simulating network failures, or controlling the wireless environment for nRF device testing.
 ---
 
-# Router Control — ASUS RT-BE92U (Asuswrt-Merlin)
+# Router Control
+
+## Available Routers
+
+| Key | Model | System | IP | Used SSID |
+|-----|-------|--------|----|-----------|
+| `asus-rt-be92u` | RT-BE92U | Asuswrt-Merlin | 192.168.92.1 | BE92U_5G |
+| `zyxel-ex5700` | Zyxel EX5700 (Telenor) | OpenWrt 25.12.4 | 192.168.75.1 | EX75_5G |
 
 ## Connection
 
-| Field | Value |
-|-------|-------|
-| Host | `192.168.92.1` |
-| User | `nRF7x` |
-| Password | `@BillionWIFI` |
-| Hostname | `RT-BE92U-F640` |
-| Firmware | Asuswrt-Merlin 3006.102.7_2 |
+Load connection details from `config.json` in this skill's directory.
 
 ```python
+import json
 import paramiko
+from pathlib import Path
 
-def router_ssh():
+
+def load_router_info(router="asus-rt-be92u"):
+    path = Path.home() / ".claude" / "skills" / "chsh-sk-router-control" / "config.json"
+    routers = json.loads(path.read_text())
+    return routers[router]
+
+def router_ssh(router="asus-rt-be92u"):
+    info = load_router_info(router)
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    ssh.connect("192.168.92.1", username="nRF7x", password="@BillionWIFI", timeout=10)
+    ssh.connect(info["host"], username=info["username"], password=info["password"], timeout=10)
     return ssh
 
 def run(ssh, cmd):
@@ -31,7 +41,7 @@ def run(ssh, cmd):
 
 ---
 
-## Interface Map
+## Interface Map — ASUS RT-BE92U
 
 | Interface | SSID | Band | Notes |
 |-----------|------|------|-------|
@@ -203,3 +213,18 @@ with ssid_down_ctx() as ssh:
 - `nvram commit` writes to flash — avoid running it frequently (flash wear).
 - The router SSH session persists; reuse one `paramiko.SSHClient` per test session.
 - `service restart_wireless` disconnects **all** wireless clients including the development Mac if it's on Wi-Fi.
+
+---
+
+## Self-Update Policy
+
+At the **end of each conversation**, review what was discovered and check
+whether any facts in this skill are new, corrected, or outdated (e.g. router
+firmware updates, new SSH commands, SSID name changes, network topology changes).
+
+If updates are warranted:
+1. Collect all proposed changes with a brief rationale for each.
+2. Present a summary to the user and ask for approval using `AskQuestion`.
+3. Apply approved updates to this file immediately.
+
+Do **not** modify this skill mid-conversation unless the user explicitly asks.

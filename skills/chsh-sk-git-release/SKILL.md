@@ -8,7 +8,7 @@ description: Tag a git release, create a GitHub release with firmware artifacts,
 Covers the full release cycle for NCS firmware projects: git tag → GitHub Actions CI → release artifact → flash → verify.
 
 > **Prerequisites**: A passing build and a GitHub repo with a CI workflow that publishes `.hex` artifacts.
-> If CI is broken, fix it first with **chsh-sk-ncs-debug** Mode G before tagging.
+> If CI is broken, fix it first with **chsh-sk-ncs-3.2-debug** Mode G before tagging.
 
 ---
 
@@ -189,10 +189,10 @@ python3 <app>/scripts/loop_test.py 20    # 20 passes = release gate
 
 If `loop_test.py` doesn't exist, copy the template from:
 ```
-~/.claude/skills/chsh-sk-ncs-debug/scripts/loop_test.py
+~/.claude/skills/chsh-sk-ncs-3.2-debug/scripts/loop_test.py
 ```
 
-Record the pass rate in the QA report (see **chsh-sk-ncs-test**).
+Record the pass rate in the test report (see **chsh-sk-ncs-4.1-verification**).
 
 ---
 
@@ -226,7 +226,23 @@ edit → commit (chsh-sk-git) → push → gh run watch
 | Task | Skill |
 |------|-------|
 | Commit before pushing | `chsh-sk-git` |
-| Functional test after flashing | `chsh-sk-ncs-test` |
-| Debug CI failures, UART capture | `chsh-sk-ncs-debug` (Mode G) |
+| Functional test after flashing | `chsh-sk-ncs-4.1-verification` |
+| Debug CI failures, UART capture | `chsh-sk-ncs-3.2-debug` (Mode G) |
 | Build commands, toolchain | `chsh-sk-ncs-env` |
-| Loop test script template | `chsh-sk-ncs-debug/scripts/loop_test.py` |
+| Loop test script template | `chsh-sk-ncs-3.2-debug/scripts/loop_test.py` |
+
+---
+
+## Self-Update Policy
+
+At the **end of each conversation**, review what was discovered and check
+whether any facts in this skill are new, corrected, or outdated (e.g. new
+CI workflow names, GitHub API changes, firmware artifact paths, toolchain
+hash updates).
+
+If updates are warranted:
+1. Collect all proposed changes with a brief rationale for each.
+2. Present a summary to the user and ask for approval using `AskQuestion`.
+3. Apply approved updates to this file immediately.
+
+Do **not** modify this skill mid-conversation unless the user explicitly asks.

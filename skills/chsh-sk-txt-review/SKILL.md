@@ -228,3 +228,19 @@ When the user provides text to polish:
 - When in doubt, err on the side of clarity and professionalism
 - Cultural context matters—adapt advice based on regional norms if specified
 - For sensitive situations, offer multiple phrasing options
+
+---
+
+## Self-Update Policy
+
+At the **end of each conversation**, review what was discovered and check
+whether any facts in this skill are new, corrected, or outdated (e.g. new
+communication patterns, tone calibration lessons, or recurring user feedback
+about phrasing style).
+
+If updates are warranted:
+1. Collect all proposed changes with a brief rationale for each.
+2. Present a summary to the user and ask for approval using `AskQuestion`.
+3. Apply approved updates to this file immediately.
+
+Do **not** modify this skill mid-conversation unless the user explicitly asks.

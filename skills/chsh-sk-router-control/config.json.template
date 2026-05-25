@@ -1,0 +1,11 @@
+{
+  "<router-key>": {
+    "host": "<ip-address>",
+    "username": "replace-me",
+    "password": "replace-me",
+    "model": "replace-me",
+    "system": "merlin|openwrt|...",
+    "system_version": "replace-me",
+    "used_ssid": "replace-me"
+  }
+}

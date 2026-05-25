@@ -30,7 +30,12 @@
 # claude 
 /hooks/
 settings.json
-skills/gitnexus-*
+
+# Skills — first-run user config files (may contain API keys, server addresses)
+skills/**/config.json
+
+# Skills — review audit reports (may expose skill internals)
+skills/chsh-sk-skill-review/report-*.md
 
 # Claude Code runtime state — do NOT track
 .claude.json

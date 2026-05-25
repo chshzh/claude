@@ -84,6 +84,7 @@ AskQuestion:
   prompt: "How would you like to proceed with this commit plan?"
   options:
     - "Approve — commit as planned"
+    - "Approve and push to <remote>/<branch>"
     - "Edit commit messages"
     - "Merge all into one commit"
     - "Re-group the commits"
@@ -93,12 +94,13 @@ AskQuestion:
 
 ### Step 4 — Handle the response
 
-- **Approve**: execute as planned.
+- **Approve**: execute as planned, then proceed to Step 6 (push gate).
+- **Approve and push**: execute commits, then push immediately — skip the Step 6 `AskQuestion` gate entirely.
 - **Edit / Re-group / Merge**: revise the plan, re-present the table, and call `AskQuestion` again.
 - **Other**: ask a single follow-up question to clarify, then re-propose.
 - **Cancel**: stop immediately.
 
-Only an explicit "Approve" response permits execution.
+Only an explicit "Approve" or "Approve and push" response permits execution.
 
 ### Step 5 — Execute commits
 
