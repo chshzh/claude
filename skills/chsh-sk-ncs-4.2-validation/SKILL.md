@@ -2,8 +2,8 @@
 name: chsh-sk-ncs-4.2-validation
 description: >-
   Load when running Phase 4.2 Validation (hardware tests) for an NCS project.
-  General test framework: flash → capture → map PRD TCs → execute → report.
-  Individual test cases in tc-*.md files. Hardware required.
+  Derives test cases from PRD acceptance criteria and engineering specs, executes
+  them on hardware via EEDP, and generates a dated VALIDATION report. Hardware required.
 ---
 
 # chsh-sk-ncs-4.2-validation — Phase 4.2 Validation (Hardware Test Framework)
@@ -118,10 +118,11 @@ python3 loop_test.py 20   # release gate
 
 ### A5. Map PRD acceptance criteria to test cases
 
-Read `docs/pm-prd/PRD.md`. For every FR and NFR:
+Read `docs/pm-prd/PRD.md` and cross-reference `docs/dev-specs/`. For every FR and NFR:
 - Extract all acceptance criteria lines
+- Verify the criterion is traceable to a spec in `docs/dev-specs/`
 - Assign each a TC ID: `TC-<FR number>-<sequence>` (e.g. `TC-001-01`)
-- List them in the Test Report before starting any testing
+- List them in the Test Report before starting any testing — this list IS the test plan
 
 ### A6. Execute each test case
 
@@ -150,21 +151,11 @@ Use `VALIDATION_TEMPLATE.md` as the base. Fill in:
 
 **Test Report quality criteria**:
 - Every TC maps to an exact acceptance criterion from the PRD — no invented test cases
+- Every TC is traceable to a spec in `docs/dev-specs/` — no acceptance criterion without a design backing
 - Evidence is specific: paste the relevant UART log lines, not a generic "it worked"
 - NFR rows always have a measured number (not just ✅) — e.g. "29 s" not just "pass"
 - Failed TC detail includes expected vs actual behaviour and a routing recommendation
 - The executive summary (total/pass/fail + one-sentence verdict) appears at the top before results
-
----
-
-## Test Case Library
-
-| TC | When to run | File |
-|----|------------|------|
-| TC-WIFI-THROUGHPUT | PRD includes throughput acceptance criteria | [tc-wifi-throughput.md](tc-wifi-throughput.md) |
-| TC-MEMFAULT-LOG | PRD includes Memfault observability requirements | [tc-memfault-log.md](tc-memfault-log.md) |
-
-> **Adding a new TC**: create `tc-<name>.md` in this directory following the structure of an existing TC file. Add a row to this table.
 
 ---
 

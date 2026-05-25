@@ -1,41 +1,26 @@
 ---
 name: chsh-sk-ncs-4.1-verification
 description: >-
-  Load when running Phase 4 Verification & Validation (V&V) for an NCS project.
-  Covers 4.1 Verification (code review, build, docs audit — no hardware) and
-  4.2 Validation (hardware tests via EEDP — GPIO, UART, Saleae, JLink, Router,
-  PPK2, Wireshark — hardware required).
+  Load when running Phase 4.1 Verification for an NCS project — code review,
+  clean build, and documentation consistency audit. No hardware required.
 ---
 
-# chsh-sk-ncs-4.1-verification — Phase 4: Verification & Validation (V&V)
+# chsh-sk-ncs-4.1-verification — Phase 4.1: Verification (no hardware)
 
-Phase 4 of the NCS project lifecycle. Run after implementation is complete or
-updated, before any release or demo, and after any merge to main.
+Phase 4.1 of the NCS project lifecycle. Runs after implementation is complete,
+before any release or demo, and after any merge to main. No hardware required —
+can run in CI.
 
 ```
-Phase 4 — Verification & Validation (V&V)
-├── 4.1 Verification (always)         ← code review, build, docs audit (no hardware)
-│   ├── Code review (structure, config, standards)
-│   ├── Build verification (west build -p)
-│   └── Documentation consistency audit
-│
-├── 4.2 Validation (always, hardware required)
-│   ├── GPIO Shell → button sequences, LED state
-│   ├── UART log → assert log content
-│   ├── Saleae → protocol timing analysis
-│   ├── JLink → flash/reset/coredump
-│   ├── Router → Wi-Fi reconnect, packet loss simulation
-│   ├── PPK2 → power budget verification
-│   └── Wireshark → 802.11 frame analysis
-│
-└── Feedback routing (P0→Phase 3, Spec gap→Phase 2, New req→Phase 1)
+4.1 Verification
+├── Code review (structure, config, standards)
+├── Build verification (west build -p)
+└── Documentation consistency audit
 ```
 
 > **Knowledge sources**: Call `mcp_nrflow_nordicsemi_workflow_ncs` at the start of each session — loads `nrfutil-manual` and `embedded-code-guidance-ncs-zephyr`. Use `mcp_nrflow_nordicsemi_search_sources` before checking any Kconfig symbol or board capability.
 
-**Outputs**:
-- 4.1: `docs/qa-test/VERIFICATION-YYYY-MM-DD-HH-MM.md`
-- 4.2: `docs/qa-test/VALIDATION-YYYY-MM-DD-HH-MM.md`
+**Output**: `docs/qa-test/VERIFICATION-YYYY-MM-DD-HH-MM.md`
 
 ---
 
@@ -105,7 +90,7 @@ Zero warnings required. Record binary size. Any warning = P1.
 
 ### 4.1.4 Generate Verification Report
 
-Create `docs/qa-test/VERIFICATION-YYYY-MM-DD-HH-MM.md`:
+Create `docs/qa-test/VERIFICATION-YYYY-MM-DD-HH-MM.md` using `VERIFICATION_TEMPLATE.md` as the base:
 
 | Section | Content |
 |---------|---------|
@@ -114,27 +99,6 @@ Create `docs/qa-test/VERIFICATION-YYYY-MM-DD-HH-MM.md`:
 | Build Result | Pass/Fail, warning count, binary size |
 | Docs Audit | SPECS_VERSION match, spec→code coverage gaps |
 | Routing | P0 → Phase 3 / spec gap → Phase 2 / ✅ proceed to 4.2 |
-
----
-
-## 4.2 — Validation
-
-Hardware validation against PRD acceptance criteria. **Hardware required.**
-
-**Test framework**: Load **chsh-sk-ncs-4.2-validation** for the full validation workflow
-(flash → UART → map TCs → execute → loop test → report).
-
-**EEDP platform**: **chsh-sk-ncs-3.2-debug** →
-[`references/eedp-platform.md`](../chsh-sk-ncs-3.2-debug/references/eedp-platform.md)
-
-**Test case library** (extend per project):
-
-| TC | When to run | File |
-|----|--------------|------|
-| TC-WIFI-THROUGHPUT | PRD includes throughput acceptance criteria | [`tc-wifi-throughput.md`](../chsh-sk-ncs-4.2-validation/tc-wifi-throughput.md) |
-| TC-MEMFAULT-LOG | PRD includes Memfault observability requirements | [`tc-memfault-log.md`](../chsh-sk-ncs-4.2-validation/tc-memfault-log.md) |
-
-Output: `docs/qa-test/VALIDATION-YYYY-MM-DD-HH-MM.md`
 
 ---
 
@@ -149,11 +113,10 @@ Output: `docs/qa-test/VALIDATION-YYYY-MM-DD-HH-MM.md`
 | Spec gap / undocumented behaviour | P1 | Phase 2 (`chsh-sk-ncs-2-spec`) |
 | New requirement found | P1 | Phase 1 (`chsh-sk-ncs-1-prd`) → Phase 2 → Phase 3 |
 | P1/P2 issues only | P2 | Phase 3 (next iteration) |
-| All P0 checks pass (4.1) + all P0 TCs pass (4.2) | ✅ | Ready for release |
+| All P0 checks pass | ✅ | Proceed to hardware validation (`chsh-sk-ncs-4.2-validation`) |
 
 After reporting, ask:
-> "Verification complete. Route P0 issues to the appropriate phase, or proceed
-> to release with **chsh-sk-git-release**?"
+> "Verification complete. Proceed to hardware validation with **chsh-sk-ncs-4.2-validation**, or route issues to the appropriate phase?"
 
 ---
 
@@ -164,8 +127,6 @@ After reporting, ask:
 | clang-format version mismatch | Use NCS toolchain clang-format (`nrfutil sdk-manager toolchain launch -- clang-format`), not system clang-format |
 | PRD "not visible" ≠ "not implemented" | Auto-reconnect via Zephyr WiFi manager has no visible app code — check `CONFIG_WIFI_CREDENTIALS` / `CONFIG_WIFI_NM` before flagging |
 | Security grep false positive | `grep -r "password"` hits comments/docs — read context before flagging |
-| Loop test mandatory for stability TCs | Never accept a single-pass result for "reliably" / "consistently" criteria |
-| Flash `--recover` erases NVS | WiFi credentials lost — re-provision after using `--recover` |
 
 ---
 
@@ -174,12 +135,9 @@ After reporting, ask:
 | Task | Skill |
 |------|-------|
 | Implement code (Phase 3) | `chsh-sk-ncs-3.1-coding` |
-| UART capture, loop test, crash debug | `chsh-sk-ncs-3.2-debug` |
-| AP simulation, SSID control | `chsh-sk-router-control` |
-| Memfault log upload diagnostics | `chsh-sk-ncs-tc-memfault-log-debug` |
-| Wi-Fi throughput benchmarking | `chsh-sk-ncs-tc-wifi-throughput` |
+| Debug firmware failures | `chsh-sk-ncs-3.2-debug` |
 | Auto-fix clang-format violations | `chsh-sk-ncs-clang-format` |
-| Memfault symbol upload / OTA | `chsh-sk-memfault-cli` |
+| Hardware validation (Phase 4.2) | `chsh-sk-ncs-4.2-validation` |
 | Tag and publish release | `chsh-sk-git-release` |
 | Full lifecycle orchestration | `chsh-sk-ncs-0-workflow` |
 
@@ -187,7 +145,7 @@ After reporting, ask:
 
 At the **end of each conversation**, review what was discovered and check
 whether any facts in this skill are new, corrected, or outdated (e.g. new
-EEDP modules, security risk patterns, test case procedures, throughput baselines).
+security risk patterns, Zephyr coding standards, or documentation checks).
 
 If updates are warranted:
 1. Collect all proposed changes with a brief rationale for each.
