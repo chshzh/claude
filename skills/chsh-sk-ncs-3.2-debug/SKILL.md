@@ -1,6 +1,6 @@
 ---
 name: chsh-sk-ncs-3.2-debug
-description: Debug NCS/Zephyr applications on Nordic hardware. Covers UART log capture, board reset, multi-device comparison testing, loop testing for stability validation, barrier/co-processor debugging, and crash analysis. Use when debugging a boot failure, WiFi issue, driver crash, kernel hang, or any firmware reliability problem on nRF devices. For initial environment setup use chsh-sk-ncs-env first.
+description: Use when debugging a boot failure, WiFi issue, driver crash, kernel hang, or any firmware reliability problem on nRF devices. Covers UART log capture, board reset, multi-device comparison, loop testing, co-processor debugging, and crash analysis. For environment setup, use chsh-sk-ncs-env first.
 ---
 
 # chsh-sk-ncs-3.2-debug — NCS Embedded Debugging Workflow
@@ -298,328 +298,34 @@ EOF
 
 ## Mode B — UART Logs and WiFi Debugging
 
-### B1. Enable verbose logging
+See [`references/wifi-debug.md`](references/wifi-debug.md) for verbose Kconfig, task template, common error patterns, and reconnect stability test (B4).
 
-Add to `prj.conf` or `boards/<board>.conf`:
-```kconfig
-CONFIG_LOG=y
-CONFIG_LOG_DEFAULT_LEVEL=3    # INFO
-CONFIG_LOG_BUFFER_SIZE=8192
-CONFIG_WIFI_LOG_LEVEL_DBG=y   # for WiFi issues
-CONFIG_NET_LOG=y              # for network issues
-```
-
-Rebuild:
-```bash
-nrfutil sdk-manager toolchain launch --ncs-version=v3.3.0 -- \
-  west build -b <board> -d <app>/build <app> -- -DSHIELD=<shield>
-```
-
-### B2. Connect, reset, capture, issue commands
-
-> **Delegate to `chsh-ag-terminal`** — do not run serial commands manually.
-
-Announce each step in chat before the Task() call, e.g.:
-> `→ Board: reset → wifi scan → wifi connect → wifi status → net iface`
-
-```
-Task(
-  subagent_type="chsh-ag-terminal",
-  description="WiFi debug — capture log + run commands",
-  prompt="""
-  Board:    <confirmed board>
-  Port:     <confirmed port>
-  Log file: <NCS_LOG from Step 0.6>
-
-  Append each received line (with [HH:MM:SS.mmm] timestamp) to Log file as it arrives.
-
-  1. Reset the board, capture boot log until uart:~$
-  2. Send: wifi scan       (wait for scan results, max 15 s)
-  3. Send: wifi connect -s <SSID> -k 1 -p <password>
-  4. Send: wifi status
-  5. Send: net iface
-  6. Return: full output for each command
-  """
-)
-```
-
-### B3. Interpret common WiFi error patterns
-
-| Log line | Likely cause | Fix |
-|----------|-------------|-----|
-| `RPU boot signature check failed` | First CSB barrier never ACK'd by VPR | Check VPR firmware load, memory layout |
-| `UMAC init timed out` | Cascaded from earlier barrier failure | Find the first failure, not the last |
-| `nrf_sqspi_xfer() failed: 0bad000b` | `transfer_in_progress` stuck | Abort + clear state before retry |
-| `Invalid memory address` | Transfer ran with corrupt state | State not reset after previous failure |
-| `wlan0: CTRL-EVENT-DISCONNECTED` | Association succeeded but data path failed | Check DMA timeout recovery logic |
-| `FF:FF:FF:FF:FF:FF` MAC | OTP blank — needs `CONFIG_WIFI_RANDOM_MAC_ADDRESS=y` | Add to Kconfig |
-| USAGE FAULT / silent reboot during WiFi reconnect | `sysworkq` stack overflow in reconnect path | Increase `CONFIG_SYSTEM_WORKQUEUE_STACK_SIZE` to ≥ 6144; see Mode C4–C5 |
-
-### B4. Test: WiFi credentials stored but AP not available
-
-This scenario validates reconnect stability when a provisioned AP is unreachable (powered
-off, out of range, SSID changed). It is **required before release** for any WiFi
-provisioning app — the reconnect path uses significantly more sysworkq stack than
-steady-state operation and will not be caught by the standard Happy Path test or by
-Thread Analyzer during normal connected operation.
-
-**Setup:**
-1. Provision the device with valid WiFi credentials.
-2. Power off the AP (or rename its SSID to something non-existent).
-3. Reboot the device — it will boot, find stored credentials, and attempt to connect.
-
-**Expected behaviour:**
-1. Connection times out: `[WiFi] Reason: Connection timed out (-ETIMEDOUT)`
-2. Retry is scheduled: `scheduling retry` / `attempting to connect`
-3. **No USAGE FAULT** — device continues running through the retry loop.
-4. When the AP is restored, device connects and resumes normal operation.
-
-**Failure signature (sysworkq stack overflow):**
-```
-***** USAGE FAULT *****  Stack overflow (context area not valid)
-  Faulting instruction address (r15/pc): 0x...  ← decodes to wpa_cli_cmd
-  RESETREAS: 0x00000040  ← SREQ (software reset by fault handler)
-```
-
-See Mode C4–C5 for the full diagnosis workflow. Fix: `CONFIG_SYSTEM_WORKQUEUE_STACK_SIZE=6144`.
+> **Quick tip**: `FF:FF:FF:FF:FF:FF` MAC → add `CONFIG_WIFI_RANDOM_MAC_ADDRESS=y`. USAGE FAULT during WiFi reconnect → `CONFIG_SYSTEM_WORKQUEUE_STACK_SIZE=6144` (see [crash-analysis.md C4–C5](references/crash-analysis.md)).
 
 ---
 
 ## Mode C — Crash and Hardfault Analysis
 
-### C1. Enable crash logging
+See [`references/crash-analysis.md`](references/crash-analysis.md) for the full workflow (C1–C5): enable crash logging, decode with addr2line, GDB attach, hidden-fault-dump workaround, thread identification from PSP.
 
-```kconfig
-CONFIG_FAULT_DUMP=2
-CONFIG_EXTRA_EXCEPTION_INFO=y
-CONFIG_DEBUG_COREDUMP=y
-CONFIG_DEBUG_COREDUMP_BACKEND_LOGGING=y
-```
-
-### C2. Capture the crash dump
-
-```
-FATAL ERROR: BUS FAULT
-   Executing thread (tid: 0x20003abc, name: "wifi_mgmt"):
-   ...
-   Faulting instruction address (r15/pc): 0x0005e2f4
-```
-
-Use the ELF to decode:
-```bash
-arm-zephyr-eabi-addr2line -e build/zephyr/zephyr.elf 0x0005e2f4
-```
-
-### C3. GDB attach
-
-```bash
-nrfutil sdk-manager toolchain launch --ncs-version=v3.3.0 -- \
-  west debug -d <app>/build
-```
-
-```gdb
-(gdb) bt full            # backtrace with locals
-(gdb) info thread        # all threads
-(gdb) frame <n>          # switch frame
-(gdb) p <variable>       # print variable
-```
-
-### C4. Stack overflow via "hidden fault dump" pattern
-
-Zephyr's default `CONFIG_LOG_MODE_DEFERRED=y` queues log messages. When a USAGE FAULT
-(stack overflow) triggers a software reset at full queue capacity, the fault dump is
-dropped and the device reboots silently. Symptoms:
-
-- Log shows `--- N messages dropped ---` immediately before the reboot line
-- `RESETREAS: 0x00000040` — SREQ (software reset by `NVIC_SystemReset()` in fault handler)
-- `Thread Analyzer` shows peak usage near or at the configured stack size
-
-**Workaround:** switch to immediate mode to make the fault dump print synchronously:
-
-```kconfig
-CONFIG_LOG_MODE_DEFERRED=n
-CONFIG_LOG_MODE_IMMEDIATE=y
-# Immediate mode causes each log call to process in the calling thread, which
-# significantly increases stack depth. Increase thread_analyzer auto stack:
-CONFIG_THREAD_ANALYZER_AUTO_STACK_SIZE=4096
-```
-
-Rebuild and flash. The next fault will print the full register dump including PC, LR,
-PSP, and RESETREAS before the reboot. Revert both changes after the fault is diagnosed.
-
-### C5. Decode fault dump — addr2line and thread identification
-
-**Always use the Zephyr SDK `addr2line` — NOT `arm-none-eabi-addr2line`:**
-
-```bash
-# NCS v3.3.0 macOS toolchain path
-ADDR2LINE="/opt/nordic/ncs/toolchains/0c0f19d91c/opt/zephyr-sdk/arm-zephyr-eabi/bin/arm-zephyr-eabi-addr2line"
-ELF="<app>/build_<board>/zephyr/zephyr.elf"
-
-# Decode faulting instruction (PC) and calling function (LR)
-$ADDR2LINE -e $ELF -f -p <PC_HEX>
-$ADDR2LINE -e $ELF -f -p <LR_HEX>
-```
-
-**Identify crashing thread from PSP** using the map file:
-
-```python
-import re
-
-MAP = "<app>/build_<board>/zephyr/zephyr.map"
-PSP = 0x<psp_from_fault_dump>          # e.g. 0x20050570
-
-stacks = []
-with open(MAP) as f:
-    for line in f:
-        m = re.search(r'(0x[0-9a-f]+)\s+(0x[0-9a-f]+)\s+(.+)', line)
-        if m:
-            addr, size = int(m.group(1), 16), int(m.group(2), 16)
-            if 0x20000000 <= addr <= 0x20100000 and size > 0:
-                stacks.append((addr, size, m.group(3).strip()))
-
-for addr, size, name in sorted(stacks):
-    if addr <= PSP <= addr + size:
-        print(f"MATCH: 0x{addr:08x}+0x{size:x}=0x{addr+size:08x}: {name}")
-```
-
-**Key register meanings:**
-
-| Register | Meaning |
-|----------|---------|
-| `r15/pc` | Faulting instruction — decode with addr2line |
-| `r14/lr` | Return address in caller — decode with addr2line |
-| `psp` | Stack pointer at fault — use map script to identify thread |
-| `EXC_RETURN=0xffffffed` | Thread mode, PSP, extended FP frame (~104 bytes stacked) |
-| `RESETREAS=0x00000040` | SREQ — fault handler called `sys_reboot()` |
-
-**Common Wi-Fi reconnect stack overflow (sysworkq):**
-
-The reconnect path (`wpa_cli_cmd_remove_network`) runs on `sysworkq` and allocates
-large on-stack buffers deep in the call chain:
-
-| Frame | Stack allocation |
-|-------|-----------------|
-| `wpa_cli_cmd` (`wpa_cli_cmds.c`) | `buf[1024]` (CMD_BUF_LEN) |
-| `_wpa_ctrl_command` (`wpa_cli_zephyr.c`) | `buf[512]` (CMD_BUF_LEN) |
-| `zvfs_poll_internal` | `poll_events[CONFIG_ZVFS_POLL_MAX=20]` ≈ 400 B |
-| Call overhead + saved regs | ~552 B |
-| **Total peak (nRF54LM20DK)** | **~4488 B** |
-
-Fix: `CONFIG_SYSTEM_WORKQUEUE_STACK_SIZE=6144` (formula: floor(4488/0.9)=4988 minimum).
+> **Quick tip**: Always use the Zephyr SDK `arm-zephyr-eabi-addr2line` (not `arm-none-eabi-addr2line`). Enable `CONFIG_LOG_MODE_IMMEDIATE=y` to surface hidden fault dumps.
 
 ---
 
 ## Mode D — Co-processor / VPR Barrier Debugging
 
 For sQSPI / MSPI soft peripheral barrier hangs on nRF54L series.
+See [`references/barrier-debug.md`](references/barrier-debug.md) for the full workflow (D1–D4).
 
-### D1. Identify the pattern
-
-VPR barrier hang symptoms:
-- Busy-wait spins forever (thread stuck in `__XSBx` macro)
-- `h0 != h1` in handshake registers: `h0=N, h1=N-1` means VPR one barrier behind
-
-### D2. Debug sequence
-
-Add instrumentation (temporary, remove before release):
-```c
-_xsb_timeout_tc = 0;
-__CSB(p_qspi->p_reg);
-if (_xsb_timeout_tc) {
-    printk("CSB timeout tc=%u h0=%u h1=%u\n",
-           _xsb_timeout_tc,
-           sp_handshake_get(p_qspi->p_reg, 0),
-           sp_handshake_get(p_qspi->p_reg, 1));
-}
-```
-
-### D3. Root cause checklist
-
-- [ ] `__DSB()` called before task trigger? (required for AHB/APB write visibility)
-- [ ] VPR still in event loop entry when trigger fires? (add graduated re-trigger)
-- [ ] Abort sends `__SSB`? (do NOT — if VPR is stuck, SSB also hangs)
-- [ ] Events cleared after abort? (`nrf_qspi2_event_clear` for all DMA events)
-- [ ] `transfer_in_progress` reset? (needed or next `nrf_sqspi_xfer` returns BUSY)
-
-### D4. Safe abort pattern
-
-```c
-void abort_transfer(void) {
-    nrf_qspi2_core_disable(p_reg);          // stop DMA, no barriers needed
-    nrf_qspi2_event_clear(p_reg, NRF_QSPI2_EVENT_DMA_DONE);
-    nrf_qspi2_event_clear(p_reg, NRF_QSPI2_EVENT_DMA_ABORTED);
-    nrf_qspi2_event_clear(p_reg, NRF_QSPI2_EVENT_DMA_DONEJOB);
-    p_cb->transfer_in_progress = false;
-    p_cb->prepared_pending = false;
-    // DO NOT call __SSB — it will also hang
-}
-```
+> **Quick tip**: Never call `__SSB` in the abort path — if VPR is stuck, SSB also hangs. Use `nrf_qspi2_core_disable()` instead.
 
 ---
 
 ## Mode F — Loop Testing for Stability
 
-Use a scripted loop test whenever a failure is intermittent or after any fix to confirm
-stability. The rule of thumb: **10 passes minimum, 20 for a release claim**.
+See [`references/loop-testing.md`](references/loop-testing.md) for the full task template, iteration counts, and multi-device test setup.
 
-### F1. Run the loop test via chsh-ag-terminal
-
-> **Delegate to `chsh-ag-terminal`** — it contains the full loop test template
-> and handles HWFC, reset, and per-iteration pass/fail reporting.
-
-Before launching, tell the developer:
-> **Loop test starting — monitor progress live:**
-> ```bash
-> tail -f <NCS_LOG>           # serial output stream
-> tail -f /tmp/loop_test_results.txt   # per-iteration pass/fail summary
-> ```
-
-```
-Task(
-  subagent_type="chsh-ag-terminal",
-  description="Loop test — N iterations",
-  run_in_background=True,   # loop tests are long; keep working while it runs
-  prompt="""
-  Board:    <confirmed board>
-  Port:     <confirmed port>
-  Log file: <NCS_LOG from Step 0.6>
-  SSID:     <ssid>
-  PSK:      <password>
-  KEY_MGMT: 1   # 1=WPA2-PSK, 3=WPA3-SAE
-
-  Run a loop test with <N> iterations (10 = acceptance, 20 = release).
-  For each iteration:
-    - Reset board, wait for uart:~$, send wifi connect, verify Connected + IP
-    - Append each received serial line (timestamped) to Log file as it arrives
-    - Append iteration result line to /tmp/loop_test_results.txt immediately after each iteration:
-        [PASS] iter=N  time=Xs  ip=A.B.C.D
-        [FAIL] iter=N  time=Xs  reason=<first error line>
-  Return: pass rate summary (X/N passed) and any failure details.
-  """
-)
-```
-
-After the task completes, read `/tmp/loop_test_results.txt` for the full per-iteration log.
-
-> **HWFC reference** (applied automatically by the subagent):
-> nRF54LM20DK+nRF7002EB2: VCOM0/suffix `...1` → `rtscts=True` (app logs). UART20/VCOM1 → disabled.
-> nRF7002DK: VCOM1/suffix `...3` → `rtscts=False` (app logs).
-> nRF54LM20DK (no shield): VCOM1/suffix `...3` → `rtscts=False` (app logs).
-
-### F2. Iteration counts
-
-| Count | Purpose |
-|-------|---------|
-| 5 | Quick smoke test |
-| 10 | Acceptance gate (minimum) |
-| 20 | Release gate |
-
-### F3. Multi-device loop test
-
-Invoke `chsh-ag-terminal` twice with `run_in_background=True`, once per board, then
-wait for both results. Supply each with its own board/port/SN. Compare pass rates
-to isolate whether the failure is hardware-specific or firmware-general.
+> **Quick tip**: Use `run_in_background=True` for the subagent task. 10 iterations = acceptance gate; 20 = release gate.
 
 ---
 
@@ -719,7 +425,7 @@ REST API + MCP — see [`references/eedp-platform.md`](references/eedp-platform.
 | First-time NCS setup | `chsh-sk-ncs-env` |
 | Optimize RAM/Flash | `chsh-sk-ncs-3.3-memopt` || Review expected module behavior from spec | `chsh-sk-ncs-2-spec` || Phase 4 Verification & Test (static + EEDP hardware) | `chsh-sk-ncs-4.1-verification` |
 | EEDP platform setup + all modules | [`references/eedp-platform.md`](references/eedp-platform.md) · wiki: `eedp-platform` |
-| Commit after fixing | `chsh-sk-git` |
+| Commit after fixing | `chsh-sk-git-commit` |
 | Tag and publish a release after CI passes | `chsh-sk-git-release` |
 | Migrate to a newer NCS version | `chsh-sk-ncs-migrate` |
 | Physical button/LED test automation | `references/eedp-gpio-shell-approach.md` — zero-firmware GPIO shell approach |
@@ -728,6 +434,9 @@ REST API + MCP — see [`references/eedp-platform.md`](references/eedp-platform.
 | CI/CD for NCS firmware | wiki: `github-actions-ncs-ci` |
 
 ---
+
+## Gotchas
+- TODO: add one entry per real observed failure or routing false-positive
 
 ## Self-Update Policy
 
