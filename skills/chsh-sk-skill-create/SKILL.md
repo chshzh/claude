@@ -1,9 +1,8 @@
 ---
 name: chsh-sk-skill-create
 description: >-
-  Guides users through creating effective Agent Skills. Use when you want to
-  create, write, or author a new skill, or asks about skill structure, best
-  practices, or SKILL.md format.
+  Load when creating, writing, or authoring a new Agent Skill, or when asked
+  about SKILL.md structure, frontmatter, or skill best practices.
 ---
 # Creating Agent Skills
 
@@ -68,7 +67,7 @@ Every skill requires a `SKILL.md` file with YAML frontmatter and markdown body:
 ```markdown
 ---
 name: your-skill-name
-description: Brief description of what this skill does and when to use it
+description: "Load when [user intent in their own words]. ≤50 words."
 ---
 
 # Your Skill Name
@@ -78,6 +77,9 @@ Clear, step-by-step guidance for the agent.
 
 ## Examples
 Concrete examples of using this skill.
+
+## Gotchas
+- [Known failure — add one entry per real agent failure observed]
 ```
 
 ### Required Metadata Fields
@@ -89,40 +91,23 @@ Concrete examples of using this skill.
 
 ---
 
-## Writing Effective Descriptions
+## Writing the Description
 
-The description is **critical** for skill discovery. The agent uses it to decide when to apply your skill.
+The description is a **routing trigger**, not documentation. It tells the agent *when to load the skill*, not what the skill does. This is the hardest line to write and the most important one to get right.
 
-### Description Best Practices
+**Rule**: Start with **"Use when"** or **"Load when"** and describe the user's intent in their own words. Target 50 words or fewer. Do not summarize the workflow.
 
-1. **Write in third person** (the description is injected into the system prompt):
-   - ✅ Good: "Processes Excel files and generates reports"
-   - ❌ Avoid: "I can help you process Excel files"
-   - ❌ Avoid: "You can use this to process Excel files"
+- Use **"Use when"** for workflow skills (always-active, action-oriented triggers).
+- Use **"Load when"** for reference/knowledge skills (passive lookup, loaded on demand).
 
-2. **Be specific and include trigger terms**:
-   - ✅ Good: "Extract text and tables from PDF files, fill forms, merge documents. Use when working with PDF files or when the user mentions PDFs, forms, or document extraction."
-   - ❌ Vague: "Helps with documents"
+| ✅ Good | ❌ Bad |
+|--------|--------|
+| "Load when the user mentions PDF, form extraction, or document merging." | "This skill processes PDF files and generates reports." |
+| "Load when asked to write, review, or fix a git commit message." | "Helps with git. Use when working with commits." |
 
-3. **Include both WHAT and WHEN**:
-   - WHAT: What the skill does (specific capabilities)
-   - WHEN: When the agent should use it (trigger scenarios)
+**Negative examples matter as much as positive ones.** For each valid trigger, name one adjacent case that should NOT load this skill — these become the initial Gotchas entry for routing.
 
-### Description Examples
-
-```yaml
-# PDF Processing
-description: Extract text and tables from PDF files, fill forms, merge documents. Use when working with PDF files or when the user mentions PDFs, forms, or document extraction.
-
-# Excel Analysis
-description: Analyze Excel spreadsheets, create pivot tables, generate charts. Use when analyzing Excel files, spreadsheets, tabular data, or .xlsx files.
-
-# Git Commit Helper
-description: Generate descriptive commit messages by analyzing git diffs. Use when the user asks for help writing commit messages or reviewing staged changes.
-
-# Code Review
-description: Review code for quality, security, and best practices following team standards. Use when reviewing pull requests, code changes, or when the user asks for a code review.
-```
+**The silent failure**: a description that describes what the skill does (not when to load it) fires on wrong queries and silently degrades every other skill in context. You won't see the error; you'll just see worse behavior across the board.
 
 ---
 
@@ -134,10 +119,9 @@ The context window is shared with conversation history, other skills, and reques
 
 **Default assumption**: The agent is already very smart. Only add context it doesn't already have.
 
-Challenge each piece of information:
-- "Does the agent really need this explanation?"
-- "Can I assume the agent knows this?"
-- "Does this paragraph justify its token cost?"
+Apply the **Pascal test** to every sentence: *"Would the agent get this wrong without this instruction?"* If no, delete it. If you're generating the skill in one pass, it is almost certainly too long — a short skill is hard to write, and that difficulty is the actual work.
+
+**Gotcha — LLM-generated skills**: Research shows self-generated skills provide no benefit on average. The model cannot reliably author the procedural knowledge it benefits from consuming. Every line must encode *your* expertise: your gotchas, your taste, your real edge cases. Generic best-practice instructions the model already knows waste context and degrade other skills.
 
 **Good (concise)**:
 ```markdown
@@ -193,118 +177,6 @@ Match specificity to the task's fragility:
 | **High** (text instructions) | Multiple valid approaches, context-dependent | Code review guidelines |
 | **Medium** (pseudocode/templates) | Preferred pattern with acceptable variation | Report generation |
 | **Low** (specific scripts) | Fragile operations, consistency critical | Database migrations |
-
----
-
-## Common Patterns
-
-### Template Pattern
-
-Provide output format templates:
-
-```markdown
-## Report structure
-
-Use this template:
-
-\`\`\`markdown
-# [Analysis Title]
-
-## Executive summary
-[One-paragraph overview of key findings]
-
-## Key findings
-- Finding 1 with supporting data
-- Finding 2 with supporting data
-
-## Recommendations
-1. Specific actionable recommendation
-2. Specific actionable recommendation
-\`\`\`
-```
-
-### Examples Pattern
-
-For skills where output quality depends on seeing examples:
-
-```markdown
-## Commit message format
-
-**Example 1:**
-Input: Added user authentication with JWT tokens
-Output:
-\`\`\`
-feat(auth): implement JWT-based authentication
-
-Add login endpoint and token validation middleware
-\`\`\`
-
-**Example 2:**
-Input: Fixed bug where dates displayed incorrectly
-Output:
-\`\`\`
-fix(reports): correct date formatting in timezone conversion
-
-Use UTC timestamps consistently across report generation
-\`\`\`
-```
-
-### Workflow Pattern
-
-Break complex operations into clear steps with checklists:
-
-```markdown
-## Form filling workflow
-
-Copy this checklist and track progress:
-
-\`\`\`
-Task Progress:
-- [ ] Step 1: Analyze the form
-- [ ] Step 2: Create field mapping
-- [ ] Step 3: Validate mapping
-- [ ] Step 4: Fill the form
-- [ ] Step 5: Verify output
-\`\`\`
-
-**Step 1: Analyze the form**
-Run: \`python scripts/analyze_form.py input.pdf\`
-...
-```
-
-### Conditional Workflow Pattern
-
-Guide through decision points:
-
-```markdown
-## Document modification workflow
-
-1. Determine the modification type:
-
-   **Creating new content?** → Follow "Creation workflow" below
-   **Editing existing content?** → Follow "Editing workflow" below
-
-2. Creation workflow:
-   - Use docx-js library
-   - Build document from scratch
-   ...
-```
-
-### Feedback Loop Pattern
-
-For quality-critical tasks, implement validation loops:
-
-```markdown
-## Document editing process
-
-1. Make your edits
-2. **Validate immediately**: \`python scripts/validate.py output/\`
-3. If validation fails:
-   - Review the error message
-   - Fix the issues
-   - Run validation again
-4. **Only proceed when validation passes**
-```
 
 ---
 
@@ -367,7 +239,25 @@ Use the v2 API endpoint.
 </details>
 ```
 
-### 4. Frontmatter `name` Must Match Directory Name
+### 4. Absolute Paths
+
+- ✅ **Own files (text)**: use relative — `scripts/run.py`, `configs/wifi-sta.conf`
+- ✅ **Own files (shell, multiple cmds)**: define `SKILL=~/.claude/skills/<skill-name>` once, then `$SKILL/path`
+- ❌ **Never**: hardcode `/Users/<name>/...` — breaks for any other user
+- ❌ **Avoid**: repeating `~/.claude/skills/<skill-name>/` on every line of a multi-command block
+
+```bash
+# Good — SKILL variable for multi-command blocks
+SKILL=~/.claude/skills/my-skill
+cp $SKILL/templates/* src/
+cp $SKILL/overlay.conf .
+
+# Bad — repeated absolute path
+cp ~/.claude/skills/my-skill/templates/* src/
+cp ~/.claude/skills/my-skill/overlay.conf .
+```
+
+### 5. Frontmatter `name` Must Match Directory Name
 
 The SKILL.md frontmatter `name:` field and the skill's directory name **must be identical**. Hermes discovers skills by scanning directories and loading `SKILL.md` — if the directory name differs from `name:`, the skill may not surface correctly.
 
@@ -398,6 +288,15 @@ Choose one term and use it throughout:
 ## Skill Creation Workflow
 
 When helping a user create a skill, follow this process:
+
+### Phase 0: Write Evals First
+
+Before writing a single line of SKILL.md:
+1. Write 2–3 **hero queries**: real user phrases that should load this skill
+2. Write 2 **negative examples**: adjacent phrases that should NOT load it
+3. Identify at least one **known failure** that motivated this skill's creation
+
+These seed the initial Gotchas section and serve as the routing test baseline. If you can't name a known failure or a negative example, the skill may not be needed yet.
 
 ### Phase 1: Discovery
 
@@ -492,16 +391,17 @@ Format feedback as:
 Before finalizing a skill, verify:
 
 ### Core Quality
-- [ ] Description is specific and includes key terms
-- [ ] Description includes both WHAT and WHEN
-- [ ] Written in third person
+- [ ] Description starts with "Load when..." (routing trigger, not documentation)
+- [ ] Description is ≤50 words
 - [ ] SKILL.md body is under 500 lines
 - [ ] Consistent terminology throughout
-- [ ] Examples are concrete, not abstract
+- [ ] Pascal test applied: every sentence would cause failure if removed
+- [ ] Skill has a Gotchas section (even if initially sparse)
+- [ ] No LLM-generated boilerplate — every line encodes real domain expertise
 
 ### Structure
 - [ ] File references are one level deep
-- [ ] Progressive disclosure used appropriately
+- [ ] Progressive disclosure used for heavy reference content
 - [ ] Workflows have clear steps
 - [ ] No time-sensitive information
 
@@ -510,3 +410,35 @@ Before finalizing a skill, verify:
 - [ ] Required packages are documented
 - [ ] Error handling is explicit and helpful
 - [ ] No Windows-style paths
+
+---
+
+## Additional Resources
+
+- [principles.md](principles.md) — deeper rationale for the token tax, Pascal test, and routing-vs-docs distinction
+
+---
+
+## Gotchas
+
+- **Placeholder Gotchas**: Authors put `[Known failure — add one entry per real agent failure observed]` and never update it. The Gotchas section only has value when it records actual observed failures.
+- **Description drift**: Descriptions often describe *what the skill does* rather than *when to load it*. Check the first sentence: if it could be a README intro, rewrite it as a routing trigger.
+- **Silent line-count creep**: Adding one subsection at a time often pushes SKILL.md past 500 lines without notice. Run `wc -l SKILL.md` as the last step before saving.
+- **"Use when" vs "Load when" confusion**: Both are valid. Workflow skills (always action-oriented) use "Use when"; passive reference skills use "Load when". Don't force "Load when" on action skills.
+- **Reference depth**: Progressive disclosure links must be one level deep (`references/file.md`). Linking to nested subdirs (e.g. `references/sub/file.md`) risks partial reads.
+
+---
+
+## Self-Update Policy
+
+At the **end of each conversation**, review what was discovered and check
+whether any facts in this skill are new, corrected, or outdated (e.g. new
+anti-patterns observed, frontmatter schema changes, routing rule refinements,
+or new skill authoring best practices).
+
+If updates are warranted:
+1. Collect all proposed changes with a brief rationale for each.
+2. Present a summary to the user and ask for approval using `AskQuestion`.
+3. Apply approved updates to this file immediately.
+
+Do **not** modify this skill mid-conversation unless the user explicitly asks.

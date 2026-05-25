@@ -1,19 +1,21 @@
 ---
 name: chsh-sk-skill-review
 description: >-
-  Daily skill health audit. Reviews all SKILL.md files for structural
-  compliance, duplication, size, dead links, and cross-reference gaps.
-  Produces a prioritized improvement report and applies approved fixes.
-  Use when running the Hermes daily review job, or when asked to audit skills.
+  Load when running the Hermes daily skill audit, or when asked to review,
+  audit, or health-check existing SKILL.md files for quality, duplication,
+  dead links, or structural compliance.
 ---
 
 # chsh-sk-skill-review — Daily Skill Health Audit
 
 Systematic review of all Agent Skills. Finds structural violations, duplication,
-stale content, and missing cross-references. Produces a prioritized fix list.
+stale content, missing cross-references, and security issues (credential leaks,
+sensitive config files not in .gitignore). Produces a prioritized fix list.
 
 > **Rule authoring**: This skill uses the rules defined in `chsh-sk-skill-create`
-> as the quality standard. Read that skill before evaluating any SKILL.md.
+> as the quality standard. Read that skill and its
+> [`principles.md`](../chsh-sk-skill-create/principles.md)
+> before evaluating any SKILL.md.
 
 ---
 
@@ -41,12 +43,17 @@ For each personal skill, verify against `chsh-sk-skill-create` rules:
 | `name` field present | `name:` key exists | P0 |
 | `name` ≤ 64 chars, lowercase + hyphens | Regex `^[a-z0-9-]{1,64}$` | P1 |
 | `description` ≤ 1024 chars | Character count | P1 |
-| Description in third person | Does NOT start with "I " or "You " | P1 |
-| Description includes WHAT and WHEN | Contains "Use when" or similar | P1 |
+| Description uses routing trigger | Starts with "Load when" or equivalent routing phrase; does NOT describe what the skill does | P1 |
+| Description ≤ 50 words | Word count | P1 |
+| Skill has Gotchas section | `## Gotchas` heading present in body | P1 |
 | SKILL.md body ≤ 500 lines | `wc -l` | P2 |
 | No Windows-style paths | No `\` path separators | P2 |
 | No time-sensitive info | No phrases like "before August 202X" | P2 |
 | File references one level deep | Linked files are direct children, not deeply nested | P2 |
+| Pascal test (manual) | No section consisting of generic best practices the model already knows — flag and propose cutting | P2 |
+| No hardcoded `/Users/` paths | `grep -r "/Users/" SKILL.md` returns empty | P0 |
+| No repeated `~/.claude/skills/<name>/` in multi-command blocks | Multi-command blocks use a `SKILL=` variable; single-command lines may keep the full `~` path | P1 |
+| Own-file text refs are relative | Markdown text mentioning a file in the same skill uses relative path, not absolute | P1 |
 
 ---
 
@@ -110,7 +117,7 @@ python3 scripts/check-deadlinks.py
 Or directly from the skills root:
 
 ```bash
-python3 ~/.claude/skills/chsh-sk-skill-review/scripts/check-deadlinks.py
+python3 scripts/check-deadlinks.py
 ```
 
 The script extracts every relative link, resolves it against the SKILL.md's own directory, and reports broken targets. It also marks links inside code blocks as likely-intentional examples.
@@ -133,12 +140,12 @@ After fixing dead links, re-run the comprehensive scan and confirm zero broken l
 When skill A mentions a topic that skill B owns, A should reference B.
 
 Patterns to detect:
-- A skill mentions "debug" or "UART" without referencing `chsh-sk-ncs-debug`
+- A skill mentions "debug" or "UART" without referencing `chsh-sk-ncs-3.2-debug`
 - A skill mentions "git commit" or "push" without referencing `chsh-sk-git`
 - A skill mentions "release" or "tag" without referencing `chsh-sk-git-release`
-- A skill mentions "PRD" or "requirements" without referencing `chsh-sk-ncs-prd`
-- A skill mentions "specs" without referencing `chsh-sk-ncs-spec`
-- A skill talks about "QA" or "test report" without referencing `chsh-sk-ncs-test`
+- A skill mentions "PRD" or "requirements" without referencing `chsh-sk-ncs-1-prd`
+- A skill mentions "specs" without referencing `chsh-sk-ncs-2-spec`
+- A skill talks about "QA" or "test report" without referencing `chsh-sk-ncs-4.1-verification`
 
 For each gap, suggest a one-line addition to the Related Skills table.
 
@@ -155,9 +162,62 @@ Flag potentially stale content:
 
 ---
 
-## Step 7 — Generate the Review Report
+## Step 7 — Security Scan
 
-Produce a Markdown report at `~/.claude/skills/chsh-sk-skill-review/report-YYYY-MM-DD.md`:
+Scan every file in every skill directory for sensitive data that must not be committed to git.
+
+### Credential patterns
+
+```bash
+grep -rn \
+  -e "password\s*[=:]" \
+  -e "passwd\s*[=:]" \
+  -e "secret\s*[=:]" \
+  -e "api_key\s*[=:]" \
+  -e "apikey\s*[=:]" \
+  -e "access_token\s*[=:]" \
+  -e "-----BEGIN" \
+  -e "AKIA[0-9A-Z]\{16\}" \
+  ~/.claude/skills/ 2>/dev/null
+```
+
+```bash
+# Private IPs and hostnames that reveal network topology
+grep -rn \
+  -e "192\.168\.[0-9]\+\.[0-9]\+" \
+  -e "10\.[0-9]\+\.[0-9]\+\.[0-9]\+" \
+  -e "172\.1[6-9]\.\|172\.2[0-9]\.\|172\.3[01]\." \
+  ~/.claude/skills/ 2>/dev/null
+```
+
+Any match is **P0**. The file must be either sanitized or added to `~/.claude/.gitignore` before the next commit.
+
+**Pitfall — false positives in examples**: Skills that teach credential-handling workflows may contain these patterns as illustrative examples inside code blocks. Read the context before flagging. A pattern inside a triple-backtick block with placeholder values (e.g. `password = "your-password-here"`) is documentation, not a leak.
+
+### Config file audit
+
+Skill directories may contain `config.json` (Perplexity-style first-run user setup: saved Slack channels, API endpoints, server addresses). These are high-risk for accidental commits.
+
+```bash
+find ~/.claude/skills -name "config.json" | while read f; do
+  echo "=== $f ==="; cat "$f"
+done
+```
+
+For each `config.json` found: verify it is listed in `~/.claude/.gitignore`. If not, flag **P0**.
+
+### Gitignore coverage check
+
+Verify `~/.claude/.gitignore` contains at minimum:
+- `skills/**/config.json` — all first-run user setup files at any nesting level
+- `skills/chsh-sk-skill-review/report-*.md` — audit reports (may expose skill internals)
+- Any skill-specific known-sensitive files not already matched by `skills/**/config.json`
+
+---
+
+## Step 8 — Generate the Review Report
+
+Produce a Markdown report at `report-YYYY-MM-DD.md` in this skill's directory:
 
 ```markdown
 # Skill Review — YYYY-MM-DD
@@ -197,11 +257,16 @@ Produce a Markdown report at `~/.claude/skills/chsh-sk-skill-review/report-YYYY-
 | Skill | Broken path |
 |-------|-------------|
 | ... | ... |
+
+## Security Issues
+| Skill / File | Pattern matched | Action required |
+|-------------|----------------|----------------|
+| ... | ... | ... |
 ```
 
 ---
 
-## Step 8 — Apply Fixes (with approval)
+## Step 9 — Apply Fixes (with approval)
 
 Present the report summary. Use `AskQuestion` to ask:
 
@@ -220,6 +285,35 @@ For each approved fix:
 3. Mark the issue resolved
 
 Do NOT apply split or delete operations without explicit per-item approval.
+
+### Fix Templates
+
+**P1-A — description doesn't start with routing trigger:**
+Rewrite as two sentences: trigger first, then what the skill does.
+```
+OLD: "Processes PDF files and extracts form fields. Use when the user mentions PDF."
+NEW: "Use when the user mentions PDF, form extraction, or document merging. Extracts form fields from PDF files using pdfplumber."
+```
+Rule: move the "Use when"/"Load when" clause to position 1. Preserve all original content; do not shorten or summarize.
+
+**P1-B — missing `## Gotchas` section:**
+Insert before `## Self-Update Policy` (or before `## Related Skills` if no Self-Update exists):
+```markdown
+## Gotchas
+- TODO: add one entry per real observed failure or routing false-positive
+```
+
+**P2 — SKILL.md over 500 lines:**
+1. Identify the largest self-contained section (workflow mode, reference table, long example).
+2. Create `references/<topic>.md` in the same skill directory.
+3. Move the section content there verbatim.
+4. Replace the section in SKILL.md with a 3-5 line stub:
+   ```markdown
+   ## Mode X — <Name>
+   See [`references/<topic>.md`](references/<topic>.md) for <summary of what moved>.
+   > **Quick tip**: <one-liner most commonly needed>
+   ```
+5. Verify `wc -l SKILL.md` is now under 500.
 
 ---
 
@@ -259,3 +353,28 @@ Check if skills with `Self-Update Policy` sections were last updated recently (v
 | Author a new skill | `chsh-sk-skill-create` |
 | Commit reviewed skill fixes | `chsh-sk-git` |
 | Push to claude repo | `chsh-sk-git` (Step 5 — push) |
+
+---
+
+## Gotchas
+
+- **False positives in security scan**: Credential patterns inside illustrative code blocks (e.g. `password = "your-password-here"`) are documentation, not leaks. Always read the surrounding context before flagging.
+- **Intentional placeholder links**: `path.md`, `reference.md`, `examples.md` in `chsh-sk-skill-create` and `chsh-sk-llm-wiki-review` are illustrative template placeholders, not dead links.
+- **P1-A rewrites must preserve content**: When fixing a description to start with the routing trigger, keep all original information — do not shorten, summarize, or drop details.
+- **P2 requires extraction, not deletion**: A 600-line skill is not fixed by cutting content; the content must move to `references/` so agents can still load it when needed.
+- **Private IPs in hermes-setup are intentional**: `192.168.75.30` is a lab VM address documented in `chsh-sk-hermes-setup`. Flag it in the report but do not auto-remove.
+
+---
+
+## Self-Update Policy
+
+At the **end of each conversation**, review what was discovered and check
+whether any check criteria, severity levels, fix templates, or false-positive
+patterns need updating based on what was found in this audit.
+
+If updates are warranted:
+1. Collect all proposed changes with a brief rationale for each.
+2. Present a summary to the user and ask for approval using `AskQuestion`.
+3. Apply approved updates to this file immediately.
+
+Do **not** modify this skill mid-conversation unless the user explicitly asks.
