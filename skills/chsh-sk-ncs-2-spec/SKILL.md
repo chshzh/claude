@@ -66,7 +66,7 @@ Per module (one file per significant feature):
 
 | Module type | Feature / Library | Spec file |
 |-------------|-------------------|-----------|
-| App module | Wi-Fi (SoftAP / STA / P2P) | `wifi-module.md` |
+| App module | Wi-Fi (SoftAP / STA / P2P) | `network-module.md` |
 | App module | HTTP web server / REST API | `webserver-module.md` |
 | App module | Button / GPIO | `button-module.md` |
 | App module | LED output | `led-module.md` |
@@ -238,8 +238,8 @@ Verify that existing specs match the PRD without generating new files.
 
 | PRD section | Spec file | Status | Gap |
 |-------------|-----------|--------|-----|
-| FR-001 Wi-Fi STA | wifi-module.md | OK | — |
-| FR-004 P2P | wifi-module.md | Gap | P2P error states not specified |
+| FR-001 Wi-Fi STA | network-module.md | OK | — |
+| FR-004 P2P | network-module.md | Gap | P2P error states not specified |
 
 Output the report to the user. If gaps exist, offer to fix them (Mode B).
 

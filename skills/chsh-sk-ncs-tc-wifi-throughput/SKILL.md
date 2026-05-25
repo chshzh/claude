@@ -10,6 +10,8 @@ nRF54LM20DK + nRF7002EB2, using zperf (nRF side) and iperf v2 (Mac side).
 
 **Script:** `scripts/run_throughput_test.py` (in this skill's directory)
 
+**Config:** `config.json` (copy `config.json.template` and fill in SSID/password on first use)
+
 ---
 
 ## Pre-flight Checklist

@@ -271,6 +271,6 @@ Example:
 
 | Spec file | Covers |
 |---|---|
-| [architecture.md](../engineering/specs/architecture.md) | System design, module map, boot sequence |
-| [wifi-module.md](../engineering/specs/wifi-module.md) | Wi-Fi STA / SoftAP / P2P |
+| [architecture.md](../dev-specs/architecture.md) | System design, module map, boot sequence |
+| [network-module.md](../dev-specs/network-module.md) | Wi-Fi STA / SoftAP / P2P |
 | *(add more as created)* | |

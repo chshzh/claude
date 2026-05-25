@@ -25,8 +25,8 @@ Before writing any code, browse both repos to understand the patterns in use:
 
 | Repo | Patterns to reference |
 |------|-----------------------|
-| [`nordic-wifi-webdash`](https://github.com/chshzh/nordic-wifi-webdash) | Web dashboard integration, HTTP server over Wi-Fi, `app_httpd` library wrapper, HTML/CSS/JS serving from littlefs, Wi-Fi station mode management |
-| [`nordic-wifi-memfault`](https://github.com/chshzh/nordic-wifi-memfault) | Memfault OTA + cloud integration, `app_memfault` library wrapper, MQTT app module, Zbus channel design, NVS credential storage, SMF state machine for connectivity |
+| [`nordic-wifi-webdash`](https://github.com/chshzh/nordic-wifi-webdash) | **SMF+Zbus** modular architecture, multi-mode Wi-Fi (SoftAP/STA/P2P_GO/P2P_CLIENT), `mode_selector` NVS+shell pattern, HTTP webserver with gzip static assets from flash, REST API design, event-triggered service start on zbus (`CLIENT_CONNECTED_CHAN`) |
+| [`nordic-wifi-memfault`](https://github.com/chshzh/nordic-wifi-memfault) | **SYS_INIT+Zbus** event-driven modules (no SMF), Memfault metrics/coredump/OTA, BLE Wi-Fi credential provisioning, NTP time sync, disconnect-time log persist to external flash, optional MQTT/HTTPS/CDR modules via Kconfig flags, button-driven debug flows |
 
 Use the `github_repo` or `fetch_webpage` tool to read specific files from these
 repos when implementing a similar module.
@@ -54,15 +54,21 @@ Identify what needs to be created vs updated:
 For each module in the spec, find the closest analogue in the reference repos:
 
 ```
-# App module with state machine (SMF + Zbus)
-# → reference: nordic-wifi-memfault/src/modules/app_connectivity/
+# SMF module (state machine + Zbus publish)
+# → reference: nordic-wifi-webdash/src/modules/button/   (SMF 3-state, BUTTON_CHAN publish)
+# → reference: nordic-wifi-webdash/src/modules/led/      (SMF 2-state per LED, LED_CMD_CHAN/LED_STATE_CHAN)
 
-# Library wrapper module
-# → reference: nordic-wifi-memfault/src/modules/app_memfault/
-# → reference: nordic-wifi-webdash/src/modules/app_httpd/
+# SYS_INIT + Zbus listener/subscriber module (no SMF)
+# → reference: nordic-wifi-memfault/src/modules/network/          (WIFI_CHAN + NETWORK_CHAN publish)
+# → reference: nordic-wifi-memfault/src/modules/app_memfault/core/ (zbus subscriber, upload on connect)
+
+# Library wrapper module (wraps external SDK or Zephyr subsystem)
+# → reference: nordic-wifi-memfault/src/modules/app_memfault/     (Memfault SDK wrapper with core/metrics/ota/cdr)
+# → reference: nordic-wifi-webdash/src/modules/webserver/         (Zephyr HTTP server + REST API wrapper)
 
 # Main.c + Kconfig + CMakeLists.txt patterns
-# → reference: nordic-wifi-memfault/CMakeLists.txt, Kconfig, prj.conf
+# → reference: nordic-wifi-memfault/CMakeLists.txt, Kconfig, prj.conf  (shell disabled, ZMS settings)
+# → reference: nordic-wifi-webdash/CMakeLists.txt, Kconfig, prj.conf   (shell enabled, NVS settings)
 ```
 
 Look for: how Zbus channels are declared, how `SYS_INIT` is used, how Kconfig

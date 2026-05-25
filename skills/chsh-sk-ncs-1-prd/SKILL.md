@@ -173,7 +173,8 @@ Proceed to **Generate Output**.
 After any mode:
 
 1. Update `docs/pm-prd/PRD.md` using `PRD_TEMPLATE.md` as the structure.
-2. Add a new row to the **Revision History** table at the bottom of the document:
+2. If the project has a customer-facing README, update it using [`README_TEMPLATE.md`](README_TEMPLATE.md).
+3. Add a new row to the **Revision History** table at the bottom of the document:
    ```markdown
    | YYYY-MM-DD-HH-MM | <one-line summary of changes> |
    ```

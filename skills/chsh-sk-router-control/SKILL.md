@@ -15,6 +15,7 @@ description: Use when writing Wi-Fi reconnection tests, simulating network failu
 ## Connection
 
 Load connection details from `config.json` in this skill's directory.
+**First use**: copy `config.json.template` to `config.json` and fill in your router credentials.
 
 ```python
 import json

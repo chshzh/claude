@@ -200,6 +200,7 @@ Create `pm_static.yml` (or `pm_static_<board>.yml`) for custom partition sizes.
 
 - [reference/heap-monitor.md](reference/heap-monitor.md) — heap monitor module, tuning knobs, log format, Memfault integration, heap architecture (system / net buffers / mbedTLS)
 - [reference/optimization-configs.md](reference/optimization-configs.md) — full Flash/RAM config options, development vs production templates, profiling tools
+- [MEMORY_REPORT_TEMPLATE.md](MEMORY_REPORT_TEMPLATE.md) — template for documenting memory optimization findings and recommendations
 
 ---
 
