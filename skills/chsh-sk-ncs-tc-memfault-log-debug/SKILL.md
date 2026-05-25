@@ -1,6 +1,6 @@
 ---
 name: chsh-sk-ncs-tc-memfault-log-debug
-description: Debug Memfault log upload issues on NCS/Zephyr: diagnose why logs appear on UART but not in the Memfault cloud, fix ring-buffer CBOR corruption at wrap boundaries, fix stale triggered-state bugs, and verify end-to-end with the cloud API. Use when a Memfault log file is missing expected entries, truncated, or when LOG RESTORE markers don't appear in the cloud after a disconnect/reconnect cycle.
+description: Use when a Memfault log file is missing expected entries, truncated, or when LOG RESTORE markers don't appear in the cloud after a disconnect/reconnect cycle. Debugs Memfault log upload issues on NCS/Zephyr — diagnoses cloud vs UART log mismatch, ring-buffer CBOR corruption, and stale triggered-state bugs.
 ---
 
 # chsh-sk-ncs-tc-memfault-log-debug
@@ -226,6 +226,9 @@ Both Bug 1 and Bug 2 fixed and verified end-to-end on first test pass:
 Firmware version at time of fix: `3.2.0.11` (build IDs: `a7106434`, `5f168f30`).
 
 ---
+
+## Gotchas
+- TODO: add one entry per real observed failure or routing false-positive
 
 ## Self-Update Policy
 

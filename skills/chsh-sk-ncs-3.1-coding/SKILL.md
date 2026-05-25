@@ -15,6 +15,8 @@ Uses two real project repositories as reference implementations.
 > **Prerequisite**: `docs/dev-specs/architecture.md` and at least one module
 > spec must exist. If specs are missing, run **chsh-sk-ncs-2-spec** first.
 
+> **Knowledge sources**: Call `mcp_nrflow_nordicsemi_workflow_ncs` to load `embedded-code-guidance-ncs-zephyr` — covers NCS code style, Kconfig patterns, and driver idioms. Use `mcp_nrflow_nordicsemi_search_sources` for API lookups, board targets, and driver symbol names.
+
 ---
 
 ## Reference Implementations

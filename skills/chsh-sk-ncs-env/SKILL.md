@@ -1,6 +1,6 @@
 ---
 name: chsh-sk-ncs-env
-description: Set up Nordic nRF Connect SDK (NCS) environment and run west commands. Use when building, flashing, or running any west command for nRF projects, or when working with Zephyr-based Nordic applications.
+description: Use when building, flashing, or running any west command for nRF projects, or when working with Zephyr-based Nordic applications. Sets up the Nordic NCS environment and runs west commands.
 ---
 
 # Nordic nRF Connect SDK (NCS) Environment
@@ -16,6 +16,8 @@ These can differ! Example: NCS main branch + v3.2.1 toolchain.
 ## Critical Rule
 
 **ALWAYS check if the NCS environment is set up before running any `west` command.**
+
+> **Knowledge sources**: Call `mcp_nrflow_nordicsemi_workflow_ncs` at the start of each session — loads `nrfutil-manual`, `nordicsemi_uart_monitor.py`, and `embedded-code-guidance-ncs-zephyr`. Use `mcp_nrflow_nordicsemi_search_sources` for board targets, VCOM ports, and Kconfig symbols — never hardcode these.
 
 ## nrfutil Command Wrapper (Preferred)
 
@@ -429,6 +431,9 @@ If the port opens but no data appears after a board reset, the terminal tool is 
 - Prompt may not change after PATH export; rely on the explicit bundle/version you set
 - To switch versions, repeat setup with new bundle ID and/or SDK path (no terminal restart needed)
 - When user says "NCS v3.2.1", clarify if they mean toolchain, SDK, or both
+
+## Gotchas
+- TODO: add one entry per real observed failure or routing false-positive
 
 ## Self-Update Policy
 

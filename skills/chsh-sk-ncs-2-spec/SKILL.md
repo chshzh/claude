@@ -1,6 +1,6 @@
 ---
 name: chsh-sk-ncs-2-spec
-description: Translate an approved PRD into engineering specs under docs/dev-specs/. Produces architecture.md, per-module specs (app modules and library wrapper modules). Architecture pattern applies to application code only; library wrappers document the external lib API boundary. Use when starting a new project design, updating specs after a PRD change, or documenting an existing codebase's design.
+description: Use when starting a new project design, updating specs after a PRD change, or documenting an existing codebase's design. Translates a PRD into engineering specs — architecture.md and per-module specs for app modules and library wrappers.
 ---
 
 # chsh-sk-ncs-2-spec — Technical Design Workflow
@@ -10,6 +10,8 @@ that drive implementation. Specs live in `docs/dev-specs/` and are the contract
 between design (this skill) and implementation (`chsh-sk-ncs-3.1-coding`).
 
 ---
+
+> **Knowledge sources**: Use `mcp_nrflow_nordicsemi_search_sources` before specifying board targets, peripheral names, or Kconfig symbols — never hardcode these from memory.
 
 ## Step 0 — Detect Context
 
@@ -263,6 +265,9 @@ Rules:
 - Keep the summary short — one line describing what changed. When the change is driven by a PRD update, include the PRD version: `Updated to PRD v2026-04-09-10-00: added P2P mode`.
 - The `PRD Version` field in Document Information always reflects the PRD Changelog timestamp this spec was written against.
 - Git tracks the actual diff; the Changelog is the human-readable log.
+
+## Gotchas
+- TODO: add one entry per real observed failure or routing false-positive
 
 ## Self-Update Policy
 

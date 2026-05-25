@@ -11,7 +11,7 @@ description: >-
 Phase 4.2 of the V&V lifecycle. Confirms PRD acceptance criteria are satisfied
 at runtime. **Hardware required.**
 
-Output: `docs/qa/VALIDATION-YYYY-MM-DD-HH-MM.md`
+Output: `docs/qa-test/VALIDATION-YYYY-MM-DD-HH-MM.md`
 
 > For Phase 4.1 Verification (code review, build, docs audit) — use
 > **chsh-sk-ncs-4.1-verification**.
@@ -94,14 +94,13 @@ Paste the relevant output lines as evidence for each test case — not generic "
 
 For any TC involving connectivity, boot reliability, or stability, always run a loop test:
 
+**Preferred**: Delegate to `chsh-ag-terminal` — run Mode F from **chsh-sk-ncs-3.2-debug** for automated loop test execution without a local script.
+
+**Manual fallback**: Copy `~/.claude/skills/chsh-sk-ncs-3.2-debug/scripts/loop_test.py` to `<app>/scripts/loop_test.py`, edit the constants at the top, then run:
 ```bash
 python3 <app>/scripts/loop_test.py 10      # minimum for acceptance
 python3 <app>/scripts/loop_test.py 20      # for release
 ```
-
-If no `loop_test.py` exists in the app, copy the template from
-`~/.claude/skills/chsh-sk-ncs-3.2-debug/scripts/loop_test.py` and edit the constants at
-the top.
 
 The loop test is **mandatory** for any PRD acceptance criterion that includes:
 - "reliably", "consistently", "always", or a success rate threshold
@@ -137,7 +136,7 @@ For failures, record expected vs actual behaviour and suggest routing:
 - Spec gap → Phase 2
 - Missing PRD requirement → Phase 1
 
-### A7. Generate `docs/qa/VALIDATION-YYYY-MM-DD-HH-MM.md`
+### A7. Generate `docs/qa-test/VALIDATION-YYYY-MM-DD-HH-MM.md`
 
 Use `VALIDATION_TEMPLATE.md` as the base. Fill in:
 - Document Information (PRD Version, Specs Version, firmware build timestamp)
@@ -188,8 +187,8 @@ After reporting, ask:
 
 ## Document Conventions
 
-- Output: `docs/qa/VALIDATION-YYYY-MM-DD-HH-MM.md` — dated snapshot, Part A only
-- Keep only the latest report in `docs/qa/`
+- Output: `docs/qa-test/VALIDATION-YYYY-MM-DD-HH-MM.md` — dated snapshot, Part A only
+- Keep only the latest report in `docs/qa-test/`
 - Include PRD Version and Specs Version in Document Information for traceability
 - Use `VALIDATION_TEMPLATE.md` (Part A sections only) as the base for every new report
 
@@ -205,6 +204,9 @@ After reporting, ask:
 | Fix code for P0 failures | `chsh-sk-ncs-3.1-coding` |
 | Tag and publish release | `chsh-sk-git-release` |
 | Full lifecycle orchestration | `chsh-sk-ncs-0-workflow` |
+
+## Gotchas
+- TODO: add one entry per real observed failure or routing false-positive
 
 ## Self-Update Policy
 

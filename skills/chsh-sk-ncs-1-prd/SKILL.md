@@ -1,6 +1,6 @@
 ---
 name: chsh-sk-ncs-1-prd
-description: Interactive PRD authoring for NCS IoT projects. Guides the Product Manager through creating, extending, or updating PRD.md under docs/. No coding knowledge required. Use when creating a new PRD, adding or changing a feature, or syncing the PRD after code changes.
+description: Use when creating a new PRD, adding or changing a feature, or syncing the PRD after code changes. Interactive PRD authoring for NCS IoT projects — guides the Product Manager through creating, extending, or updating PRD.md under docs/. No coding knowledge required.
 ---
 
 # chsh-sk-ncs-1-prd — Interactive PRD Workflow
@@ -228,6 +228,9 @@ After saving the PRD, always ask:
 | Implement code from specs | `chsh-sk-ncs-3.1-coding` |
 | Generate test report from acceptance criteria | `chsh-sk-ncs-4.1-verification` |
 | Full project lifecycle orchestration | `chsh-sk-ncs-0-workflow` |
+
+## Gotchas
+- TODO: add one entry per real observed failure or routing false-positive
 
 ## Self-Update Policy
 

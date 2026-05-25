@@ -1,6 +1,6 @@
 ---
 name: chsh-sk-git-commit
-description: Plans and executes git commits and push. Extracts rationale from the current conversation and delegates execution to the chsh-ag-git subagent. Supports Conventional Commits (user app repos) and Zephyr style (NCS/Zephyr repos). Use when the user asks to commit, push, prepare commits, split commits, or wrap up work.
+description: Use when the user asks to commit, push, prepare commits, split commits, or wrap up work. Plans and executes git commits, extracts rationale from the conversation, and delegates to chsh-ag-git. Supports Conventional Commits (user app repos) and Zephyr style (NCS/Zephyr repos).
 ---
 
 # Git Commit Skill
@@ -72,6 +72,9 @@ Only skip the subagent if:
 For inline execution, follow the workflow in `~/.claude/agents/chsh-ag-git.md` directly — that file is the canonical reference for inspection, planning, approval gates, formats, and grouping rules.
 
 The skill should stay concise and delegation-focused; commit trailer format details and fallback behavior are source-of-truth in `~/.claude/agents/chsh-ag-git.md`.
+
+## Gotchas
+- TODO: add one entry per real observed failure or routing false-positive
 
 ## Self-Update Policy
 

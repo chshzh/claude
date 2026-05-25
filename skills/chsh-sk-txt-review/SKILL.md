@@ -1,6 +1,6 @@
 ---
 name: chsh-sk-txt-review
-description: Polish replies to customers or colleagues to be friendly, professional, and easy to understand. Use when drafting emails, messages, or responses that need to be clear and professional.
+description: Use when drafting emails, messages, or responses to customers or colleagues. Polishes text to be friendly, professional, and easy to understand.
 ---
 
 # Professional Answer Polishing
@@ -230,6 +230,9 @@ When the user provides text to polish:
 - For sensitive situations, offer multiple phrasing options
 
 ---
+
+## Gotchas
+- TODO: add one entry per real observed failure or routing false-positive
 
 ## Self-Update Policy
 

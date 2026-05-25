@@ -1,6 +1,6 @@
 ---
 name: chsh-sk-git-release
-description: Tag a git release, create a GitHub release with firmware artifacts, download pre-built firmware, and flash + verify on hardware. Use when cutting a release, publishing firmware, or doing a full release validation loop (tag → CI → download → flash → test).
+description: Use when cutting a release, publishing firmware, or doing a full release validation loop (tag → CI → download → flash → test). Tags a git release, creates a GitHub release with firmware artifacts, downloads pre-built firmware, and flashes + verifies on hardware.
 ---
 
 # chsh-sk-git-release — Release Tagging, Publishing & Firmware Validation
@@ -182,14 +182,12 @@ uart:~$ kernel threads
 
 Before marking a release **done**, run the loop test to confirm stability:
 
+**Preferred**: Delegate to `chsh-ag-terminal` — run Mode F from **chsh-sk-ncs-3.2-debug** for automated loop test execution without a local script.
+
+**Manual fallback**: Copy `~/.claude/skills/chsh-sk-ncs-3.2-debug/scripts/loop_test.py` to `<app>/scripts/loop_test.py`, edit the constants at the top, then run:
 ```bash
 python3 <app>/scripts/loop_test.py 10    # 10 passes = acceptance gate
 python3 <app>/scripts/loop_test.py 20    # 20 passes = release gate
-```
-
-If `loop_test.py` doesn't exist, copy the template from:
-```
-~/.claude/skills/chsh-sk-ncs-3.2-debug/scripts/loop_test.py
 ```
 
 Record the pass rate in the test report (see **chsh-sk-ncs-4.1-verification**).
@@ -225,13 +223,16 @@ edit → commit (chsh-sk-git) → push → gh run watch
 
 | Task | Skill |
 |------|-------|
-| Commit before pushing | `chsh-sk-git` |
+| Commit before pushing | `chsh-sk-git-commit` |
 | Functional test after flashing | `chsh-sk-ncs-4.1-verification` |
 | Debug CI failures, UART capture | `chsh-sk-ncs-3.2-debug` (Mode G) |
 | Build commands, toolchain | `chsh-sk-ncs-env` |
 | Loop test script template | `chsh-sk-ncs-3.2-debug/scripts/loop_test.py` |
 
 ---
+
+## Gotchas
+- TODO: add one entry per real observed failure or routing false-positive
 
 ## Self-Update Policy
 

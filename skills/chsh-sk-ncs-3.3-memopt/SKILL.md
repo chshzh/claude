@@ -1,6 +1,6 @@
 ---
 name: chsh-sk-ncs-3.3-memopt
-description: Optimize and debug memory usage in Nordic nRF Connect SDK (NCS) applications. Use when analyzing RAM/Flash usage, reducing memory footprint, debugging stack overflows, or investigating memory-related crashes in nRF projects.
+description: Use when analyzing RAM/Flash usage, reducing memory footprint, debugging stack overflows, or investigating memory-related crashes in nRF projects. Optimizes and debugs memory usage in Nordic NCS applications.
 ---
 
 # NCS Memory Optimization
@@ -10,6 +10,8 @@ description: Optimize and debug memory usage in Nordic nRF Connect SDK (NCS) app
 1. **Set up NCS environment first** — use `chsh-sk-ncs-env`
 2. **Build Release mode** for accurate Flash measurements (Debug builds are larger)
 3. **Measure before optimizing** — Thread Analyzer and `heap_monitor` first
+
+> **Knowledge sources**: Call `mcp_nrflow_nordicsemi_workflow_ncs` at the start of each session — loads `nrfutil-manual` and `embedded-code-guidance-ncs-zephyr`. Use `mcp_nrflow_nordicsemi_search_sources` for Kconfig symbols and memory-related config options.
 
 ---
 
@@ -200,6 +202,9 @@ Create `pm_static.yml` (or `pm_static_<board>.yml`) for custom partition sizes.
 - [reference/optimization-configs.md](reference/optimization-configs.md) — full Flash/RAM config options, development vs production templates, profiling tools
 
 ---
+
+## Gotchas
+- TODO: add one entry per real observed failure or routing false-positive
 
 ## Self-Update Policy
 

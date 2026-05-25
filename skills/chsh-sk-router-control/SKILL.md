@@ -1,6 +1,6 @@
 ---
 name: chsh-sk-router-control
-description: Control lab routers (ASUS RT-BE92U / Zyxel EX5700) over SSH — enable/disable wireless SSIDs, simulate AP reboots, block/unblock clients, and restart services. Use when writing Wi-Fi reconnection tests, simulating network failures, or controlling the wireless environment for nRF device testing.
+description: Use when writing Wi-Fi reconnection tests, simulating network failures, or controlling the wireless environment for nRF device testing. Controls lab routers (ASUS RT-BE92U / Zyxel EX5700) over SSH — enable/disable SSIDs, simulate AP reboots, block/unblock clients, restart services.
 ---
 
 # Router Control
@@ -215,6 +215,9 @@ with ssid_down_ctx() as ssh:
 - `service restart_wireless` disconnects **all** wireless clients including the development Mac if it's on Wi-Fi.
 
 ---
+
+## Gotchas
+- TODO: add one entry per real observed failure or routing false-positive
 
 ## Self-Update Policy
 

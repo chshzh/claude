@@ -1,6 +1,6 @@
 ---
 name: chsh-sk-hermes-setup
-description: Complete reference for Charlie's Hermes Agent + Hermes WebUI installation on Ubuntu 24.04 VM (192.168.75.30). Covers code paths, venv, config locations, env vars, systemd services, startup chains, and the NFS-based config centralization scheme. Use when working on the Hermes stack, troubleshooting startup, or referencing installation layout.
+description: Use when working on the Hermes stack, troubleshooting startup, or referencing installation layout. Complete reference for the Hermes Agent + Hermes WebUI on Ubuntu 24.04 VM (192.168.75.30) — covers code paths, venv, config locations, env vars, systemd services, startup chains, and NFS-based config centralization.
 ---
 
 # Hermes Agent + WebUI Installation Layout
@@ -326,6 +326,9 @@ chmod 644 /mnt/CharlieII/claude/.git/COMMIT_EDITMSG 2>/dev/null || true
 - [[hermes-setup-on-linux-with-nas-nfs-backup]] — NAS NFS architecture and machine recovery procedure
 
 ---
+
+## Gotchas
+- TODO: add one entry per real observed failure or routing false-positive
 
 ## Self-Update Policy
 

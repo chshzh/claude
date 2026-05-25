@@ -1,6 +1,6 @@
 ---
 name: chsh-sk-memfault-cli
-description: Upload Memfault symbol files and perform OTA release workflow for nordic-wifi-memfault on nrf54lm20dk and nrf7002dk. Use when uploading .elf symbol files to Memfault, creating an OTA release, deploying a release to a cohort, or disabling/aborting active release deployments. Delegates execution to the chsh-ag-memfault subagent.
+description: Use when uploading .elf symbol files to Memfault, creating an OTA release, deploying a release to a cohort, or disabling/aborting active deployments for nordic-wifi-memfault. Uploads symbols and performs OTA release workflow on nrf54lm20dk and nrf7002dk via chsh-ag-memfault.
 ---
 
 # chsh-sk-memfault-cli
@@ -242,10 +242,13 @@ Expected: new entries within 60–90s of device boot (when developer mode is on)
 |------|-------|
 | Build / flash / west commands | `chsh-sk-ncs-env` |
 | Debug UART logs, capture disconnect traces | `chsh-sk-ncs-3.2-debug` |
-| Git commit + push after release | `chsh-sk-git` |
+| Git commit + push after release | `chsh-sk-git-commit` |
 | Cut a GitHub release with firmware artifacts | `chsh-sk-git-release` |
 
 ---
+
+## Gotchas
+- TODO: add one entry per real observed failure or routing false-positive
 
 ## Self-Update Policy
 

@@ -1,6 +1,6 @@
 ---
 name: chsh-sk-ncs-clang-format
-description: Format C/C++ source files using the clang-format binary from the active NCS toolchain. Use when the user asks to format code, run clang-format, fix formatting, or clean up a file or folder in an NCS/Zephyr project.
+description: Use when the user asks to format code, run clang-format, fix formatting, or clean up a file or folder in an NCS/Zephyr project. Formats C/C++ source files using the clang-format binary from the active NCS toolchain.
 ---
 
 # NCS Clang-Format Skill
@@ -69,6 +69,7 @@ find <TARGET_DIR> -name "*.[ch]" | \
 
 | Toolchain Version | Bundle ID   |
 |-------------------|-------------|
+| v3.3.0            | 0c0f19d91c  |
 | v3.2.4            | 185bb0e3b6  |
 | v3.2.0, v3.2.1    | 322ac893fe  |
 | v3.1.1            | 561dce9adf  |
@@ -82,6 +83,9 @@ For any other version, always look up `toolchains.json`.
 - clang-format edits files **in-place** with `-i`. No backup is created — ensure git is clean first if needed.
 - If the project has no `.clang-format`, recommend copying from `<SDK>/zephyr/.clang-format` and setting `ColumnLimit: 80` (Zephyr checkpatch enforces 80, not 100).
 - Zephyr macros like `HTTP_RESOURCE_DEFINE` or `ZBUS_CHAN_DEFINE` may need `/* clang-format off/on */` guards if the formatter fights checkpatch style.
+
+## Gotchas
+- TODO: add one entry per real observed failure or routing false-positive
 
 ## Self-Update Policy
 

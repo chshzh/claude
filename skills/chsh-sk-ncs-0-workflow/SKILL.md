@@ -1,6 +1,6 @@
 ---
 name: chsh-sk-ncs-0-workflow
-description: Orchestrates the full NCS project lifecycle. Detects where a project stands, guides through each phase (PRD → Specs → Code → QA+Test), and routes feedback back to the right phase. Use as the single entry point for any NCS project work.
+description: Use as the single entry point for any NCS project work. Orchestrates the full NCS project lifecycle — detects where a project stands, guides through each phase (PRD → Specs → Code → QA+Test), and routes feedback back to the right phase.
 ---
 
 # chsh-sk-ncs-0-workflow — NCS Project Lifecycle Orchestrator
@@ -54,11 +54,12 @@ status dashboard, and guides you through each phase — invoking the right skill
                             │ Implementation done → triggers Phase 4
                             ▼
 ┌────────────────────────────────────────────────────────────────┐
-│  PHASE 4 — VERIFICATION & VALIDATION (V&V)   skill: chsh-sk-ncs-4.1-verification │
+│  PHASE 4 — VERIFICATION & VALIDATION (V&V)                                   │
+│           4.1: chsh-sk-ncs-4.1-verification · 4.2: chsh-sk-ncs-4.2-validation │
 │                                                                 │
 │  4.1 Verification (always, no HW): code review, build, docs    │
 │  4.2 Validation via EEDP (HW): GPIO, UART, Saleae, JLink, Router  │
-│  • Output: docs/qa/ (VERIFICATION + VALIDATION)                │
+│  • Output: docs/qa-test/ (VERIFICATION + VALIDATION)                │
 │                                                                 │
 │  P0 → Phase 3  |  Spec gap → Phase 2  |  New req → Phase 1    │
 └────────────────────────────────────────────────────────────────┘
@@ -74,7 +75,7 @@ Run this before anything else. Provide the project path if not already in it.
 # Documents
 ls docs/pm-prd/PRD.md 2>/dev/null              && echo "PRD: YES"     || echo "PRD: NO"
 ls docs/dev-specs/overview.md 2>/dev/null && echo "SPECS: YES" || echo "SPECS: NO"
-ls docs/qa/VALIDATION-*.md 2>/dev/null | sort | tail -1   && echo "VALIDATION: YES"    || echo "VALIDATION: NO"
+ls docs/qa-test/VALIDATION-*.md 2>/dev/null | sort | tail -1   && echo "VALIDATION: YES"    || echo "VALIDATION: NO"
 
 # Code
 ls src/main.c 2>/dev/null    && echo "CODE: YES"    || echo "CODE: NO"
@@ -176,7 +177,7 @@ log evidence of correct behavior.
 
 ---
 
-## Phase 4 — Verification & Validation (V&V)  `skill: chsh-sk-ncs-4.1-verification`
+## Phase 4 — Verification & Validation (V&V)  `chsh-sk-ncs-4.1-verification` · `chsh-sk-ncs-4.2-validation`
 
 **Enter Phase 4 when:**
 - Implementation is complete or updated
@@ -187,8 +188,8 @@ log evidence of correct behavior.
 
 | Sub-phase | Document | Hardware? |
 |-----------|----------|-----------|
-| 4.1 Verification (always) | `docs/qa/VERIFICATION-YYYY-MM-DD-HH-MM.md` | No |
-| 4.2 Validation (always) | `docs/qa/VALIDATION-YYYY-MM-DD-HH-MM.md` | Yes |
+| 4.1 Verification (always) | `docs/qa-test/VERIFICATION-YYYY-MM-DD-HH-MM.md` | No |
+| 4.2 Validation (always) | `docs/qa-test/VALIDATION-YYYY-MM-DD-HH-MM.md` | Yes |
 
 **Feedback routing after Phase 4:**
 
@@ -226,7 +227,7 @@ Changes are tracked in a built-in Changelog table:
 QA and Test reports are **point-in-time snapshots**. Each run creates a new dated file:
 
 ```
-docs/qa/VALIDATION-2026-04-09-14-30.md
+docs/qa-test/VALIDATION-2026-04-09-14-30.md
 ```
 
 ---
@@ -239,7 +240,7 @@ docs/qa/VALIDATION-2026-04-09-14-30.md
 | `overview.md` | `docs/dev-specs/` | Developer | Spec index, PRD-to-spec map, design decisions |
 | `architecture.md` | `docs/dev-specs/` | Developer | System design, module map, memory budget |
 | `<module>.md` | `docs/dev-specs/` | Developer | State machines, Kconfig, APIs |
-| `VALIDATION-*.md` | `docs/qa/` | Tester / PM + Reviewer | PRD acceptance criteria pass/fail, UART evidence, code quality score |
+| `VALIDATION-*.md` | `docs/qa-test/` | Tester / PM + Reviewer | PRD acceptance criteria pass/fail, UART evidence, code quality score |
 
 **Division of responsibility:**
 - PRD: behaviour in user terms — no Kconfig flags, no memory numbers.
@@ -276,11 +277,15 @@ docs/qa/VALIDATION-2026-04-09-14-30.md
 | `chsh-sk-ncs-2-spec` | Translating PRD to engineering specs | `docs/dev-specs/*.md` |
 | `chsh-sk-ncs-3.1-coding` | Implementing code from specs | `src/`, `prj.conf`, passing build |
 | `chsh-sk-ncs-3.2-debug` | Debugging firmware failures, UART log analysis | Root cause identified and fixed |
-| `chsh-sk-ncs-4.1-verification` | Phase 4 V&V (4.1 Verification + 4.2 Validation via EEDP) | `docs/qa/VERIFICATION-*.md`, `docs/qa/VALIDATION-*.md` |
-| `chsh-sk-git` | Preparing git commits | Clean, logical commit history |
+| `chsh-sk-ncs-4.1-verification` | Phase 4.1 Verification (code review, build, docs audit — no hardware) | `docs/qa-test/VERIFICATION-*.md` |
+| `chsh-sk-ncs-4.2-validation` | Phase 4.2 Validation (hardware tests via EEDP against PRD acceptance criteria) | `docs/qa-test/VALIDATION-*.md` |
+| `chsh-sk-git-commit` | Preparing git commits | Clean, logical commit history |
 | `chsh-sk-git-release` | Tagging a release, publishing firmware, downloading and flashing pre-built `.hex` | GitHub release with verified artifact |
 | `chsh-sk-ncs-migrate` | Upgrading the project to a newer NCS version (single hop or multi-hop) | Migrated app, clean build, verified on hardware |
 | `chsh-sk-ncs-3.3-memopt` | Diagnosing memory usage | Heap / stack recommendations |
+
+## Gotchas
+- TODO: add one entry per real observed failure or routing false-positive
 
 ## Self-Update Policy
 

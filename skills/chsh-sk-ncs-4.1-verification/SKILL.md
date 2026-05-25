@@ -31,9 +31,11 @@ Phase 4 — Verification & Validation (V&V)
 └── Feedback routing (P0→Phase 3, Spec gap→Phase 2, New req→Phase 1)
 ```
 
+> **Knowledge sources**: Call `mcp_nrflow_nordicsemi_workflow_ncs` at the start of each session — loads `nrfutil-manual` and `embedded-code-guidance-ncs-zephyr`. Use `mcp_nrflow_nordicsemi_search_sources` before checking any Kconfig symbol or board capability.
+
 **Outputs**:
-- 4.1: `docs/qa/VERIFICATION-YYYY-MM-DD-HH-MM.md`
-- 4.2: `docs/qa/VALIDATION-YYYY-MM-DD-HH-MM.md`
+- 4.1: `docs/qa-test/VERIFICATION-YYYY-MM-DD-HH-MM.md`
+- 4.2: `docs/qa-test/VALIDATION-YYYY-MM-DD-HH-MM.md`
 
 ---
 
@@ -103,7 +105,7 @@ Zero warnings required. Record binary size. Any warning = P1.
 
 ### 4.1.4 Generate Verification Report
 
-Create `docs/qa/VERIFICATION-YYYY-MM-DD-HH-MM.md`:
+Create `docs/qa-test/VERIFICATION-YYYY-MM-DD-HH-MM.md`:
 
 | Section | Content |
 |---------|---------|
@@ -132,7 +134,7 @@ Hardware validation against PRD acceptance criteria. **Hardware required.**
 | TC-WIFI-THROUGHPUT | PRD includes throughput acceptance criteria | [`tc-wifi-throughput.md`](../chsh-sk-ncs-4.2-validation/tc-wifi-throughput.md) |
 | TC-MEMFAULT-LOG | PRD includes Memfault observability requirements | [`tc-memfault-log.md`](../chsh-sk-ncs-4.2-validation/tc-memfault-log.md) |
 
-Output: `docs/qa/VALIDATION-YYYY-MM-DD-HH-MM.md`
+Output: `docs/qa-test/VALIDATION-YYYY-MM-DD-HH-MM.md`
 
 ---
 

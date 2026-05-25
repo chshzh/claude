@@ -1,14 +1,6 @@
 ---
 name: chsh-sk-ncs-migrate
-description: >-
-  Migrate a Nordic nRF Connect SDK application from an older NCS version to a
-  newer one — handles single-step and multi-step jumps. Establishes a baseline
-  build + functional test on the source version, walks the official release
-  notes and migration guides version-by-version, applies required code/Kconfig
-  changes, drives the build to clean, flashes to hardware, and verifies
-  functionality. Use when the user asks to upgrade, migrate, or port an NCS
-  project to a newer SDK version, or when CI breaks after a west.yml SDK
-  revision bump.
+description: Use when the user asks to upgrade, migrate, or port an NCS project to a newer SDK version, or when CI breaks after a west.yml SDK revision bump. Migrates NCS apps from one version to another — baseline build, walks release notes, applies code/Kconfig changes, builds clean, flashes, and verifies.
 ---
 
 # chsh-sk-ncs-migrate — NCS Version Migration
@@ -303,6 +295,9 @@ is faster than a migration. Surface this trade-off to the user up front.
 
 ---
 
+## Gotchas
+- TODO: add one entry per real observed failure or routing false-positive
+
 ## Self-Update Policy
 
 At the **end of each conversation**, review what was discovered and check
@@ -325,7 +320,7 @@ Do **not** modify this skill mid-conversation unless the user explicitly asks.
 | Toolchain install + west command wrapper | `chsh-sk-ncs-env` |
 | Build/runtime debugging during migration | `chsh-sk-ncs-3.2-debug` |
 | Functional test against PRD acceptance criteria | `chsh-sk-ncs-4.1-verification` |
-| Per-hop commit | `chsh-sk-git` |
+| Per-hop commit | `chsh-sk-git-commit` |
 | Final release after migration | `chsh-sk-git-release` |
 | Update specs if migration changes architecture | `chsh-sk-ncs-2-spec` |
 | Optimize after migration (heap/stack defaults change) | `chsh-sk-ncs-3.3-memopt` |

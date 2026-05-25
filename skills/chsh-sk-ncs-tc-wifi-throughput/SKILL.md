@@ -1,11 +1,6 @@
 ---
 name: chsh-sk-ncs-tc-wifi-throughput
-description: >-
-  Run automated UDP throughput tests on nRF54LM20DK + nRF7002EB2 hardware using
-  zperf (on-device) and iperf (Mac), compare sQSPI vs SPI interfaces, and update
-  Jira results. Use when testing Wi-Fi throughput on nRF devices, running
-  zperf/iperf benchmarks, debugging sQSPI or SPI bus performance, or re-running
-  the WCS-121 test suite.
+description: Use when testing Wi-Fi throughput on nRF devices, running zperf/iperf benchmarks, debugging sQSPI or SPI bus performance, or re-running the WCS-121 test suite. Runs automated UDP throughput tests on nRF54LM20DK + nRF7002EB2 using zperf and iperf, comparing sQSPI vs SPI interfaces, and updates Jira results.
 ---
 
 # nRF Wi-Fi Throughput Test
@@ -162,6 +157,9 @@ SPI@8MHz reference baseline from WCS-78 (NCS v3.2.0-preview2):
 - 5 GHz: TX 4.74–4.86, RX 4.63–4.65 Mbps
 
 ---
+
+## Gotchas
+- TODO: add one entry per real observed failure or routing false-positive
 
 ## Self-Update Policy
 
