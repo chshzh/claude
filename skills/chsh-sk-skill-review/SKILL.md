@@ -33,6 +33,33 @@ Build a flat list of `(skill_name, path, line_count)` tuples.
 
 ---
 
+## Step 0b — Registry Integrity
+
+Check that `~/.claude/skills/chsh-sk-skill-review/REGISTRY.md` exists and is coherent. If missing, flag **P1** — create it via `chsh-sk-skill-create` Phase 5 and continue with per-skill checks.
+
+```bash
+REGISTRY=~/.claude/skills/chsh-sk-skill-review/REGISTRY.md
+
+# Every name in the registry must resolve on disk with a matching name: field
+grep -oP '`\K[a-z0-9-]+(?=`)' "$REGISTRY" | while read name; do
+  dir=~/.claude/skills/$name
+  [ -d "$dir" ]         || { echo "MISSING DIR: $name";     continue; }
+  [ -f "$dir/SKILL.md" ] || { echo "MISSING SKILL.md: $name"; continue; }
+  declared=$(grep "^name:" "$dir/SKILL.md" | sed 's/^name:[[:space:]]*//')
+  [ "$declared" = "$name" ] || echo "NAME MISMATCH: registry=$name  SKILL.md=$declared"
+done
+
+# Every skill on disk must have a registry entry
+find ~/.claude/skills -mindepth 2 -maxdepth 2 -name "SKILL.md" | while read f; do
+  name=$(basename "$(dirname "$f")")
+  grep -q "\`$name\`" "$REGISTRY" || echo "NOT REGISTERED: $name"
+done
+```
+
+Flag each finding as **P1**. Apply registry fixes in Step 9.
+
+---
+
 ## Step 1 — Structure Check (per skill)
 
 For each personal skill, verify against `chsh-sk-skill-create` rules:
@@ -141,13 +168,26 @@ When skill A mentions a topic that skill B owns, A should reference B.
 
 Patterns to detect:
 - A skill mentions "debug" or "UART" without referencing `chsh-sk-ncs-3.2-debug`
-- A skill mentions "git commit" or "push" without referencing `chsh-sk-git`
+- A skill mentions "git commit" or "push" without referencing `chsh-sk-git-commit`
 - A skill mentions "release" or "tag" without referencing `chsh-sk-git-release`
 - A skill mentions "PRD" or "requirements" without referencing `chsh-sk-ncs-1-prd`
 - A skill mentions "specs" without referencing `chsh-sk-ncs-2-spec`
 - A skill talks about "QA" or "test report" without referencing `chsh-sk-ncs-4.1-verification`
 
 For each gap, suggest a one-line addition to the Related Skills table.
+
+Also verify every backtick-referenced skill name in every SKILL.md resolves on disk:
+
+```bash
+# Extract all `chsh-sk-*` names from every SKILL.md and check they exist
+find ~/.claude/skills -name "SKILL.md" | while read f; do
+  grep -oP '`\Kchsh-sk-[a-z0-9.-]+(?=`)' "$f" | while read ref; do
+    [ -d ~/.claude/skills/$ref ] || echo "DEAD REF in $f: $ref"
+  done
+done
+```
+
+Flag unresolvable references as **P1**.
 
 ---
 
@@ -351,8 +391,8 @@ Check if skills with `Self-Update Policy` sections were last updated recently (v
 | Task | Skill |
 |------|-------|
 | Author a new skill | `chsh-sk-skill-create` |
-| Commit reviewed skill fixes | `chsh-sk-git` |
-| Push to claude repo | `chsh-sk-git` (Step 5 — push) |
+| Commit reviewed skill fixes | `chsh-sk-git-commit` |
+| Push to claude repo | `chsh-sk-git-commit` (Step 5 — push) |
 
 ---
 
