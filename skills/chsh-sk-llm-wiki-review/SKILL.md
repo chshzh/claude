@@ -10,7 +10,7 @@ description: >-
 
 Systematic review of a Karpathy-style LLM Wiki. Finds schema violations,
 broken links, orphan pages, index gaps, stale content, and source drift.
-Produces a dated report and applies approved fixes.
+Reports findings in the session (no file written) and asks the user how to fix each issue group.
 
 > **Schema source**: Each wiki defines its own rules in `SCHEMA.md`. Read the
 > schema first — frontmatter fields, tag taxonomy, page thresholds, and
@@ -208,60 +208,47 @@ These need user attention to resolve or downgrade.
 
 ---
 
-## Step 11 — Generate the Review Report
+## Step 11 — Report in Session
 
-Produce a Markdown report at `report-YYYY-MM-DD.md` in this skill's directory:
+Do NOT write a report file. Present findings directly in the chat session:
 
-```markdown
-# Wiki Review — YYYY-MM-DD
+```
+## Wiki Review — YYYY-MM-DD
 
-## Summary
-- Wiki path: <path>
-- Pages reviewed: N (<excluded raw/archive>)
+**Summary**
+- Pages reviewed: N (excluding raw/archive)
 - Issues: P0=N, P1=N, P2=N
 - Orphans: N | Broken links: N | Index gaps: N | Drift: N
 
-## P0 Issues (must fix)
-| Page | Issue | Fix |
-|------|-------|-----|
+**P0 Issues (must fix)**
+| Page | Issue | Proposed fix |
 
-## P1 Issues (should fix)
+**P1 Issues (should fix)**
+| Page | Issue | Proposed fix |
 
-## P2 Issues (nice to fix)
-
-## Orphan Pages
-| Page | Suggested incoming links |
-
-## Broken Links
-| From | To | Severity |
-
-## Index Gaps
-| File on disk | In index? |
-
-## Stale Candidates
-| Page | updated | days since |
-
-## Contested / Low-confidence Pages
-| Page | confidence | contested | contradictions |
-
-## Source Drift
-| Raw file | Expected sha256 | Actual sha256 |
+**P2 Issues (nice to fix)**
+| Page | Issue | Proposed fix |
 ```
+
+Then ask the user how to proceed for each issue group (P0, P1, P2 separately).
 
 ---
 
-## Step 12 — Apply Fixes (with approval)
+## Step 12 — Ask User How to Fix
 
-Show the report summary. Use `AskQuestion`:
+After showing the report, ask one issue group at a time:
 
 ```
-Question: "Apply fixes from the wiki review?"
+"Found N P0 issues. How would you like to handle them?"
 Options:
-  - "Apply P0 + index gaps automatically"
-  - "Apply P0 + P1 + index gaps"
-  - "Show me each fix for approval"
-  - "Report only, no changes"
+  - "Apply all P0 fixes automatically"
+  - "Show me each P0 fix for approval"
+  - "Skip for now"
 ```
+
+Repeat for P1 and P2 groups. Never batch P0+P1+P2 into a single question.
+
+Do NOT ask about groups with zero issues.
 
 Auto-applicable fixes (with approval):
 - Add page to `index.md` under correct section
