@@ -17,7 +17,7 @@ These can differ! Example: NCS main branch + v3.2.1 toolchain.
 
 **ALWAYS check if the NCS environment is set up before running any `west` command.**
 
-> **Knowledge sources**: Call `mcp_nrflow_nordicsemi_workflow_ncs` at the start of each session — loads `nrfutil-manual`, `nordicsemi_uart_monitor.py`, and `embedded-code-guidance-ncs-zephyr`. Use `mcp_nrflow_nordicsemi_search_sources` for board targets, VCOM ports, and Kconfig symbols — never hardcode these.
+> **Knowledge sources**: Call `mcp_nordic-mcp_nordicsemi_workflow_ncs` at the start of each session — loads `nrfutil-manual`, `nordicsemi_uart_monitor.py`, and `embedded-code-guidance-ncs-zephyr`. Use `mcp_nordic-mcp_nordicsemi_search_sources` for board targets, VCOM ports, and Kconfig symbols — never hardcode these.
 
 ## nrfutil Command Wrapper (Preferred)
 

@@ -152,7 +152,7 @@ Or use **nRF Connect for Desktop → Programmer** (no local toolchain needed).
 
 ### 5c. Verify boot over UART
 
-Call `mcp_nrflow_nordicsemi_workflow_ncs` to load `nordicsemi_uart_monitor.py`, then:
+Call `mcp_nordic-mcp_nordicsemi_workflow_ncs` to load `nordicsemi_uart_monitor.py`, then:
 
 ```bash
 python3 nordicsemi_uart_monitor.py --port /dev/tty.usbmodem<VCOM> --baud 115200

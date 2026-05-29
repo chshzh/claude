@@ -58,7 +58,7 @@ Compare boot logs side-by-side when available. The first divergent line identifi
 
 ### A2. Capture UART output
 
-**Preferred (mcp.nrflow)**: call `mcp_nrflow_nordicsemi_workflow_ncs` to load the
+**Preferred (mcp.nordic-mcp)**: call `mcp_nordic-mcp_nordicsemi_workflow_ncs` to load the
 `nordicsemi_uart_monitor.py` script, then:
 
 ```bash

@@ -18,7 +18,7 @@ can run in CI.
 └── Documentation consistency audit
 ```
 
-> **Knowledge sources**: Call `mcp_nrflow_nordicsemi_workflow_ncs` at the start of each session — loads `nrfutil-manual` and `embedded-code-guidance-ncs-zephyr`. Use `mcp_nrflow_nordicsemi_search_sources` before checking any Kconfig symbol or board capability.
+> **Knowledge sources**: Call `mcp_nordic-mcp_nordicsemi_workflow_ncs` at the start of each session — loads `nrfutil-manual` and `embedded-code-guidance-ncs-zephyr`. Use `mcp_nordic-mcp_nordicsemi_search_sources` before checking any Kconfig symbol or board capability.
 
 **Output**: `docs/qa-test/VERIFICATION-YYYY-MM-DD-HH-MM.md`
 

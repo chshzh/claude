@@ -19,7 +19,7 @@ access to all hardware modules via REST API and MCP.
 ## When Not on EEDP
 
 Use `nordicsemi_uart_monitor.py` for UART capture
-(load via `mcp_nrflow_nordicsemi_workflow_ncs`):
+(load via `mcp_nordic-mcp_nordicsemi_workflow_ncs`):
 
 ```bash
 python3 nordicsemi_uart_monitor.py --port /dev/cu.usbmodem... --baud 115200

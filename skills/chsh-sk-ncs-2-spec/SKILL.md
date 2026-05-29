@@ -11,7 +11,7 @@ between design (this skill) and implementation (`chsh-sk-ncs-3.1-coding`).
 
 ---
 
-> **Knowledge sources**: Use `mcp_nrflow_nordicsemi_search_sources` before specifying board targets, peripheral names, or Kconfig symbols — never hardcode these from memory.
+> **Knowledge sources**: Use `mcp_nordic-mcp_nordicsemi_search_sources` before specifying board targets, peripheral names, or Kconfig symbols — never hardcode these from memory.
 
 ## Step 0 — Detect Context
 

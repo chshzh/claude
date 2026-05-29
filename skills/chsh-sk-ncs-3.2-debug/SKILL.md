@@ -11,7 +11,7 @@ Covers the full range from simple UART log capture to co-processor barrier synch
 > **Prerequisite**: A working NCS toolchain (`nrfutil sdk-manager`) and at least one connected Nordic board.
 > If not set up, run **chsh-sk-ncs-env** first.
 
-> **Knowledge sources**: Always call `mcp_nrflow_nordicsemi_workflow_ncs` at the start
+> **Knowledge sources**: Always call `mcp_nordic-mcp_nordicsemi_workflow_ncs` at the start
 > of any debug session to load the `nrfutil-manual`, `nordicsemi_uart_monitor.py`, and
 > `embedded-code-guidance-ncs-zephyr` resources into context.
 
@@ -84,11 +84,14 @@ Required information:
 - **Firmware version**: git tag or commit hash
 - **UART port**: correct VCOM — see table below:
 
-  | Board config | Log VCOM | Port suffix | rtscts |
-  |---|---|---|---|
-  | nRF7002DK | VCOM1 | `...3` e.g. `/dev/tty.usbmodem0010507879623` | False |
-  | nRF54LM20DK + nRF7002EB2 | VCOM0 | `...1` e.g. `/dev/tty.usbmodem0010518067141` | True |
-  | nRF54LM20DK (no shield) | VCOM1 | `...3` e.g. `/dev/tty.usbmodem0010518067143` | False |
+  | Board config | Log VCOM | Port suffix | rtscts | Notes |
+  |---|---|---|---|---|
+  | nRF7002DK | VCOM1 | `...3` e.g. `/dev/tty.usbmodem0010507879623` | False | Application logs on VCOM1; VCOM0 is NET core |
+  | nRF54LM20DK + nRF7002EB2 | VCOM0 | `...1` e.g. `/dev/tty.usbmodem0010518067141` | True | Shield overlay disables UART20; app logs on UART30/VCOM0 |
+  | nRF54LM20DK (no shield) | VCOM1 | `...3` e.g. `/dev/tty.usbmodem0010518067143` | False | UART20/VCOM1 is the application log port |
+  | nRF5340 Audio DK + nRF7002EK | VCOM0 | `...1` e.g. `/dev/tty.usbmodem0010501119811` | False | Application logs on VCOM0; PCA10121 board |
+
+  Port suffix pattern: VCOM0 → last digit `1`, VCOM1 → last digit `3`.
 - **Second reference board** (if available): same HW with known-good firmware
 
 > **Rule**: If you have two boards, assign one as **reference** (known-good firmware)
@@ -105,7 +108,8 @@ Board options to present:
   A) nRF54LM20DK+nRF7002EB2  — VCOM0 (suffix ...1, rtscts=True)  e.g. /dev/tty.usbmodem0010518067141
   B) nRF7002DK               — VCOM1 (suffix ...3, rtscts=False) e.g. /dev/tty.usbmodem0010507879623
   C) nRF54LM20DK (no shield) — VCOM1 (suffix ...3, rtscts=False) e.g. /dev/tty.usbmodem0010518067143
-  D) Other                   — specify board name and port
+  D) nRF5340 Audio DK + nRF7002EK — VCOM0 (suffix ...1, rtscts=False) e.g. /dev/tty.usbmodem0010501119811
+  E) Other                   — specify board name and port
 
 Pre-filled default when context is silent: option A.
 ```
@@ -233,15 +237,7 @@ Task(
 The subagent handles port selection, HWFC (rtscts), reconnection, and timestamping
 internally. Do not run pyserial or nordicsemi_uart_monitor.py directly.
 
-> **Board UART/VCOM reference** (for context — the subagent applies this automatically):
->
-> | Board config | Log VCOM | macOS port suffix | rtscts | Notes |
-> |---|---|---|---|---|
-> | nRF54LM20DK + nRF7002EB2 | VCOM0 | `...1` | True | Shield overlay disables UART20; app logs on UART30/VCOM0 |
-> | nRF54LM20DK (no shield) | VCOM1 | `...3` | False | UART20/VCOM1 is the application log port |
-> | nRF7002DK | VCOM1 | `...3` | False | Application logs on VCOM1; VCOM0 is NET core |
->
-> Port suffix pattern: VCOM0 → last digit `1`, VCOM1 → last digit `3`.
+> **Board UART/VCOM reference**: see the table in Step 0. The subagent applies the correct VCOM and rtscts automatically.
 
 ### A2. Interpret the returned boot log
 
@@ -429,14 +425,19 @@ REST API + MCP — see [`references/eedp-platform.md`](references/eedp-platform.
 | Tag and publish a release after CI passes | `chsh-sk-git-release` |
 | Migrate to a newer NCS version | `chsh-sk-ncs-migrate` |
 | Physical button/LED test automation | `references/eedp-gpio-shell-approach.md` — zero-firmware GPIO shell approach |
-| mcp.nrflow tools reference | wiki: `mcp-nrflow-tools` |
+| mcp.nordic-mcp tools reference | wiki: `mcp-nrflow-tools` |
+| Decode Memfault crash trace (stacktrace + logs) | `mcp_memfault_trace_get` with `include_logs: true` |
+| Check device reboot history on Memfault | `mcp_memfault_device_listReboots` |
 | General embedded debug patterns | wiki: `embedded-system-general-debugging` |
 | CI/CD for NCS firmware | wiki: `github-actions-ncs-ci` |
 
 ---
 
 ## Gotchas
-- TODO: add one entry per real observed failure or routing false-positive
+
+- **DNS-SD -EAGAIN race (mDNS additional records)**: mDNS PTR responses include the A record as an additional record arriving ~100–200µs after the instance-name callback. If code calls `dns_get_addr_info` unconditionally after receiving the instance name, it gets `-EAGAIN (-11)` because the prior query slot is still occupied by pending callbacks. Symptom: headset log shows `A record: x.x.x.x` followed immediately by `DNS-SD discovery attempt N failed (err -11)` on all 3 retries. Fix: `k_sleep(K_MSEC(50))` after instance name to drain remaining callbacks, then guard the A-record query with `if (!ctx.addr_received)`.
+
+- **Identifying gateway vs headset role at runtime**: If both boards are already past boot, `nrfutil device list` does not indicate role. Reset both boards simultaneously (parallel threads) and read ~15 lines each — the `fw_info: Compiled as AUDIO GATEWAY / HEADSET LEFT` line appears at ~460–470ms into boot on nRF5340 Audio DK.
 
 ## Self-Update Policy
 

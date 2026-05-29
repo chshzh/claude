@@ -190,7 +190,7 @@ nrfutil sdk-manager toolchain launch --ncs-version=v<target> -- \
 # WARNING: --recover/--erase wipe all flash including NVS/WiFi credentials
 ```
 
-Connect via UART (use `mcp_nrflow_nordicsemi_workflow_ncs` for the helper
+Connect via UART (use `mcp_nordic-mcp_nordicsemi_workflow_ncs` for the helper
 script) and run the same smoke test from Step 0c. Compare against the
 baseline log — first divergence identifies the regression.
 

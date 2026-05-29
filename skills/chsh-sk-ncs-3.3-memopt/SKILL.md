@@ -11,7 +11,7 @@ description: Use when analyzing RAM/Flash usage, reducing memory footprint, debu
 2. **Build Release mode** for accurate Flash measurements (Debug builds are larger)
 3. **Measure before optimizing** — Thread Analyzer and `heap_monitor` first
 
-> **Knowledge sources**: Call `mcp_nrflow_nordicsemi_workflow_ncs` at the start of each session — loads `nrfutil-manual` and `embedded-code-guidance-ncs-zephyr`. Use `mcp_nrflow_nordicsemi_search_sources` for Kconfig symbols and memory-related config options.
+> **Knowledge sources**: Call `mcp_nordic-mcp_nordicsemi_workflow_ncs` at the start of each session — loads `nrfutil-manual` and `embedded-code-guidance-ncs-zephyr`. Use `mcp_nordic-mcp_nordicsemi_search_sources` for Kconfig symbols and memory-related config options.
 
 ---
 
