@@ -1,9 +1,9 @@
 ---
-name: chsh-sk-memfault-cli
-description: Use when uploading .elf symbol files to Memfault, creating an OTA release, deploying a release to a cohort, or disabling/aborting active deployments for nordic-wifi-memfault. Uploads symbols and performs OTA release workflow on nrf54lm20dk and nrf7002dk via chsh-ag-memfault.
+name: chsh-sk-memfault
+description: Use when uploading .elf symbol files to Memfault, creating an OTA release, deploying to a cohort, aborting deployments, querying device state, or decoding crash traces for nordic-wifi-memfault. Covers both Memfault MCP (read-only fleet/trace queries) and CLI (symbol upload, OTA release, deploy) via chsh-ag-memfault.
 ---
 
-# chsh-sk-memfault-cli
+# chsh-sk-memfault
 
 Orchestrates Memfault symbol upload, OTA release, and deployment tasks for
 `nordic-wifi-memfault` by delegating to the `chsh-ag-memfault` subagent.
@@ -174,6 +174,35 @@ Task: <workflow letter(s) and version, e.g.:
 
 The agent handles all pre-flight checks, AskQuestion approval gates, API calls,
 and reporting. Do not duplicate that logic here.
+
+---
+
+## Memfault MCP Tools (read-only observability)
+
+The `mcp_memfault_*` tools expose the Memfault API for **read/query operations
+only**. They complement the CLI workflow but **cannot** upload symbols, create
+releases, or deploy OTA. Use them alongside the agent, not as a replacement.
+
+| Tool | Use case |
+|------|----------|
+| `mcp_memfault_projects_list` | Confirm project slug before any operation |
+| `mcp_memfault_device_get` | Inspect device state (cohort, software version, last seen) |
+| `mcp_memfault_device_search` | SQL filter fleet — e.g. `software_version = '3.3.0.1'` |
+| `mcp_memfault_device_getAttributes` | Read attribute metrics on a device |
+| `mcp_memfault_device_listReboots` | Check recent reboot reasons on a device |
+| `mcp_memfault_issue_get` | Fetch crash issue details by ID |
+| `mcp_memfault_trace_get` | Decode crash trace (stacktrace + fault analysis + logs) |
+| `mcp_memfault_metrics_list` | List available timeseries/attribute metric keys |
+
+**Typical use after Workflow B (deploy):** run `mcp_memfault_device_search` with
+`software_version = '<new-version>'` to confirm devices have updated, or
+`mcp_memfault_device_listReboots` to check for unexpected reboots post-OTA.
+
+**Typical use after Workflow A (symbols):** run `mcp_memfault_trace_get` with
+`include_logs: true` to decode a crash trace directly in the conversation —
+no separate symbol-server lookup needed once symbols are uploaded.
+
+Default project slug: `nrf-test`
 
 ---
 

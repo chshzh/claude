@@ -8,7 +8,7 @@ All personal skills in `~/.claude/skills/`. Maintained by `chsh-sk-skill-review`
 | `chsh-sk-hermes-setup` | Use when working on the Hermes stack, troubleshooting startup, or referencing installation layout. C… |
 | `chsh-sk-llm-wiki-review` | >- Load when running the daily Hermes wiki audit, or when asked to lint, audit, or health-check a Ka… |
 | `chsh-sk-llm-wiki` | >- Use when initializing a wiki, adding a source (URL, paper, transcript), asking a domain question … |
-| `chsh-sk-memfault-cli` | Use when uploading .elf symbol files to Memfault, creating an OTA release, deploying a release to a … |
+| `chsh-sk-memfault` | Use when uploading .elf symbol files to Memfault, creating an OTA release, deploying to a cohort, aborting deployments, querying device state, or decoding crash traces. Covers MCP (read-only) and CLI (write) via chsh-ag-memfault. |
 | `chsh-sk-ncs-0-workflow` | Use as the single entry point for any NCS project work. Orchestrates the full NCS project lifecycle … |
 | `chsh-sk-ncs-1-prd` | Use when creating a new PRD, adding or changing a feature, or syncing the PRD after code changes. In… |
 | `chsh-sk-ncs-2-spec` | Use when starting a new project design, updating specs after a PRD change, or documenting an existin… |
@@ -27,4 +27,4 @@ All personal skills in `~/.claude/skills/`. Maintained by `chsh-sk-skill-review`
 | `chsh-sk-skill-review` | >- Load when running the Hermes daily skill audit, or when asked to review, audit, or health-check e… |
 | `chsh-sk-txt-review` | Use when drafting emails, messages, or responses to customers or colleagues. Polishes text to be fri… |
 
-_Last updated: 2026-05-26 · 23 skills_
+_Last updated: 2026-05-29 · 23 skills_
