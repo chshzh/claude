@@ -15,7 +15,7 @@ This template is owned by Product/PM workflow and intended for evaluator and cus
 4. Target Users (Evaluator, Developer)
 5. Evaluator Quick Start
 6. Buttons and LEDs
-7. Developer Info
+7. Developer Guide
 8. Documentation
 9. Methodology
 10. License

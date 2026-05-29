@@ -391,7 +391,7 @@ _3=All appropriate files present, 2=Most present, 1=Some present, 0=None_
 | Features list | ☐ | ☐ | ☐ Good ☐ Fair ☐ Poor | /1 |
 | Project Structure tree | ☐ | ☐ | ☐ Good ☐ Fair ☐ Poor | /1 |
 | Quick Start (evaluator path ≤5 min) | ☐ | ☐ | ☐ Good ☐ Fair ☐ Poor | /1 |
-| Developer Info (build + flash) | ☐ | ☐ | ☐ Good ☐ Fair ☐ Poor | /1 |
+| Developer Guide (build + flash) | ☐ | ☐ | ☐ Good ☐ Fair ☐ Poor | /1 |
 | Buttons & LEDs reference table | ☐ | ☐ | ☐ Good ☐ Fair ☐ Poor | /1 |
 | Documentation links table | ☐ | ☐ | ☐ Good ☐ Fair ☐ Poor | /1 |
 
