@@ -225,7 +225,7 @@ For scanned PDFs requiring OCR, use pdf2image with pytesseract instead."
 
 ### 3. Time-Sensitive Information
 ```markdown
-# Bad - will become outdated
+# Bad - will become outdated (conditional instruction)
 "If you're doing this before August 2025, use the old API."
 
 # Good - use an "old patterns" section
@@ -239,12 +239,19 @@ Use the v2 API endpoint.
 </details>
 ```
 
+**Exempt**: historical labels in data tables describing *when something existed*
+(e.g. `period: Oct 2025 – Mar 2026` in an import-sources table) are fine — they
+describe facts, not conditional instructions that expire.
+
 ### 4. Absolute Paths
 
 - ✅ **Own files (text)**: use relative — `scripts/run.py`, `configs/wifi-sta.conf`
 - ✅ **Own files (shell, multiple cmds)**: define `SKILL=~/.claude/skills/<skill-name>` once, then `$SKILL/path`
 - ❌ **Never**: hardcode `/Users/<name>/...` — breaks for any other user
 - ❌ **Avoid**: repeating `~/.claude/skills/<skill-name>/` on every line of a multi-command block
+- ❌ **Private IPs in Quick run examples**: use `<server-ip>` placeholder instead of
+  a real `192.168.x.x` address. Document the actual address in a Gotcha bullet so it
+  is available as reference without appearing in an executable example.
 
 ```bash
 # Good — SKILL variable for multi-command blocks
@@ -416,8 +423,10 @@ Before finalizing a skill, verify:
 - [ ] Consistent terminology throughout
 - [ ] Pascal test applied: every sentence would cause failure if removed
 - [ ] Skill has a Gotchas section (even if initially sparse)
+- [ ] Skill has a Self-Update Policy section
 - [ ] No LLM-generated boilerplate — every line encodes real domain expertise
 - [ ] `name:` frontmatter matches directory name exactly
+- [ ] No real IP addresses in Quick run examples — use `<server-ip>` placeholder
 - [ ] Entry added to `~/.claude/skills/chsh-sk-skill-review/REGISTRY.md`
 
 ### Structure
