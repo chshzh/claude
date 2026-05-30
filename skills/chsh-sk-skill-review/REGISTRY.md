@@ -3,6 +3,7 @@ All personal skills in `~/.claude/skills/`. Maintained by `chsh-sk-skill-review`
 
 | Skill | Description (trigger) |
 |-------|----------------------|
+| `chsh-agentmemory-inject-session` | Use when bulk-importing Cursor or Claude chat history into AgentMemory, injecting past sessions, or backfilling a remote memory server from local transcripts. |
 | `chsh-sk-git-commit` | Use when the user asks to commit, push, prepare commits, split commits, or wrap up work. Plans and e… |
 | `chsh-sk-git-release` | Use when cutting a release, publishing firmware, or doing a full release validation loop (tag → CI →… |
 | `chsh-sk-hermes-setup` | Use when working on the Hermes stack, troubleshooting startup, or referencing installation layout. C… |
@@ -27,4 +28,4 @@ All personal skills in `~/.claude/skills/`. Maintained by `chsh-sk-skill-review`
 | `chsh-sk-skill-review` | >- Load when running the Hermes daily skill audit, or when asked to review, audit, or health-check e… |
 | `chsh-sk-txt-review` | Use when drafting emails, messages, or responses to customers or colleagues. Polishes text to be fri… |
 
-_Last updated: 2026-05-29 · 23 skills_
+_Last updated: 2026-05-30 · 24 skills_
