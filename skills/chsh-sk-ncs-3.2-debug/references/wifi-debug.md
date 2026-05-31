@@ -17,7 +17,7 @@ CONFIG_NET_LOG=y              # for network issues
 
 Rebuild:
 ```bash
-nrfutil sdk-manager toolchain launch --ncs-version=v3.3.0 -- \
+nrfutil sdk-manager toolchain launch --ncs-version=${NCS_VERSION:-v3.3.0} -- \
   west build -b <board> -d <app>/build <app> -- -DSHIELD=<shield>
 ```
 

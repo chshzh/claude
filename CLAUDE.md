@@ -61,6 +61,51 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 ---
 
+## Wiki
+
+This project has a persistent engineering knowledge base at `.claude/wiki/` (28 pages).
+
+**At the start of every non-trivial session**, orient before acting:
+1. Read `.claude/wiki/index.md` to see what experience pages exist
+2. Read the relevant page(s) for the task:
+   - Building / Kconfig / west? → `concepts/ncs-build-system`
+   - WiFi failures / provisioner / P2P? → `concepts/wifi-debugging-patterns`
+   - NCS version upgrade? → `concepts/ncs-version-migration`
+   - Memfault upload / OTA deploy? → `concepts/memfault-workflow`
+   - Which board to target? → `entities/nrf7002dk` or `entities/nrf54lm20dk-plus-nrf7002eb2`
+   - Homelab / Hermes / Docker? → relevant concept page in `concepts/`
+
+**After resolving a non-trivial problem**, update the wiki:
+1. Edit or create the relevant page with what was learned
+2. Append a one-line entry to `.claude/wiki/log.md`
+
+Wiki path: `.claude/wiki/` (relative to workspace root)
+Link format: `[page-name](relative-path.md)` — standard markdown, NOT `[[wikilinks]]`
+
+---
+
+## Skills
+
+Agent skills are reusable procedure files (`SKILL.md`) the agent reads before executing a specialized workflow (commit, release, debug, OTA, etc.).
+
+**Full skill index:** `.claude/skills/chsh-sk-skill-review/REGISTRY.md` — 24 skills, one-line trigger for each.
+
+**When to use a skill:** When the user's request matches a skill trigger, load its `SKILL.md` with `read_file` before acting. Key skills for this workspace:
+
+| Trigger | Skill |
+|---------|-------|
+| Build / flash / west command | `chsh-sk-ncs-env` |
+| Debug WiFi / firmware crash | `chsh-sk-ncs-3.2-debug` |
+| NCS version upgrade | `chsh-sk-ncs-migrate` |
+| Memfault OTA release | `chsh-sk-memfault` |
+| Git commit / push | `chsh-sk-git-commit` |
+| New NCS feature → code | `chsh-sk-ncs-0-workflow` |
+| Hardware validation tests | `chsh-sk-ncs-4.2-validation` |
+
+Skills path: `.claude/skills/` (relative to workspace root)
+
+---
+
 <!-- CODEGRAPH_START -->
 ## CodeGraph
 

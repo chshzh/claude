@@ -187,6 +187,56 @@ Extract all `tags:` from all pages. Compare against SCHEMA.md taxonomy.
 
 ---
 
+## Step 8b — Security & Credentials Scan
+
+Scan every wiki page (including `raw/`) for sensitive data that must not be committed.
+
+### Credential patterns
+
+```bash
+WIKI="${WIKI_PATH:-$HOME/.claude/wiki}"
+grep -rn \
+  -e "password\s*[=:]" \
+  -e "secret\s*[=:]" \
+  -e "api_key\s*[=:]" \
+  -e "access_token\s*[=:]" \
+  -e "-----BEGIN" \
+  -e "AKIA[0-9A-Z]\{16\}" \
+  "$WIKI/" 2>/dev/null
+```
+
+### Private network topology
+
+```bash
+# IPs, hostnames, or ports that expose internal infrastructure
+grep -rn \
+  -e "192\.168\.[0-9]\+\.[0-9]\+" \
+  -e "10\.[0-9]\+\.[0-9]\+\.[0-9]\+" \
+  -e "172\.1[6-9]\.\|172\.2[0-9]\.\|172\.3[01]\." \
+  "$WIKI/" 2>/dev/null
+```
+
+Any match is **P0**. The page must be sanitised (replace with a placeholder like
+`<gateway-ip>` or `<api-key>`) before committing.
+
+**False positive note**: A wiki page teaching credential management may show
+placeholder examples in code blocks (e.g. `api_key = "your-key-here"`).  
+Read context before flagging — placeholder text is documentation, not a leak.
+
+### Raw source audit
+
+Pages in `raw/` often contain scraped or pasted content. Re-run the same scans
+specifically on `raw/` and flag separately, since `raw/` files are likely
+auto-ingested and more likely to carry incidental sensitive content.
+
+### Gitignore coverage
+
+Verify the wiki repo's `.gitignore` (or `~/.claude/.gitignore`) covers:
+- `wiki/**/config.json` — any first-run user setup files
+- `wiki/raw/` — if raw sources contain scrapes of internal docs
+
+---
+
 ## Step 9 — Log Health
 
 | Check | Severity |

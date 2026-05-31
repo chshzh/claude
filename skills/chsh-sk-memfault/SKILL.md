@@ -22,7 +22,7 @@ Orchestrates Memfault symbol upload, OTA release, and deployment tasks for
 | nrf54lm20dk | `nrf54lm20dk-fw` | `build_nrf54lm20dk/nordic-wifi-memfault/zephyr/zephyr.elf` | `build_nrf54lm20dk/nordic-wifi-memfault/zephyr/zephyr.signed.bin` |
 | nrf7002dk | `nrf7002dk-fw` | `build_nrf7002dk/nordic-wifi-memfault/zephyr/zephyr.elf` | `build_nrf7002dk/nordic-wifi-memfault/zephyr/zephyr.signed.bin` |
 
-Project root: `/opt/nordic/ncs/v3.3.0/nordic-wifi-memfault`
+Project root: `$(west topdir)/nordic-wifi-memfault`
 
 ### Two Memfault projects — local credentials only cover `nord-project`
 
@@ -54,7 +54,7 @@ gh release download <VER> --repo chshzh/nordic-wifi-memfault \
 ## Default Workflow (project folder invocation)
 
 When the user invokes this skill with a project folder reference (e.g.
-`@v3.3.0/nordic-wifi-memfault`) **without specifying a workflow**, execute
+`@<ncs-version>/nordic-wifi-memfault`) **without specifying a workflow**, execute
 this sequence automatically — no further clarification needed:
 
 1. **Rebuild** both boards in parallel (Step 2)
@@ -62,7 +62,7 @@ this sequence automatically — no further clarification needed:
 3. **Upload symbols without version** — Workflow A (Step 3)
 
 This default applies to `nordic-wifi-memfault` at
-`/opt/nordic/ncs/v3.3.0/nordic-wifi-memfault`.
+`$(west topdir)/nordic-wifi-memfault`.
 
 ---
 
@@ -101,14 +101,14 @@ Read the user's request and decide:
 > Confirm the overlay is correct before starting any build.
 
 If the user asks to rebuild, or if the `.signed.bin` / `.elf` files are absent,
-build both DKs first using `chsh-sk-ncs-env` (toolchain v3.3.0, bundle `0c0f19d91c`):
+build both DKs first using `chsh-sk-ncs-env` ((use chsh-sk-ncs-env to resolve toolchain + bundle)):
 
 ```bash
 BUNDLE_ID="0c0f19d91c"
 export PATH="/opt/nordic/ncs/toolchains/${BUNDLE_ID}/bin:$PATH"
 export GIT_EXEC_PATH=$(ls -d /opt/nordic/ncs/toolchains/${BUNDLE_ID}/Cellar/git/*/libexec/git-core)
-source /opt/nordic/ncs/v3.3.0/zephyr/zephyr-env.sh
-cd /opt/nordic/ncs/v3.3.0/nordic-wifi-memfault
+source $(west topdir)/zephyr/zephyr-env.sh
+cd $(west topdir)/nordic-wifi-memfault
 
 # nrf54lm20dk
 west build -b nrf54lm20dk/nrf54lm20a/cpuapp -d build_nrf54lm20dk -p \
@@ -144,15 +144,15 @@ Known board serial numbers:
 BUNDLE_ID="0c0f19d91c"
 export PATH="/opt/nordic/ncs/toolchains/${BUNDLE_ID}/bin:$PATH"
 export GIT_EXEC_PATH=$(ls -d /opt/nordic/ncs/toolchains/${BUNDLE_ID}/Cellar/git/*/libexec/git-core)
-source /opt/nordic/ncs/v3.3.0/zephyr/zephyr-env.sh
-cd /opt/nordic/ncs/v3.3.0/nordic-wifi-memfault
+source $(west topdir)/zephyr/zephyr-env.sh
+cd $(west topdir)/nordic-wifi-memfault
 
 # nrf54lm20dk — NO --recover, preserves NVS/Wi-Fi credentials
-nrfutil sdk-manager toolchain launch --ncs-version=v3.3.0 -- \
+nrfutil sdk-manager toolchain launch --ncs-version=${NCS_VERSION:-v3.3.0} -- \
   west flash -d build_nrf54lm20dk --dev-id 1051806714
 
 # nrf7002dk — NO --recover, preserves NVS/Wi-Fi credentials
-nrfutil sdk-manager toolchain launch --ncs-version=v3.3.0 -- \
+nrfutil sdk-manager toolchain launch --ncs-version=${NCS_VERSION:-v3.3.0} -- \
   west flash -d build_nrf7002dk --dev-id 1050718454
 ```
 

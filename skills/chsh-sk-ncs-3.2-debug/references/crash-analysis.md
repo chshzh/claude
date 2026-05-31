@@ -29,7 +29,7 @@ arm-zephyr-eabi-addr2line -e build/zephyr/zephyr.elf 0x0005e2f4
 ## C3. GDB attach
 
 ```bash
-nrfutil sdk-manager toolchain launch --ncs-version=v3.3.0 -- \
+nrfutil sdk-manager toolchain launch --ncs-version=${NCS_VERSION:-v3.3.0} -- \
   west debug -d <app>/build
 ```
 

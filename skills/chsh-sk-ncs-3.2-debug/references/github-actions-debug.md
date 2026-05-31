@@ -35,7 +35,7 @@ gh release download latest --repo <owner>/<repo> --pattern "*.hex" -D /tmp/fw/
 ls /tmp/fw/   # confirm filename — use descriptive name, not merged.hex
 
 # Flash (standard — preserves NVS and WiFi credentials)
-nrfutil sdk-manager toolchain launch --ncs-version=v3.3.0 -- \
+nrfutil sdk-manager toolchain launch --ncs-version=${NCS_VERSION:-v3.3.0} -- \
   west flash --hex-file /tmp/fw/<project>-<board>-<shield>-ncs<version>.hex --dev-id <SN>
 
 # Use --recover only for first flash or if AP protection is blocking access

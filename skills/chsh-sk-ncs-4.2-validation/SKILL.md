@@ -43,7 +43,7 @@ Document Information of each report.
 
 ```bash
 # Standard flash — preserves NVS and WiFi credentials
-nrfutil sdk-manager toolchain launch --ncs-version=v3.3.0 -- \
+nrfutil sdk-manager toolchain launch --ncs-version=${NCS_VERSION:-v3.3.0} -- \
   west flash -d build/ --dev-id <SN>
 
 # Use --recover only for first-time flash on nRF54LM20DK or after AP protection erase

@@ -368,16 +368,16 @@ CONFIG_THREAD_ANALYZER=y
 
 ```bash
 # Build (pristine)
-nrfutil sdk-manager toolchain launch --ncs-version=v3.3.0 -- \
+nrfutil sdk-manager toolchain launch --ncs-version=${NCS_VERSION:-v3.3.0} -- \
   west build -b <board> -p -d <app>/build <app> -- -DSHIELD=<shield>
 
 # Flash (standard — preserves NVS and WiFi credentials)
-nrfutil sdk-manager toolchain launch --ncs-version=v3.3.0 -- \
+nrfutil sdk-manager toolchain launch --ncs-version=${NCS_VERSION:-v3.3.0} -- \
   west flash -d <app>/build --dev-id <SN>
 
 # Flash (first-time only, or when AP protection blocks access)
 # WARNING: --recover does a full chip erase — wipes NVS including WiFi credentials
-nrfutil sdk-manager toolchain launch --ncs-version=v3.3.0 -- \
+nrfutil sdk-manager toolchain launch --ncs-version=${NCS_VERSION:-v3.3.0} -- \
   west flash -d <app>/build --recover --dev-id <SN>
 
 # Reset only
