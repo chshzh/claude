@@ -277,7 +277,14 @@ Expected: new entries within 60–90s of device boot (when developer mode is on)
 ---
 
 ## Gotchas
-- TODO: add one entry per real observed failure or routing false-positive
+
+### Version string must include `v` prefix
+`CONFIG_MEMFAULT_NCS_FW_VERSION` in `overlay-app-memfault-project-info.conf` must
+use the same `v`-prefixed format as the git tag (e.g. `"v3.3.0.2"`, **not** `"3.3.0.2"`).
+The CI-built binary embeds the tag name directly; if the overlay omits the `v`, the
+locally built binary reports a different version than the CI artifact, causing a
+mismatch between the device's reported software version and the Memfault release.
+Always set the overlay as `CONFIG_MEMFAULT_NCS_FW_VERSION="v<tag>"` before building.
 
 ## Self-Update Policy
 
