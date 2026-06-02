@@ -606,7 +606,7 @@
         "@agentmemory/mcp"
       ],
       "env": {
-        "AGENTMEMORY_URL": "http://192.168.75.30:3111",
+        "AGENTMEMORY_URL": "http://<AGENTMEMORY_HOST>:<AGENTMEMORY_PORT>",
         "AGENTMEMORY_SECRET": "<REDACTED>"
       }
     }

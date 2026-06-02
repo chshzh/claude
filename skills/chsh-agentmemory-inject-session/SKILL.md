@@ -82,8 +82,8 @@ The script reads `~/.cursor/mcp.json` using a comment-stripping regex before
   `//…` lines first. If `AGENTMEMORY_SECRET` still isn't found, pass it via env.
 - **Re-run token cost**: Step 3 still reads all 49 k bubbles from SQLite even
   when nothing is new. This takes ~30 s but costs nothing in network/API calls.
-- **Lab server address**: The personal AgentMemory API runs at `192.168.75.30:3111`
-  (dashboard at `:3113`). With mcp.json auto-detection, you don't need to set
+- **Lab server address**: The personal AgentMemory API runs at `<AGENTMEMORY_HOST>:<AGENTMEMORY_PORT>`
+  (dashboard typically at `<AGENTMEMORY_HOST>:3113`). With mcp.json auto-detection, you don't need to set
   `AGENTMEMORY_URL` at all — the script reads it from `~/.cursor/mcp.json`.
 
 ## Related Skills
