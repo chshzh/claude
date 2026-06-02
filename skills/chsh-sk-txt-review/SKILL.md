@@ -1,223 +1,77 @@
 ---
 name: chsh-sk-txt-review
-description: Use when drafting emails, messages, or responses to customers or colleagues. Polishes text to be friendly, professional, and easy to understand.
+description: Use when drafting, polishing, or reviewing emails, messages, or responses to colleagues and customers — especially to remove AI-sounding phrasing and make text sound human.
 ---
 
-# Professional Answer Polishing
+# Professional Text Review
 
-## Purpose
+## Core Rules
 
-Help craft or refine responses to customers, colleagues, or stakeholders that are:
-- Friendly and approachable
-- Professional and respectful
-- Clear and easy to understand
-- Free of jargon (or jargon is explained)
-- Action-oriented when needed
+1. **Active voice.** Every sentence needs a human subject doing something. No passive constructions. No false agency — inanimate objects don't perform human actions ("the complaint becomes a fix"). Name the person.
+2. **Cut filler.** Remove throat-clearing openers, emphasis crutches, and all adverbs. See [references/phrases.md](references/phrases.md).
+3. **Break formulaic structures.** No binary contrasts ("not X, it's Y" — just say Y), no negative listings, no dramatic fragmentation. See [references/structures.md](references/structures.md).
+4. **Be specific.** No vague declaratives ("The stakes are high"). Name the specific thing.
+5. **Trust readers.** State facts directly. Skip softening, justification, hand-holding.
+6. **Vary rhythm.** Mix sentence lengths. Two items beat three. End paragraphs differently. No em dashes.
 
-## When to Use
+## Business Jargon → Plain Language
 
-Use this skill when the user needs to:
-- Draft an email or message to a customer
-- Respond to a colleague's question
-- Explain technical concepts to non-technical audiences
-- Provide status updates or reports
-- Handle difficult or sensitive situations
-- Clarify requirements or ask for information
+| Avoid | Use instead |
+|-------|-------------|
+| Navigate (challenges) | Handle, address |
+| Moving forward | Next |
+| Circle back | Return to, revisit |
+| On the same page | Aligned, agreed |
+| Deep dive | Analysis, examination |
+| Lean into | Accept, embrace |
+| Game-changer | Significant |
+| Double down | Commit |
+| As per my last email | As I mentioned |
+| ASAP | Specific timeframe |
+| Obviously / Clearly | Remove — condescending |
+| Just (minimizing) | Remove |
 
-## Core Principles
+## Pre-Delivery Checks
 
-### 1. Clarity Over Cleverness
-- Use simple, direct language
-- Avoid unnecessary technical terms
-- If technical terms are needed, explain them briefly
-- Break complex ideas into digestible parts
+Before delivering text:
+- Any adverbs (-ly words, "really," "just," "honestly")? Kill them.
+- Any passive voice? Find the actor, make them the subject.
+- Any throat-clearing ("Here's the thing:", "Let me be clear", "I'll be honest")? Cut to the point.
+- Any "not X, it's Y" contrasts? State Y directly.
+- Any vague declaratives ("The situation is complex")? Name the specific thing.
+- Three consecutive same-length sentences? Break one.
+- Em dash anywhere? Replace with comma or period.
 
-### 2. Professional Tone
-- Be polite and respectful
-- Avoid overly casual language (unless appropriate for the relationship)
-- Stay positive and solution-focused
-- Use "we" and "I" appropriately to show ownership
+## Scoring
 
-### 3. Structure and Organization
-- Start with the main point or answer
-- Provide context and details as needed
-- End with clear next steps or calls to action
-- Use formatting (bullets, numbering) for readability
+Rate 1–10 on each before delivering:
 
-### 4. Empathy and Understanding
-- Acknowledge the other person's situation or concerns
-- Show appreciation for their time or patience
-- Be honest about limitations while offering alternatives
-- Maintain a helpful, can-do attitude
+| Dimension | Question |
+|-----------|----------|
+| Directness | Statements or announcements? |
+| Rhythm | Varied or metronomic? |
+| Trust | Respects reader intelligence? |
+| Authenticity | Sounds human? |
+| Density | Anything cuttable? |
 
-## Response Framework
+Below 35/50: revise.
 
-### Opening
-- Greeting appropriate to the relationship
-- Brief acknowledgment of their message or situation
-- Express appreciation if relevant
+## Reference Files
 
-### Body
-- Lead with the most important information
-- Provide necessary context and details
-- Use short paragraphs (2-3 sentences max)
-- Include examples or analogies for complex topics
-- Break down steps or options clearly
+- [references/phrases.md](references/phrases.md) — banned phrases by category (throat-clearing, jargon, adverbs, meta-commentary)
+- [references/structures.md](references/structures.md) — structural anti-patterns with fixes (binary contrasts, false agency, passive voice, rhythm)
 
-### Closing
-- Summarize key points if needed
-- Clearly state next steps or actions
-- Invite questions or further discussion
-- Professional sign-off
+## Gotchas
 
-## Common Scenarios
+- **Structure without voice**: Correctly structured text can still be full of AI tells ("Moving forward, let's circle back and navigate this together"). Run pre-delivery checks even when structure looks right.
+- **False agency creep**: "The fix was deployed", "the decision emerged", "the update will address" — name who deployed, decided, or will address it.
+- **Adverb hedging as sincerity**: "I genuinely believe", "I simply wanted to", "I truly appreciate" — adverb-driven filler that sounds like AI performing emotion.
+- **"Power words" are themselves a slop pattern**: Coaching to use "recommend" over "think" or "ensure" over "try" is a tell. Use the most natural word.
+- **Passive voice in apologies**: "Mistakes were made" / "This was overlooked" — name who made the mistake or overlooked it.
 
-### 1. Answering a Question
-```
-Structure:
-1. Direct answer first
-2. Supporting details
-3. Additional resources or context
-4. Invitation to follow up
-```
+## Self-Update Policy
 
-### 2. Providing Status Update
-```
-Structure:
-1. Current status/progress
-2. What's been completed
-3. Any blockers or delays (with solutions)
-4. Next steps and timeline
-```
-
-### 3. Explaining a Technical Issue
-```
-Structure:
-1. Plain language summary
-2. What happened (avoid blame)
-3. Impact and what it means for them
-4. Resolution or plan forward
-5. How to prevent recurrence (if relevant)
-```
-
-### 4. Making a Request
-```
-Structure:
-1. Context for the request
-2. Specific ask (what you need)
-3. Why it's needed
-4. Deadline or timeline
-5. Thank them in advance
-```
-
-### 5. Delivering Bad News
-```
-Structure:
-1. Lead with facts (don't bury the news)
-2. Explain why/what happened
-3. Show empathy for impact
-4. Offer solutions or alternatives
-5. Clear next steps
-```
-
-## Language Tips
-
-### Replace This → With This
-- "As per my last email" → "As I mentioned previously"
-- "You failed to..." → "We didn't receive..."
-- "That's not my job" → "Let me connect you with the right person"
-- "I think/maybe/possibly" → "I recommend" or "The best approach is"
-- "ASAP" → Specific timeframe
-- "Obviously" or "Clearly" → Remove entirely (can sound condescending)
-- "Just" (minimizing) → Remove or be specific
-- "Sorry for bothering you" → "Thank you for your time"
-
-### Power Words
-- Use: "recommend," "suggest," "propose," "ensure," "achieve"
-- Avoid: "try," "attempt," "might," "should," "hopefully"
-
-### Active Voice
-- Instead of: "The issue was discovered"
-- Use: "We discovered the issue"
-
-## Example Transformations
-
-### Before (Too Casual/Unclear)
-```
-Hey, so I looked at that thing you sent and it's kinda broken.
-Not sure what happened but it might be the config or something.
-Can you check it out and let me know?
-```
-
-### After (Professional & Clear)
-```
-Hi [Name],
-
-Thank you for sending over the configuration file. I've reviewed it
-and identified an issue with the database connection settings on line 47.
-
-The hostname format appears to be incorrect, which would prevent the
-application from connecting to the database. Could you please update
-it to match this pattern: hostname:port?
-
-Once you've made the change, I'm happy to review it again to ensure
-everything is working correctly.
-
-Let me know if you have any questions!
-
-Best regards,
-[Your Name]
-```
-
-### Before (Too Technical)
-```
-The API endpoint is returning a 503 error due to upstream service
-degradation. We've implemented exponential backoff with jitter in
-the retry logic to mitigate the issue.
-```
-
-### After (Accessible)
-```
-We're experiencing intermittent connection issues with one of our
-partner services, which is causing some requests to fail temporarily.
-
-To minimize the impact, we've updated our system to automatically
-retry failed requests with smart timing to avoid overwhelming the
-service. This should help maintain stability while the partner
-resolves their issue.
-
-I'll keep you updated on the situation and let you know once it's
-fully resolved.
-```
-
-## Workflow
-
-When the user provides text to polish:
-
-1. **Understand the context**
-   - Who is the audience?
-   - What's the relationship (customer, colleague, manager)?
-   - What's the goal of the message?
-
-2. **Identify issues**
-   - Tone problems (too casual, too formal, defensive)
-   - Clarity issues (jargon, unclear structure)
-   - Missing elements (next steps, context)
-
-3. **Restructure if needed**
-   - Apply appropriate framework
-   - Lead with key information
-   - Add necessary context
-   - Include clear action items
-
-4. **Refine language**
-   - Simplify complex terms
-   - Remove weak or negative phrasing
-   - Ensure professional but friendly tone
-   - Check for empathy and respect
-
-5. **Present the polished version**
-   - Show the improved text
+After each use, note new phrases or patterns observed in the wild. Update references/phrases.md or references/structures.md with real failures, not hypotheticals.
    - Briefly explain key changes made
    - Offer alternative phrasings if relevant
 
