@@ -423,7 +423,7 @@ Before finalizing a skill, verify:
 - [ ] Consistent terminology throughout
 - [ ] Pascal test applied: every sentence would cause failure if removed
 - [ ] Skill has a Gotchas section (even if initially sparse)
-- [ ] Skill has a Self-Update Policy section
+- [ ] Skill has a Self-Update Policy section following the canonical 3-step template (see Canonical Templates below)
 - [ ] No LLM-generated boilerplate — every line encodes real domain expertise
 - [ ] `name:` frontmatter matches directory name exactly
 - [ ] No real IP addresses in Quick run examples — use `<server-ip>` placeholder
@@ -440,6 +440,28 @@ Before finalizing a skill, verify:
 - [ ] Required packages are documented
 - [ ] Error handling is explicit and helpful
 - [ ] No Windows-style paths
+
+---
+
+## Canonical Templates
+
+### Self-Update Policy
+
+Every skill must end with this section. Customize the bracketed description for the skill's domain; keep the 3-step process and the "Do not modify" rule verbatim — they must not be shortened, removed, or reworded.
+
+```markdown
+## Self-Update Policy
+
+At the **end of each conversation**, review what was discovered and check
+whether any [domain-specific facts, patterns, or rules] are new, corrected, or outdated.
+
+If updates are warranted:
+1. Collect all proposed changes with a brief rationale for each.
+2. Present a summary to the user and ask for approval using `AskQuestion`.
+3. Apply approved updates to this file immediately.
+
+Do **not** modify this skill mid-conversation unless the user explicitly asks.
+```
 
 ---
 

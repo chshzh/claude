@@ -73,6 +73,8 @@ For each personal skill, verify against `chsh-sk-skill-create` rules:
 | Description uses routing trigger | Starts with "Load when" or equivalent routing phrase; does NOT describe what the skill does | P1 |
 | Description ≤ 50 words | Word count | P1 |
 | Skill has Gotchas section | `## Gotchas` heading present in body | P1 |
+| No duplicate section headings | Each `##` heading appears exactly once | P1 |
+| `Self-Update Policy` follows canonical 3-step form | Contains "end of each conversation", 3 numbered steps ending in "Apply approved updates", and "Do not modify this skill mid-conversation" | P1 |
 | SKILL.md body ≤ 500 lines | `wc -l` | P2 |
 | No Windows-style paths | No `\` path separators | P2 |
 | No time-sensitive info | No phrases like "before August 202X" | P2 |
@@ -81,6 +83,18 @@ For each personal skill, verify against `chsh-sk-skill-create` rules:
 | No hardcoded `/Users/` paths | `grep -r "/Users/" SKILL.md` returns empty | P0 |
 | No repeated `~/.claude/skills/<name>/` in multi-command blocks | Multi-command blocks use a `SKILL=` variable; single-command lines may keep the full `~` path | P1 |
 | Own-file text refs are relative | Markdown text mentioning a file in the same skill uses relative path, not absolute | P1 |
+
+Detect duplicate headings:
+
+```bash
+# Flag any ## heading that appears more than once in the same SKILL.md
+find ~/.claude/skills -name "SKILL.md" | while read f; do
+  dupes=$(grep -E '^## ' "$f" | sort | uniq -d)
+  [ -n "$dupes" ] && echo "DUPLICATE HEADINGS in $f: $dupes"
+done
+```
+
+For each duplicate found: keep the richer instance, remove the stub. A stub is a section with only a TODO comment or generic boilerplate.
 
 ---
 
@@ -320,6 +334,22 @@ Insert before `## Self-Update Policy` (or before `## Related Skills` if no Self-
 ```markdown
 ## Gotchas
 - TODO: add one entry per real observed failure or routing false-positive
+```
+
+**P1-C — `Self-Update Policy` section is missing, abbreviated, or non-canonical:**
+Replace with the canonical template from `chsh-sk-skill-create` § Canonical Templates. Keep the domain-specific first paragraph; the 3 numbered steps and "Do not modify" line must be verbatim:
+```markdown
+## Self-Update Policy
+
+At the **end of each conversation**, review what was discovered and check
+whether any [domain-specific description].
+
+If updates are warranted:
+1. Collect all proposed changes with a brief rationale for each.
+2. Present a summary to the user and ask for approval using `AskQuestion`.
+3. Apply approved updates to this file immediately.
+
+Do **not** modify this skill mid-conversation unless the user explicitly asks.
 ```
 
 **P2 — SKILL.md over 500 lines:**

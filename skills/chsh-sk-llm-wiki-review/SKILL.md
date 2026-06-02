@@ -58,6 +58,22 @@ inbound link count, outbound link count.
 
 ---
 
+## Step 1b — Duplicate Section Check
+
+Before frontmatter validation, scan every wiki page for repeated headings — a common artifact of partial file merges or copy-paste additions:
+
+```bash
+# Flag any heading that appears more than once in the same wiki page
+find "$WIKI" -name "*.md" -not -path "*/raw/*" | while read f; do
+  dupes=$(grep -E '^#{1,3} ' "$f" | sort | uniq -d)
+  [ -n "$dupes" ] && echo "DUPLICATE HEADINGS in $f: $dupes"
+done
+```
+
+For each duplicate: keep the richer instance (more content, real entries vs. TODO stubs), remove the duplicate. Flag as **P1**.
+
+---
+
 ## Step 2 — Frontmatter Validation
 
 For every wiki page (`entities/`, `concepts/`, `comparisons/`, `queries/`):

@@ -69,31 +69,18 @@ Below 35/50: revise.
 - **"Power words" are themselves a slop pattern**: Coaching to use "recommend" over "think" or "ensure" over "try" is a tell. Use the most natural word.
 - **Passive voice in apologies**: "Mistakes were made" / "This was overlooked" — name who made the mistake or overlooked it.
 
-## Self-Update Policy
+## End-of-Conversation Checks
 
-After each use, note new phrases or patterns observed in the wild. Update references/phrases.md or references/structures.md with real failures, not hypotheticals.
-   - Briefly explain key changes made
-   - Offer alternative phrasings if relevant
+Before closing, run these two steps:
 
-## Notes
-
-- Always maintain the user's core message and intent
-- Adjust formality level based on the specific context
-- When in doubt, err on the side of clarity and professionalism
-- Cultural context matters—adapt advice based on regional norms if specified
-- For sensitive situations, offer multiple phrasing options
-
----
-
-## Gotchas
-- TODO: add one entry per real observed failure or routing false-positive
+1. **Duplicate section check** — scan for any repeated `##` headings in this file. Keep the richer instance; remove stubs (empty TODO entries or generic boilerplate).
+2. **Reference updates** — if new phrases or structural anti-patterns were observed, add them to `references/phrases.md` or `references/structures.md` with real examples, not hypotheticals.
 
 ## Self-Update Policy
 
 At the **end of each conversation**, review what was discovered and check
-whether any facts in this skill are new, corrected, or outdated (e.g. new
-communication patterns, tone calibration lessons, or recurring user feedback
-about phrasing style).
+whether any phrases, structural anti-patterns, or skill rules are new, corrected,
+or outdated.
 
 If updates are warranted:
 1. Collect all proposed changes with a brief rationale for each.
