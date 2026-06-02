@@ -109,6 +109,26 @@ For each module from the spec:
 
 ---
 
+## Logging Standards
+
+Every module **must** have structured logging at all four levels. This enables post-mortem debugging without rebuilding.
+
+| Level | When to use | Example |
+|-------|-------------|---------|
+| `LOG_ERR` | Any non-zero return from a hardware or OS API; anything that stops the module working | `LOG_ERR("dk_set_led_on(%d) failed: %d", n, ret)` |
+| `LOG_WRN` | Invalid input, out-of-range index, unexpected-but-recoverable state | `LOG_WRN("LED index %d out of range (max %d)", n, NUM_LEDS - 1)` |
+| `LOG_INF` | Module init with key config values; significant mode/state transitions | `LOG_INF("LED %d BLINK period=%u ms", n, period)` |
+| `LOG_DBG` | Per-event / per-cycle data (called at high frequency; gated by log level at compile/runtime) | `LOG_DBG("LED %d -> %s", n, on ? "ON" : "OFF")` |
+
+**Rules:**
+
+1. **Never silently discard a non-zero return value.** Always `LOG_ERR` it. Silent failures cause invisible hardware bugs (e.g. `dk_set_led_on()` returns `-ENODEV` when GPIO isn't configured — if not logged, the LED just doesn't light up with no indication why).
+2. **Log init params at `LOG_INF`.** Every `SYS_INIT` function must log the key Kconfig values it was compiled with so the boot log alone is sufficient to reproduce a field issue.
+3. **Log direction changes and milestones at `LOG_DBG`**, not every tick. For a state machine: log entry to each state. For a timer loop: log on direction/phase change, not every fire.
+4. **Log with context**: include the resource index (LED number, button index, etc.) in every message so logs from multi-instance modules are unambiguous.
+
+---
+
 ## Gotchas
 
 | Gotcha | Detail |
