@@ -46,6 +46,7 @@ cache/
 history.jsonl
 plugins/cache/
 plugins/marketplaces/
+plugins/plugin-catalog-cache.json
 sessions/
 file-history/
 wiki/
