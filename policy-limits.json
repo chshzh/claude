@@ -1,0 +1,14 @@
+{
+  "restrictions": {
+    "allow_remote_control": {
+      "allowed": true
+    },
+    "allow_workflows": {
+      "allowed": true
+    },
+    "enforce_web_search_mcp_isolation": {
+      "allowed": true
+    }
+  },
+  "compliance_taints": []
+}
