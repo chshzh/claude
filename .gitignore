@@ -27,9 +27,9 @@
 *.backup
 *.orig
 
-# claude 
+# claude
 /hooks/
-settings.json
+mcp-needs-auth-cache.json
 
 # Skills — first-run user config files (may contain API keys, server addresses)
 skills/**/config.json
