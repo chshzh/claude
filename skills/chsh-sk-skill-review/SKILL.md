@@ -198,39 +198,24 @@ Flag potentially stale content:
 
 ## Step 7 — Security Scan
 
-Scan every file in every skill directory for sensitive data that must not be committed to git.
-
-### Credential patterns
+Run `chsh-sk-security-scan` across all skill files:
 
 ```bash
-grep -rn \
-  -e "password\s*[=:]" \
-  -e "passwd\s*[=:]" \
-  -e "secret\s*[=:]" \
-  -e "api_key\s*[=:]" \
-  -e "apikey\s*[=:]" \
-  -e "access_token\s*[=:]" \
-  -e "-----BEGIN" \
-  -e "AKIA[0-9A-Z]\{16\}" \
-  ~/.claude/skills/ 2>/dev/null
+SKILL=~/.claude/skills/chsh-sk-security-scan
+python3 $SKILL/scripts/scan.py dir ~/.claude/skills/
 ```
 
-```bash
-# Private IPs and hostnames that reveal network topology
-grep -rn \
-  -e "192\.168\.[0-9]\+\.[0-9]\+" \
-  -e "10\.[0-9]\+\.[0-9]\+\.[0-9]\+" \
-  -e "172\.1[6-9]\.\|172\.2[0-9]\.\|172\.3[01]\." \
-  ~/.claude/skills/ 2>/dev/null
-```
+| Exit code | Verdict | Severity in report |
+|-----------|---------|-------------------|
+| 0 | `CLEAN` | — |
+| 1 | `BLOCK` | **P0** — must fix before next commit |
+| 2 | `WARN` | **P1** — review required; may be intentional lab docs |
 
-Any match is **P0**. The file must be either sanitized or added to `~/.claude/.gitignore` before the next commit.
-
-**Pitfall — false positives in examples**: Skills that teach credential-handling workflows may contain these patterns as illustrative examples inside code blocks. Read the context before flagging. A pattern inside a triple-backtick block with placeholder values (e.g. `password = "your-password-here"`) is documentation, not a leak.
+See `chsh-sk-security-scan` for the full pattern list and known false positives.
 
 ### Config file audit
 
-Skill directories may contain `config.json` (Perplexity-style first-run user setup: saved Slack channels, API endpoints, server addresses). These are high-risk for accidental commits.
+Skill directories may contain `config.json` (first-run user setup: API keys, server addresses). These are high-risk for accidental commits.
 
 ```bash
 find ~/.claude/skills -name "config.json" | while read f; do

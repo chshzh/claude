@@ -61,13 +61,27 @@ Detect repo style by checking the path returned by `git rev-parse --show-topleve
 | `/zephyr`, `/nrf`, `/nrfxlib`, `/modules/` (NCS workspace) | **Zephyr style** |
 | Anything else (user app repo) | **Conventional Commits** |
 
-### Step 2 — Use any provided rationale (no questions)
+### Step 2 — Security scan
+
+Before proposing any commit plan, run the risk scanner on staged files:
+
+```bash
+python3 ~/.claude/skills/chsh-sk-security-scan/scripts/scan.py staged
+```
+
+| Exit code | Verdict | Action |
+|-----------|---------|--------|
+| 0 | `CLEAN` | Proceed silently |
+| 2 | `WARN` | Add a `⚠ Risk scan` row to the commit plan table; user decides at approval gate |
+| 1 | `BLOCK` | **Stop.** Show the findings. Do not propose a commit plan until the user resolves them. |
+
+### Step 3 — Use any provided rationale (no questions)
 
 If the delegating prompt includes rationale (goal, decisions, ticket refs), incorporate it into the commit body for the relevant commit(s). If it doesn't, **do not ask** — write concise messages derived from the diff alone. Optimize for speed, not for prose.
 
 Do not invent rationale that isn't in the diff or the prompt.
 
-### Step 3 — Propose the commit plan
+### Step 4 — Propose the commit plan
 
 Present a markdown table:
 
@@ -92,17 +106,17 @@ AskQuestion:
     - "Other — describe what you want"
 ```
 
-### Step 4 — Handle the response
+### Step 5 — Handle the response
 
-- **Approve**: execute as planned, then proceed to Step 6 (push gate).
-- **Approve and push**: execute commits, then push immediately — skip the Step 6 `AskQuestion` gate entirely.
+- **Approve**: execute as planned, then proceed to Step 7 (push gate).
+- **Approve and push**: execute commits, then push immediately — skip the Step 7 `AskQuestion` gate entirely.
 - **Edit / Re-group / Merge**: revise the plan, re-present the table, and call `AskQuestion` again.
 - **Other**: ask a single follow-up question to clarify, then re-propose.
 - **Cancel**: stop immediately.
 
 Only an explicit "Approve" or "Approve and push" response permits execution.
 
-### Step 5 — Execute commits
+### Step 6 — Execute commits
 
 For each approved commit:
 
@@ -132,7 +146,7 @@ EOF
 
 After all commits, run `git log --oneline -N` (where N = number of commits made) and show it to the user.
 
-### Step 6 — Offer to push (separate approval gate)
+### Step 7 — Offer to push (separate approval gate)
 
 After commits succeed, determine the push target:
 
@@ -272,7 +286,7 @@ Committed N changes:
   def5678 docs: clarify build instructions
 ```
 
-(Then call `AskQuestion` for push — see Step 6.)
+(Then call `AskQuestion` for push — see Step 7.)
 
 After commits + push:
 

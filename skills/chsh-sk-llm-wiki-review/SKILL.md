@@ -189,45 +189,23 @@ Extract all `tags:` from all pages. Compare against SCHEMA.md taxonomy.
 
 ## Step 8b — Security & Credentials Scan
 
-Scan every wiki page (including `raw/`) for sensitive data that must not be committed.
-
-### Credential patterns
+Run `chsh-sk-security-scan` across all wiki pages (including `raw/`):
 
 ```bash
 WIKI="${WIKI_PATH:-$HOME/.claude/wiki}"
-grep -rn \
-  -e "password\s*[=:]" \
-  -e "secret\s*[=:]" \
-  -e "api_key\s*[=:]" \
-  -e "access_token\s*[=:]" \
-  -e "-----BEGIN" \
-  -e "AKIA[0-9A-Z]\{16\}" \
-  "$WIKI/" 2>/dev/null
+SKILL=~/.claude/skills/chsh-sk-security-scan
+python3 $SKILL/scripts/scan.py dir "$WIKI"
 ```
 
-### Private network topology
+| Exit code | Verdict | Severity in report |
+|-----------|---------|-------------------|
+| 0 | `CLEAN` | — |
+| 1 | `BLOCK` | **P0** — sanitise before committing (replace real value with `<placeholder>`) |
+| 2 | `WARN` | **P1** — review required; may be intentional lab topology docs |
 
-```bash
-# IPs, hostnames, or ports that expose internal infrastructure
-grep -rn \
-  -e "192\.168\.[0-9]\+\.[0-9]\+" \
-  -e "10\.[0-9]\+\.[0-9]\+\.[0-9]\+" \
-  -e "172\.1[6-9]\.\|172\.2[0-9]\.\|172\.3[01]\." \
-  "$WIKI/" 2>/dev/null
-```
+`raw/` is included in the scan — flag `raw/` WARN/BLOCK findings separately since those files are auto-ingested and more likely to carry incidental sensitive content.
 
-Any match is **P0**. The page must be sanitised (replace with a placeholder like
-`<gateway-ip>` or `<api-key>`) before committing.
-
-**False positive note**: A wiki page teaching credential management may show
-placeholder examples in code blocks (e.g. `api_key = "your-key-here"`).  
-Read context before flagging — placeholder text is documentation, not a leak.
-
-### Raw source audit
-
-Pages in `raw/` often contain scraped or pasted content. Re-run the same scans
-specifically on `raw/` and flag separately, since `raw/` files are likely
-auto-ingested and more likely to carry incidental sensitive content.
+See `chsh-sk-security-scan` for the full pattern list and known false positives.
 
 ### Gitignore coverage
 

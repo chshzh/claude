@@ -25,11 +25,13 @@
 *~
 *.bak
 *.backup
+!.claude.json.backup
 *.orig
 
 # claude
 /hooks/
 mcp-needs-auth-cache.json
+.last-cleanup
 
 # Skills — first-run user config files (may contain API keys, server addresses)
 skills/**/config.json
@@ -42,7 +44,9 @@ skills/chsh-sk-skill-review/report-*.md
 backups/
 cache/
 history.jsonl
-plugins/
+plugins/cache/
+plugins/marketplaces/
 sessions/
 file-history/
 wiki/
+chrome/

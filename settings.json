@@ -1,4 +1,27 @@
 {
-  "theme": "dark",
-  "model": "sonnet"
+  "permissions": {
+    "defaultMode": "default"
+  },
+  "model": "sonnet",
+  "enabledMcpjsonServers": [
+    "logic2",
+    "chrome-devtools",
+    "github",
+    "nordic-mcp",
+    "memfault",
+    "agentmemory"
+  ],
+  "extraKnownMarketplaces": {
+    "agentmemory": {
+      "source": {
+        "source": "github",
+        "repo": "rohitg00/agentmemory"
+      }
+    }
+  },
+  "theme": "auto",
+  "verbose": true,
+  "enabledPlugins": {
+    "agentmemory@agentmemory": true
+  }
 }

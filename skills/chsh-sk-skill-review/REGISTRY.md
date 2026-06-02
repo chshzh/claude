@@ -22,9 +22,10 @@ All personal skills in `~/.claude/skills/`. Maintained by `chsh-sk-skill-review`
 | `chsh-sk-ncs-migrate` | Use when the user asks to upgrade, migrate, or port an NCS project to a newer SDK version, or when C… |
 | `chsh-sk-ncs-tc-memfault-log-debug` | Use when a Memfault log file is missing expected entries, truncated, or when LOG RESTORE markers don… |
 | `chsh-sk-ncs-tc-wifi-throughput` | Use when testing Wi-Fi throughput on nRF devices, running zperf/iperf benchmarks, debugging sQSPI or… |
+| `chsh-sk-security-scan` | Use when scanning for credentials, tokens, or sensitive data before committing or on demand. Also called by chsh-ag-git, chsh-sk-skill-review, chsh-sk-llm-wiki-review. | Findings report (BLOCK / WARN / CLEAN) |
 | `chsh-sk-router-control` | Use when writing Wi-Fi reconnection tests, simulating network failures, or controlling the wireless … |
 | `chsh-sk-skill-create` | >- Load when creating, writing, or authoring a new Agent Skill, or when asked about SKILL.md structu… |
 | `chsh-sk-skill-review` | >- Load when running the Hermes daily skill audit, or when asked to review, audit, or health-check e… |
 | `chsh-sk-txt-review` | Use when drafting emails, messages, or responses to customers or colleagues. Polishes text to be fri… |
 
-_Last updated: 2026-05-31 · 23 skills_
+_Last updated: 2026-06-02 · 24 skills_

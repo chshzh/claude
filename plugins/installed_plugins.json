@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "plugins": {
+    "agentmemory@agentmemory": [
+      {
+        "scope": "user",
+        "installPath": "/Users/chsh/.claude/plugins/cache/agentmemory/agentmemory/0.9.24",
+        "version": "0.9.24",
+        "installedAt": "2026-06-02T13:18:36.885Z",
+        "lastUpdated": "2026-06-02T13:18:36.885Z",
+        "gitCommitSha": "de95403e4270739a5b2b3c9ee5d80276c526ca14"
+      }
+    ]
+  }
+}

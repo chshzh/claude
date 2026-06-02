@@ -1,0 +1,18 @@
+{
+  "claude-plugins-official": {
+    "source": {
+      "source": "github",
+      "repo": "anthropics/claude-plugins-official"
+    },
+    "installLocation": "/Users/chsh/.claude/plugins/marketplaces/claude-plugins-official",
+    "lastUpdated": "2026-06-02T13:15:55.700Z"
+  },
+  "agentmemory": {
+    "source": {
+      "source": "github",
+      "repo": "rohitg00/agentmemory"
+    },
+    "installLocation": "/Users/chsh/.claude/plugins/marketplaces/agentmemory",
+    "lastUpdated": "2026-06-02T13:18:27.160Z"
+  }
+}
