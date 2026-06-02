@@ -10,6 +10,76 @@
         "lastUpdated": "2026-06-02T13:18:36.885Z",
         "gitCommitSha": "de95403e4270739a5b2b3c9ee5d80276c526ca14"
       }
+    ],
+    "security-guidance@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/chsh/.claude/plugins/cache/claude-plugins-official/security-guidance/2.0.2",
+        "version": "2.0.2",
+        "installedAt": "2026-06-02T20:44:20.400Z",
+        "lastUpdated": "2026-06-02T20:44:20.400Z",
+        "gitCommitSha": "917286d5b2f1823393f7af3b85a27da6899582a3"
+      }
+    ],
+    "playwright@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/chsh/.claude/plugins/cache/claude-plugins-official/playwright/917286d5b2f1",
+        "version": "917286d5b2f1",
+        "installedAt": "2026-06-02T20:47:40.890Z",
+        "lastUpdated": "2026-06-02T20:47:40.890Z",
+        "gitCommitSha": "917286d5b2f1823393f7af3b85a27da6899582a3"
+      }
+    ],
+    "code-review@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/chsh/.claude/plugins/cache/claude-plugins-official/code-review/917286d5b2f1",
+        "version": "917286d5b2f1",
+        "installedAt": "2026-06-02T20:47:50.705Z",
+        "lastUpdated": "2026-06-02T20:47:50.705Z",
+        "gitCommitSha": "917286d5b2f1823393f7af3b85a27da6899582a3"
+      }
+    ],
+    "telegram@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/chsh/.claude/plugins/cache/claude-plugins-official/telegram/0.0.6",
+        "version": "0.0.6",
+        "installedAt": "2026-06-02T20:48:42.906Z",
+        "lastUpdated": "2026-06-02T20:48:42.906Z",
+        "gitCommitSha": "917286d5b2f1823393f7af3b85a27da6899582a3"
+      }
+    ],
+    "chrome-devtools-mcp@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/chsh/.claude/plugins/cache/claude-plugins-official/chrome-devtools-mcp/1.1.1",
+        "version": "1.1.1",
+        "installedAt": "2026-06-02T20:49:06.437Z",
+        "lastUpdated": "2026-06-02T20:49:06.437Z",
+        "gitCommitSha": "692b28adac70f6475737ffbc4e6e2a0bb65569db"
+      }
+    ],
+    "atlassian@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/chsh/.claude/plugins/cache/claude-plugins-official/atlassian/9b52fb18e184",
+        "version": "9b52fb18e184",
+        "installedAt": "2026-06-02T20:49:41.385Z",
+        "lastUpdated": "2026-06-02T20:49:41.385Z",
+        "gitCommitSha": "9b52fb18e184edc307ce33f8bf4cdf148dedf1f2"
+      }
+    ],
+    "superpowers@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/chsh/.claude/plugins/cache/claude-plugins-official/superpowers/5.1.0",
+        "version": "5.1.0",
+        "installedAt": "2026-06-02T20:55:13.067Z",
+        "lastUpdated": "2026-06-02T20:55:13.067Z",
+        "gitCommitSha": "6fd4507659784c351abbd2bc264c7162cfd386dc"
+      }
     ]
   }
 }
