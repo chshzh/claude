@@ -2,7 +2,6 @@
   "permissions": {
     "defaultMode": "default"
   },
-  "model": "sonnet",
   "enabledMcpjsonServers": [
     "logic2",
     "chrome-devtools",
@@ -19,7 +18,8 @@
     "telegram@claude-plugins-official": true,
     "chrome-devtools-mcp@claude-plugins-official": true,
     "atlassian@claude-plugins-official": true,
-    "superpowers@claude-plugins-official": true
+    "superpowers@claude-plugins-official": true,
+    "clangd-lsp@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
     "agentmemory": {
