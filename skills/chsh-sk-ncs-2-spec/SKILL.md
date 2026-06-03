@@ -61,6 +61,7 @@ Derive the required spec files from PRD features. Always required:
 |------|---------|
 | `docs/dev-specs/overview.md` | Entry point — spec index, PRD-to-spec mapping, design decisions |
 | `docs/dev-specs/architecture.md` | System overview, module map, Zbus channels, boot sequence, memory budget |
+| `docs/dev-specs/partition-layout.md` | DTS-based partition layout per board, NVS capacity notes, migration rationale (**include whenever the project uses MCUboot OTA, Memfault coredumps, or custom NVS partitions**) |
 
 Per module (one file per significant feature):
 
@@ -133,6 +134,26 @@ Choose the observer type that matches the work performed by each module:
 > **Anti-pattern**: calling `k_sleep()` or `http_server_start()` inside a `ZBUS_LISTENER` callback blocks the publisher's thread (e.g. the `net_mgmt` thread) for the entire duration. Use `k_work_schedule(&work, K_MSEC(delay))` from the listener instead.
 
 Add the revision history entry (version 1.0, today's date).
+
+### A6b. Generate `docs/dev-specs/partition-layout.md` (when needed)
+
+Include this spec whenever the project uses any of:
+- MCUboot OTA (requires `slot0_partition` + `slot1_partition`)
+- Memfault coredump storage (requires a dedicated coredump partition)
+- Custom NVS partitions beyond `storage_partition`
+- Migration from Partition Manager (NCS ≤ 3.2) to DTS fixed-partitions (NCS ≥ 3.3)
+
+Use `PARTITION_LAYOUT_TEMPLATE.md` as the base. Fill in:
+- **Document Information**: project, boards, NCS version
+- **Internal flash table** per board: `boot_partition`, `slot0_partition`, `storage_partition`, coredump partition — actual addresses and sizes from the board DTS/overlay or SoC datasheet
+- **External flash table** per board (if present): `slot1_partition` plus any project-specific partitions
+- **Storage Partition Capacity Notes**: list every consumer of the 8 KB `storage_partition` with estimated sizes; flag if headroom is tight
+- **Migration Notes**: fill only when migrating from PM; delete section for new projects
+- **DTS Overlay Checklist**: verify all overlay files exist and are consistent
+
+> Reference: `nordic-wifi-memfault/docs/dev-specs/partition-layout.md` is a complete example covering both nRF7002DK and nRF54LM20DK + nRF7002EB2 with Memfault coredump and log-state partitions.
+
+Add the changelog entry (initial version, today's date).
 
 ### A7. Generate per-module specs
 
