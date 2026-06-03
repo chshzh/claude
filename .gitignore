@@ -51,3 +51,9 @@ sessions/
 file-history/
 wiki/
 chrome/
+paste-cache/
+cursor-claude-control/
+.search-index/
+security/
+.last-update-result.json
+#policy-limits.json
