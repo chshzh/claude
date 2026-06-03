@@ -6,11 +6,11 @@
 |---|---|
 | Product Name | |
 | Version | YYYY-MM-DD-HH-MM |
-| Previous Version | — |
-| Status | Draft |
-| Product Manager | |
 | NCS Version | e.g. v3.2.4 |
 | Target Board(s) | e.g. nRF7002DK, nRF54LM20DK |
+| Status | Draft |
+
+> `Version` = the latest Changelog entry timestamp (the current edit time, `date +%Y-%m-%d-%H-%M`); bump it on **every** change. Keep these exact fields from creation through maintenance — no `Latest Version` variant.
 
 ---
 

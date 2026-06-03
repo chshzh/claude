@@ -83,7 +83,7 @@ Present the plan to the user and confirm before generating.
 
 Use `OVERVIEW_TEMPLATE.md` as the base. Fill in:
 
-- **PRD Version**: read the latest entry from `docs/pm-prd/PRD.md`'s Changelog table and copy its timestamp into the `PRD Version` field of Document Information. Do the same for every spec file generated.
+- **Document Information**: fill the table exactly as defined in the matching template's Document Information (`OVERVIEW_TEMPLATE.md` / `ARCH_TEMPLATE.md` / `MODULE_TEMPLATE.md`) — the template documents what `Version` and `PRD Version` mean. Do this for every spec file generated.
 - **Spec Index**: list every spec file to be generated, with a one-line description and the PRD sections it covers
 - **Architecture Summary**: pattern choice (SMF+Zbus vs multi-threaded) and the top 3–5 design decisions with rationale
 - **PRD-to-Spec Mapping**: table mapping each FR/NFR to the spec file that implements it
@@ -188,10 +188,10 @@ Present the impact analysis to the user before making changes.
 
 For each impacted spec file:
 
-- Update the `PRD Version` field in Document Information to the new PRD Changelog timestamp.
+- Update Document Information per the matching template (it defines `Version` vs `PRD Version`): bump `Version` to the current time, set `PRD Version` to the new PRD Changelog timestamp.
 - Apply the PRD change to the relevant section (state machine, Kconfig, API, etc.).
-- Add a new row to the spec's **Changelog** table:
-  `| YYYY-MM-DD-HH-MM | Updated to PRD v<timestamp>: <summary of change> |`
+- Add a new row to the spec's **Changelog** table (its version cell = the `Version` field = now):
+  `| <now> | Updated to PRD v<prd-version>: <summary of change> |`
 - If a module is newly added, generate its spec from `MODULE_TEMPLATE.md`.
 - If a module is removed, mark it `[DEPRECATED]` in the header; do not delete.
 
@@ -293,6 +293,9 @@ Use this checklist before handing off specs to `chsh-sk-ncs-3.1-coding`.
 - [ ] Every module has a spec file with Overview, Zbus Integration, Error Handling, and Memory Estimate
 - [ ] Architecture.md has a Thread Budget (justified) and Memory Budget (with headroom)
 - [ ] All Zbus channels are listed with publisher, subscriber(s), and message struct
+
+### Document Information (every spec)
+- [ ] DI table matches the template exactly (`Project, Version, PRD Version, NCS Version, Target Board(s), Status`); `Version` is the current edit time and is not equal to `PRD Version`
 
 ### Implementability (the "no-ask" test)
 - [ ] A developer could write all source files using only the specs — no PRD re-reading needed

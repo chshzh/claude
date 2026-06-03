@@ -173,12 +173,19 @@ Proceed to **Generate Output**.
 After any mode:
 
 1. Update `docs/pm-prd/PRD.md` using `PRD_TEMPLATE.md` as the structure.
-2. If the project has a customer-facing README, update it using [`README_TEMPLATE.md`](README_TEMPLATE.md).
-3. Add a new row to the **Revision History** table at the bottom of the document:
+2. Set the **Document Information** table to the exact `PRD_TEMPLATE.md` fields
+   (`Product Name, Version, NCS Version, Target Board(s), Status`) — the same fields
+   from first creation through every maintenance edit. Do **not** introduce variants
+   such as `Latest Version`. Set **`Version`** to the **current time**
+   (`date +%Y-%m-%d-%H-%M`); it must equal the newest Changelog row you add in the next
+   step, and you bump it on every edit.
+3. If the project has a customer-facing README, update it using [`README_TEMPLATE.md`](README_TEMPLATE.md).
+4. Add a new row to the **Changelog** table:
    ```markdown
    | YYYY-MM-DD-HH-MM | <one-line summary of changes> |
    ```
-3. Confirm: *"PRD updated. New revision added to Revision History."*
+   (`YYYY-MM-DD-HH-MM` = the same current time you put in the `Version` field.)
+5. Confirm: *"PRD updated. New revision added to Changelog (Version = <timestamp>)."*
 
 ---
 
@@ -199,8 +206,9 @@ Before handing off, verify the PRD meets these criteria.
 - [ ] User stories use "As a… I want to… so that…" format
 
 ### Living document
-- [ ] Revision History has a new entry for every change
-- [ ] PRD Version matches the latest Changelog entry date
+- [ ] Changelog has a new entry for every change
+- [ ] Document Information uses the exact `PRD_TEMPLATE.md` fields (no `Latest Version` variant)
+- [ ] The `Version` field equals the latest Changelog entry timestamp (the current edit time)
 
 ### Anti-patterns to avoid
 - Over-specifying implementation details (leave HOW to the engineer)

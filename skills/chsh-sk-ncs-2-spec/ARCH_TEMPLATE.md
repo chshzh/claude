@@ -11,6 +11,9 @@
 | Target Board(s) | e.g. nRF7002DK |
 | Status | Draft |
 
+> `Version` = this doc's own latest edit time (`date +%Y-%m-%d-%H-%M`); bump it on **every** edit.
+> `PRD Version` = the PRD Changelog timestamp this doc tracks. The two normally **differ** — never set them equal.
+
 ---
 
 ## Changelog

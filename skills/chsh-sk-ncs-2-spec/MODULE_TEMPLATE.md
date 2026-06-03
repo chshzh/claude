@@ -4,10 +4,15 @@
 
 | Field | Value |
 |-------|-------|
-| Module | |
+| Project | |
 | Version | YYYY-MM-DD-HH-MM |
 | PRD Version | YYYY-MM-DD-HH-MM |
+| NCS Version | e.g. v3.2.4 |
+| Target Board(s) | e.g. nRF7002DK |
 | Status | Draft |
+
+> `Version` = this spec's own latest edit time (`date +%Y-%m-%d-%H-%M`); bump it on **every** edit.
+> `PRD Version` = the PRD Changelog timestamp this spec tracks. The two normally **differ** — never set them equal.
 
 ---
 

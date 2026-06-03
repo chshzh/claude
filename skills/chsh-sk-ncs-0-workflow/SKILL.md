@@ -204,6 +204,19 @@ log evidence of correct behavior.
 
 ## Document Conventions
 
+### Document Information header
+
+Every `PRD.md` and engineering spec opens with a **Document Information** table whose
+fields come **verbatim from the matching template** (`PRD_TEMPLATE.md`, `OVERVIEW_TEMPLATE.md`,
+`ARCH_TEMPLATE.md`, `MODULE_TEMPLATE.md`) and stay identical from creation through every
+maintenance edit — no ad-hoc variants like `Latest Version`.
+
+- **`Version`** = the document's **own** latest edit timestamp (the current time, = its
+  newest Changelog row). Bump it on every edit.
+- **`PRD Version`** (specs only) = the PRD Changelog timestamp the spec is synced to.
+- `Version` and `PRD Version` are different timestamps and must **not** be set equal —
+  if they match, `Version` was filled in wrong.
+
 ### Living documents — Changelog table
 
 `PRD.md` and all engineering specs are **living documents** with a single canonical filename.
