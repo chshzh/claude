@@ -11,7 +11,7 @@
     "agentmemory"
   ],
   "enabledPlugins": {
-    "agentmemory@agentmemory": true,
+    "agentmemory@agentmemory": false,
     "security-guidance@claude-plugins-official": true,
     "playwright@claude-plugins-official": true,
     "code-review@claude-plugins-official": true,
@@ -19,7 +19,7 @@
     "chrome-devtools-mcp@claude-plugins-official": true,
     "atlassian@claude-plugins-official": true,
     "superpowers@claude-plugins-official": true,
-    "clangd-lsp@claude-plugins-official": true
+    "clangd-lsp@claude-plugins-official": false
   },
   "extraKnownMarketplaces": {
     "agentmemory": {

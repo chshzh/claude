@@ -25,7 +25,6 @@
 *~
 *.bak
 *.backup
-!.claude.json.backup
 *.orig
 
 # claude
@@ -40,7 +39,6 @@ skills/**/config.json
 skills/chsh-sk-skill-review/report-*.md
 
 # Claude Code runtime state — do NOT track
-.claude.json
 backups/
 cache/
 history.jsonl
@@ -56,4 +54,4 @@ cursor-claude-control/
 .search-index/
 security/
 .last-update-result.json
-#policy-limits.json
+policy-limits.json
