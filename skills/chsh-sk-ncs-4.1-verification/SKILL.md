@@ -27,13 +27,25 @@ can run in CI.
 ## Step 0 — Check Inputs
 
 ```bash
-cat docs/pm-prd/PRD.md              # acceptance criteria
-ls docs/dev-specs/                  # spec files
-grep "SPECS_VERSION" src/main.c     # spec version tag
-west build --build-dir build/ 2>&1 | tail -5   # confirm build baseline
+# Extract version chain — record all three before proceeding
+grep -m1 -E "^##\s+v[0-9]" docs/pm-prd/PRD.md            # → PRD_VERSION
+grep -m1 -E "^##\s+v[0-9]" docs/dev-specs/overview.md    # → SPECS_VERSION
+grep "SPECS_VERSION" src/main.c                            # → code version tag
+
+# Remaining inputs
+ls docs/dev-specs/                                         # spec files present
+west build --build-dir build/ 2>&1 | tail -5              # confirm build baseline
 ```
 
-Note the PRD Changelog version and Specs version — both go into all report headers.
+Record `PRD_VERSION` (latest PRD Changelog entry), `SPECS_VERSION` (latest specs/overview.md Changelog entry), and the version tag in `src/main.c` — all three go into every report header. The version chain must satisfy:
+
+```
+PRD_VERSION  →  specs/overview.md written against PRD_VERSION
+                  ↓
+             SPECS_VERSION  →  src/main.c SPECS_VERSION tag matches
+                                  ↓
+                             README features reflect current PRD features
+```
 
 ---
 
@@ -81,12 +93,50 @@ Zero warnings required. Record binary size. Any warning = P1.
 
 ### 4.1.3 Documentation Consistency Audit
 
+Work through the version chain in order. A failure at an earlier step blocks the steps below it.
+
+**Step A — PRD version → Specs**
+
+```bash
+# 1. Read the latest PRD Changelog entry to get PRD_VERSION
+grep -A3 -m1 -E "^##\s+v[0-9]" docs/pm-prd/PRD.md
+
+# 2. Confirm specs/overview.md declares it was written against PRD_VERSION
+grep -i "prd.version\|based on prd\|prd_version\|PRD v" docs/dev-specs/overview.md | head -5
+```
+
 | Check | Pass condition |
 |-------|----------------|
-| `SPECS_VERSION` in `src/main.c` | Matches latest `docs/dev-specs/overview.md` Changelog entry |
-| Spec modules | Every `docs/dev-specs/<module>.md` has a `src/modules/<name>/` counterpart |
-| README feature list | Reflects current PRD features (no stale or missing entries) |
-| PRD acceptance criteria in specs | Each FR/NFR traceable to at least one spec requirement |
+| Specs reference current PRD version | `docs/dev-specs/overview.md` header/changelog explicitly references `PRD_VERSION`; no older PRD version cited |
+| PRD FR/NFR coverage | Every Functional Requirement and Non-Functional Requirement in PRD traceable to at least one spec requirement |
+
+**Step B — Specs version → Code** *(only if Step A passes)*
+
+```bash
+# 1. Read the latest Specs Changelog entry to get SPECS_VERSION
+grep -A3 -m1 -E "^##\s+v[0-9]" docs/dev-specs/overview.md
+
+# 2. Confirm src/main.c carries the matching tag
+grep "SPECS_VERSION" src/main.c
+```
+
+| Check | Pass condition |
+|-------|----------------|
+| `SPECS_VERSION` in `src/main.c` | Matches the latest `docs/dev-specs/overview.md` Changelog entry |
+| Spec modules → code | Every `docs/dev-specs/<module>.md` has a `src/modules/<name>/` counterpart |
+
+**Step C — PRD features → README** *(only if Steps A & B pass)*
+
+```bash
+# Extract feature list from PRD (FR section) and compare against README
+grep -E "^\*\*?FR[0-9]|^-.*feature" docs/pm-prd/PRD.md | head -20
+grep -i "feature\|capability\|support" README.md | head -20
+```
+
+| Check | Pass condition |
+|-------|----------------|
+| README feature list | Every PRD feature (FR items) mentioned in README; no stale or removed features listed |
+| No undocumented features in README | README does not describe features absent from the PRD |
 
 ### 4.1.4 Generate Verification Report
 
@@ -97,7 +147,7 @@ Create `docs/qa-test/VERIFICATION-YYYY-MM-DD-HH-MM.md` using `VERIFICATION_TEMPL
 | Document Info | PRD version, Specs version, reviewer, date |
 | Code Review | Findings per check, severity (P0/P1/P2) |
 | Build Result | Pass/Fail, warning count, binary size |
-| Docs Audit | SPECS_VERSION match, spec→code coverage gaps |
+| Docs Audit | Version chain: PRD→Specs (Step A), Specs→Code (Step B), PRD features→README (Step C); coverage gaps |
 | Routing | P0 → Phase 3 / spec gap → Phase 2 / ✅ proceed to 4.2 |
 
 ---
