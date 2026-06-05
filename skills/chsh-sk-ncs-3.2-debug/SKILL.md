@@ -89,7 +89,7 @@ Required information:
   | nRF7002DK | VCOM1 | `...3` e.g. `/dev/tty.usbmodem0010507879623` | False | Application logs on VCOM1; VCOM0 is NET core |
   | nRF54LM20DK + nRF7002EB2 | VCOM0 | `...1` e.g. `/dev/tty.usbmodem0010518067141` | True | Shield overlay disables UART20; app logs on UART30/VCOM0 |
   | nRF54LM20DK (no shield) | VCOM1 | `...3` e.g. `/dev/tty.usbmodem0010518067143` | False | UART20/VCOM1 is the application log port |
-  | nRF5340 Audio DK + nRF7002EK | VCOM0 | `...1` e.g. `/dev/tty.usbmodem0010501119811` | False | Application logs on VCOM0; PCA10121 board |
+  | nRF5340 Audio DK + nRF7002EK | VCOM0 | `...1` e.g. `/dev/tty.usbmodem0010501119811` | True | Application logs on VCOM0; PCA10121 board |
 
   Port suffix pattern: VCOM0 → last digit `1`, VCOM1 → last digit `3`.
 - **Second reference board** (if available): same HW with known-good firmware
@@ -108,7 +108,7 @@ Board options to present:
   A) nRF54LM20DK+nRF7002EB2  — VCOM0 (suffix ...1, rtscts=True)  e.g. /dev/tty.usbmodem0010518067141
   B) nRF7002DK               — VCOM1 (suffix ...3, rtscts=False) e.g. /dev/tty.usbmodem0010507879623
   C) nRF54LM20DK (no shield) — VCOM1 (suffix ...3, rtscts=False) e.g. /dev/tty.usbmodem0010518067143
-  D) nRF5340 Audio DK + nRF7002EK — VCOM0 (suffix ...1, rtscts=False) e.g. /dev/tty.usbmodem0010501119811
+  D) nRF5340 Audio DK + nRF7002EK — VCOM0 (suffix ...1, rtscts=True) e.g. /dev/tty.usbmodem0010501119811
   E) Other                   — specify board name and port
 
 Pre-filled default when context is silent: option A.
