@@ -10,6 +10,8 @@
 | Target Board(s) | e.g. nRF7002DK, nRF54LM20DK |
 | Status | Draft |
 
+> **Status values:** `Draft` → `In Review` → `Approved` → `Implemented` → `Archived`
+
 > `Version` = the latest Changelog entry timestamp (the current edit time, `date +%Y-%m-%d-%H-%M`); bump it on **every** change. Keep these exact fields from creation through maintenance — no `Latest Version` variant.
 
 ---
@@ -263,14 +265,4 @@ Example:
 |---|---|---|---|
 | 1 | | | |
 
----
 
-## 10. Engineering Spec References
-
-*Filled in by the Developer Engineer after receiving this PRD.*
-
-| Spec file | Covers |
-|---|---|
-| [architecture.md](../dev-specs/architecture.md) | System design, module map, boot sequence |
-| [network-module.md](../dev-specs/network-module.md) | Wi-Fi STA / SoftAP / P2P |
-| *(add more as created)* | |
