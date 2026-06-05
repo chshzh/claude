@@ -30,5 +30,7 @@
     }
   },
   "theme": "auto",
-  "verbose": true
+  "verbose": true,
+  "model": "sonnet",
+  "effortLevel": "high"
 }
