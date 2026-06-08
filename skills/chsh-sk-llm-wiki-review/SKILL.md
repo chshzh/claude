@@ -200,7 +200,7 @@ or the source URL has changed since ingest. Severity P2.
 
 ## Step 7 — Page Size
 
-Pages over 200 lines are split candidates per the standard schema. Flag
+Pages over 500 lines are split candidates per the standard schema. Flag
 with severity P2 and propose natural split points (top-level `##` sections).
 
 ---
@@ -353,15 +353,15 @@ Fill in `title` from the first `#` heading, `created`/`updated` from file mtime,
 **P1 — page missing from `index.md`:**
 Add under the correct section header in `index.md`:
 ```
-- [[entities/thing-name]] — one-line description
+- [page-name](entities/thing-name.md) — one-line description
 ```
 Use the page's `title:` frontmatter field for the description. Then bump `index.md`'s own `updated` date and increment its page count.
 
 **P1 — orphan page (zero inbound links):**
-Search existing pages for any mention of the topic; if found, add a `[[wikilink]]` to the orphan from the most relevant page. If no natural home exists, add a bare link in `index.md` or a related page.
+Search existing pages for any mention of the topic; if found, add a `[text](relative/path.md)` link to the orphan from the most relevant page. If no natural home exists, add a bare link in `index.md` or a related page.
 
-**P2 — page over 200 lines:**
-Identify the largest `##` section. If it is standalone content, create a new page for it (`concepts/subtopic.md`) and replace the section with a 2-line summary + `[[subtopic]]` link.
+**P2 — page over 500 lines:**
+Identify the largest `##` section. If it is standalone content, create a new page for it (`concepts/subtopic.md`) and replace the section with a 2-line summary + `[subtopic](concepts/subtopic.md)` link.
 
 ---
 
@@ -405,7 +405,7 @@ prompt that the user can run against fresh sources to detect updates.
 
 - **False positives in code blocks**: Links and credential patterns inside triple-backtick blocks are illustrative examples, not real references or leaks. Flag them with a note but do not mark P0.
 - **Intentional placeholder links**: `path.md`, `reference.md`, `examples.md` in skills' own illustrative SKILL.md examples are template placeholders, not dead links. Do not flag them.
-- **`index.md` / `SCHEMA.md` / `log.md` are exempt from orphan check**: These three root files are expected to have zero inbound links from other pages.
+- **`index.md` / `SCHEMA.md` / `log.md` / `README.md` are exempt from orphan, staleness, and quality-signal checks** (`contested`, `confidence`): These root files are not wiki pages and their content (including template code blocks in `SCHEMA.md`) should not be scanned for frontmatter signals.
 - **LOG RESTORE markers need a full buffer**: `log.md` entries that reference LOG RESTORE only appear in Memfault when the log buffer was full at disconnect. A partial run may look like a missing entry but is correct.
 - **sha256 drift on local edits**: If `raw/` files were edited locally (notes added, formatting fixed), sha256 will mismatch. Decide whether to re-hash or revert the edit — do not silently re-hash without user confirmation.
 
