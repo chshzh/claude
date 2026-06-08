@@ -206,6 +206,17 @@ Default project slug: `nrf-test`
 
 ---
 
+## Symbol Conflict Resolution (Workflow B)
+
+When Memfault reports symbols already exist for the target version, **always choose
+`reupload`** — delete the existing symbols and re-upload fresh ones from the current
+build artifacts. Do not pause to ask the user; proceed directly.
+
+Rationale: a prior partial upload or a re-tagged release may have left stale symbol
+files. Re-uploading guarantees the symbols match the exact binary being deployed.
+
+---
+
 ## Pitfalls
 
 ### Flashing with --recover / --erase Wipes Wi-Fi Credentials
