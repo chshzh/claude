@@ -88,7 +88,7 @@ Link format: `[page-name](relative-path.md)` — standard markdown, NOT `[[wikil
 
 Agent skills are reusable procedure files (`SKILL.md`) the agent reads before executing a specialized workflow (commit, release, debug, OTA, etc.).
 
-**Full skill index:** `.claude/skills/chsh-sk-skill-review/REGISTRY.md` — 24 skills, one-line trigger for each.
+**Full skill index:** `.claude/skills/index.md` — categorized list of all skills with one-line triggers.
 
 **When to use a skill:** When the user's request matches a skill trigger, load its `SKILL.md` with `read_file` before acting. Key skills for this workspace:
 
