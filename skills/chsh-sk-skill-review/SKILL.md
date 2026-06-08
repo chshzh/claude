@@ -35,6 +35,19 @@ Capture from SCHEMA.md:
 - Category taxonomy (for index.md completeness check)
 - Link conventions
 
+### Early-exit: skip if nothing changed
+
+```bash
+LAST_AUDIT_COMMIT=$(grep '| (review) |' ~/.claude/skills/log.md | tail -1 | grep -oP '`\K[0-9a-f]{7,}(?=`)' || true)
+CURRENT_COMMIT=$(git -C ~/.claude/skills rev-parse --short HEAD 2>/dev/null || echo "unknown")
+if [ -n "$LAST_AUDIT_COMMIT" ] && [ "$LAST_AUDIT_COMMIT" = "$CURRENT_COMMIT" ]; then
+  echo "Skills repo unchanged since last audit ($CURRENT_COMMIT). Nothing to do."
+  # exit early — no report needed
+fi
+```
+
+If the commit matches, stop and report "no changes since last audit". Only proceed past this point if the repo has new commits.
+
 ---
 
 ## Step 0c — Discover All Skills
@@ -345,8 +358,10 @@ For each approved fix:
 1. Apply using StrReplace (prefer) or Write
 2. Log what was changed in the report under `## Applied Fixes`
 3. Mark the issue resolved
-4. After all fixes, append a row to `~/.claude/skills/log.md`:
-   `| YYYY-MM-DD | (review) | N issues fixed: <brief summary> |`
+4. After all fixes are applied (but **before committing**), append a row to `~/.claude/skills/log.md`:
+   `| YYYY-MM-DD | (review) | N issues fixed: <brief summary> | \`<short-commit>\` |`
+   Leave `<short-commit>` as a placeholder — it will be filled by the commit step.
+5. Commit all changed skill files **and `log.md` together** via `chsh-sk-git-commit`. The resulting commit hash is the one that belongs in the log row — since `log.md` is part of that same commit, HEAD will equal the recorded hash after the push, enabling the early-exit check on the next audit run.
 
 Do NOT apply split or delete operations without explicit per-item approval.
 
@@ -429,7 +444,7 @@ Check if skills with `Self-Update Policy` sections were last updated recently (v
 - **Intentional placeholder links**: `path.md`, `reference.md`, `examples.md` in `chsh-sk-skill-create` and `chsh-sk-llm-wiki-review` are illustrative template placeholders, not dead links.
 - **P1-A rewrites must preserve content**: When fixing a description to start with the routing trigger, keep all original information — do not shorten, summarize, or drop details.
 - **P2 requires extraction, not deletion**: A 600-line skill is not fixed by cutting content; the content must move to `references/` so agents can still load it when needed.
-- **Private IPs in hermes-setup are intentional**: `192.168.75.30` is a lab VM address documented in `chsh-sk-hermes-setup`. Flag it in the report but do not auto-remove.
+- **Private IPs in router-control/hermes-setup are intentional**: `192.168.75.30` is a lab VM address documented in `chsh-sk-router-control`. Flag it in the report but do not auto-remove.
 
 ---
 
