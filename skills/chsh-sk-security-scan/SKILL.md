@@ -83,4 +83,11 @@ BLOCK findings → P0. WARN findings → P1 (review required, may be intentional
 
 ## Self-Update Policy
 
-After each use, check if a new false positive or missed pattern was observed. If so, propose an update to this file and `scripts/scan.py` via `AskQuestion`.
+At the **end of each conversation**, check if a new false positive or missed pattern was observed.
+
+If updates are warranted:
+1. Collect all proposed changes with a brief rationale for each.
+2. Present a summary to the user and ask for approval using `AskQuestion`.
+3. Apply approved updates to this file and `scripts/scan.py` immediately.
+
+Do **not** modify this skill mid-conversation unless the user explicitly asks.

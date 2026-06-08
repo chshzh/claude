@@ -78,7 +78,11 @@ The skill should stay concise and delegation-focused; commit trailer format deta
 
 ## Self-Update Policy
 
-At the end of each conversation, check if any facts here or in `~/.claude/agents/chsh-ag-git.md` are new, corrected, or outdated. If so:
-1. Collect proposed changes with rationale.
-2. Ask for approval via `AskQuestion`.
-3. Apply approved updates immediately.
+At the **end of each conversation**, check if any facts here or in `~/.claude/agents/chsh-ag-git.md` are new, corrected, or outdated.
+
+If updates are warranted:
+1. Collect all proposed changes with a brief rationale for each.
+2. Present a summary to the user and ask for approval using `AskQuestion`.
+3. Apply approved updates to this file immediately.
+
+Do **not** modify this skill mid-conversation unless the user explicitly asks.

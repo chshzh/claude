@@ -289,11 +289,12 @@ Always set the overlay as `CONFIG_MEMFAULT_NCS_FW_VERSION="v<tag>"` before build
 ## Self-Update Policy
 
 At the **end of each conversation** involving Memfault work, check whether any
-of the following changed and update this skill or `chsh-ag-memfault` accordingly:
+of the following changed: Memfault API behaviour, workflow steps, build commands,
+toolchain bundle IDs, or credentials file location.
 
-- New Memfault API behaviour discovered (e.g. new error codes, missing fields)
-- New workflow steps added (e.g. new cohort, new board target)
-- Build commands or toolchain bundle IDs changed
-- Credentials file location or format changed
+If updates are warranted:
+1. Collect all proposed changes with a brief rationale for each.
+2. Present a summary to the user and ask for approval using `AskQuestion`.
+3. Apply approved updates to this file immediately.
 
-Apply updates immediately if the change is clear; ask the user if uncertain.
+Do **not** modify this skill mid-conversation unless the user explicitly asks.

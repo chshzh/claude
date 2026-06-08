@@ -95,7 +95,11 @@ The script reads `~/.cursor/mcp.json` using a comment-stripping regex before
 ## Self-Update Policy
 
 At the **end of each conversation**, check whether any new import sources,
-format changes, or dedup edge cases were discovered. Update this file if:
-- A new VS Code session format is found
-- The agentmemory server import API version changes
-- A new gotcha is observed during an actual run
+format changes, or dedup edge cases were discovered.
+
+If updates are warranted:
+1. Collect all proposed changes with a brief rationale for each.
+2. Present a summary to the user and ask for approval using `AskQuestion`.
+3. Apply approved updates to this file immediately.
+
+Do **not** modify this skill mid-conversation unless the user explicitly asks.
