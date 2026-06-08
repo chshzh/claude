@@ -375,55 +375,8 @@ Update the "Total skills" count and "Last updated" date in the index header.
 
 ## Complete Example
 
-Here's a complete example of a well-structured skill:
-
-**Directory structure:**
-```
-code-review/
-├── SKILL.md
-├── STANDARDS.md
-└── examples.md
-```
-
-**SKILL.md:**
-```markdown
----
-name: code-review
-description: Review code for quality, security, and maintainability following team standards. Use when reviewing pull requests, examining code changes, or when the user asks for a code review.
----
-
-# Code Review
-
-## Quick Start
-
-When reviewing code:
-
-1. Check for correctness and potential bugs
-2. Verify security best practices
-3. Assess code readability and maintainability
-4. Ensure tests are adequate
-
-## Review Checklist
-
-- [ ] Logic is correct and handles edge cases
-- [ ] No security vulnerabilities (SQL injection, XSS, etc.)
-- [ ] Code follows project style conventions
-- [ ] Functions are appropriately sized and focused
-- [ ] Error handling is comprehensive
-- [ ] Tests cover the changes
-
-## Providing Feedback
-
-Format feedback as:
-- 🔴 **Critical**: Must fix before merge
-- 🟡 **Suggestion**: Consider improving
-- 🟢 **Nice to have**: Optional enhancement
-
-## Additional Resources
-
-- For detailed coding standards, see [STANDARDS.md](STANDARDS.md)
-- For example reviews, see [examples.md](examples.md)
-```
+See [`references/complete-example.md`](references/complete-example.md) for a full worked example with directory structure and annotated SKILL.md.
+> **Quick tip**: Description must start with "Use when"/"Load when"; file must end with `## Self-Update Policy`.
 
 ---
 
