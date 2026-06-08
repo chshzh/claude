@@ -40,6 +40,19 @@ Capture from the schema:
 
 The audit must respect the wiki's own conventions, not impose external defaults.
 
+### Early-exit: skip if nothing changed
+
+```bash
+LAST_AUDIT_COMMIT=$(grep -E '^## \[[0-9-]+\] lint \|' "$WIKI/log.md" | tail -1 | grep -oE '`[0-9a-f]{7,}`' | tr -d '`' || true)
+CURRENT_COMMIT=$(git -C "$WIKI" rev-parse --short HEAD 2>/dev/null || echo "unknown")
+if [ -n "$LAST_AUDIT_COMMIT" ] && [ "$LAST_AUDIT_COMMIT" = "$CURRENT_COMMIT" ]; then
+  echo "Wiki repo unchanged since last audit ($CURRENT_COMMIT). Nothing to do."
+  # exit early — no report needed
+fi
+```
+
+If the commit matches, stop and report "no changes since last audit". Only proceed past this point if the repo has new commits.
+
 ---
 
 ## Step 1 — Inventory
@@ -297,7 +310,23 @@ Do NOT ask about groups with zero issues.
 Auto-applicable fixes (with approval):
 - Add page to `index.md` under correct section
 - Bump `updated:` date when applying programmatic fixes
-- Append review entry to `log.md`
+- Append review entry to `log.md` **before committing** (see sequencing below)
+
+### Log entry format and commit sequencing
+
+After all fixes are applied (but **before committing**):
+
+1. Append a lint entry to `$WIKI/log.md`:
+   ```markdown
+   ## [YYYY-MM-DD] lint | Wiki review — N P0 fixed, N P1, N P2 | `<short-commit>`
+   - <one-line summary of key findings>
+   ```
+   Leave `<short-commit>` as a placeholder.
+
+2. Commit all changed wiki files **and `log.md` together** via `chsh-sk-git-commit`.
+   The resulting commit hash replaces the `<short-commit>` placeholder — since `log.md`
+   is part of that same commit, HEAD will equal the recorded hash after push,
+   enabling the early-exit check on the next audit run.
 
 Never auto-apply without approval:
 - Tag changes (semantic)
