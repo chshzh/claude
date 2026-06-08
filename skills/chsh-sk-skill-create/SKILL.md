@@ -8,6 +8,20 @@ description: >-
 
 This skill guides you through creating effective Agent Skills. Skills are markdown files that teach the agent how to perform specific tasks: reviewing PRs using team standards, generating commit messages in a preferred format, querying database schemas, or any specialized workflow.
 
+## Vault Orientation (mandatory when adding to an existing vault)
+
+Before creating a new skill, orient yourself:
+
+```bash
+VAULT=~/.claude/skills
+read_file "$VAULT/SCHEMA.md"     # naming rules, quality thresholds, category taxonomy
+read_file "$VAULT/index.md"      # what skills already exist — avoid duplicates
+```
+
+Check the category taxonomy in SCHEMA.md — you'll need it to place the skill in `index.md`.
+
+---
+
 ## Before You Begin: Gather Requirements
 
 Before creating a skill, gather essential information from the user about:
@@ -341,19 +355,20 @@ If you have access to the AskQuestion tool, use it for efficient structured gath
 
 Confirm `name:` in the SKILL.md frontmatter **exactly matches** the directory name.
 
-Add the new skill to `~/.claude/skills/chsh-sk-skill-review/REGISTRY.md`:
+**A. Add to `index.md`** (`~/.claude/skills/index.md`):
 
-```
-| `<skill-name>` | <when to invoke, ≤10 words> | <primary output> |
-```
-
-If `REGISTRY.md` does not exist yet, create it first at `~/.claude/skills/chsh-sk-skill-review/REGISTRY.md`:
+Find the correct category section (see SCHEMA.md taxonomy). Add an entry:
 
 ```markdown
-# Skill Registry
+- [chsh-sk-new-skill](chsh-sk-new-skill/SKILL.md) — one-line trigger summary
+```
 
-| Skill | Invoke when | Output |
-|-------|-------------|--------|
+Update the "Total skills" count and "Last updated" date in the index header.
+
+**B. Append to `log.md`** (`~/.claude/skills/log.md`):
+
+```markdown
+| YYYY-MM-DD | chsh-sk-new-skill | Created: <one-line description> |
 ```
 
 ---
@@ -427,7 +442,8 @@ Before finalizing a skill, verify:
 - [ ] No LLM-generated boilerplate — every line encodes real domain expertise
 - [ ] `name:` frontmatter matches directory name exactly
 - [ ] No real IP addresses in Quick run examples — use `<server-ip>` placeholder
-- [ ] Entry added to `~/.claude/skills/chsh-sk-skill-review/REGISTRY.md`
+- [ ] Entry added to `~/.claude/skills/index.md` under correct category
+- [ ] Row appended to `~/.claude/skills/log.md`
 
 ### Structure
 - [ ] File references are one level deep

@@ -19,7 +19,25 @@ sensitive config files not in .gitignore). Produces a prioritized fix list.
 
 ---
 
-## Step 0 — Discover All Skills
+## Step 0 — Orient (mandatory)
+
+Read the vault's own conventions before any check:
+
+```bash
+VAULT=~/.claude/skills
+read_file "$VAULT/SCHEMA.md"                  # quality thresholds, category taxonomy, link conventions
+read_file "$VAULT/index.md"                   # full skill inventory
+read_file "$VAULT/log.md" offset=<last 20>    # recent create/update/delete activity
+```
+
+Capture from SCHEMA.md:
+- Quality thresholds (line count, description length, required sections)
+- Category taxonomy (for index.md completeness check)
+- Link conventions
+
+---
+
+## Step 0c — Discover All Skills
 
 ```bash
 # Personal skills (primary target)
@@ -33,30 +51,41 @@ Build a flat list of `(skill_name, path, line_count)` tuples.
 
 ---
 
-## Step 0b — Registry Integrity
+## Step 0d — Index Integrity
 
-Check that `~/.claude/skills/chsh-sk-skill-review/REGISTRY.md` exists and is coherent. If missing, flag **P1** — create it via `chsh-sk-skill-create` Phase 5 and continue with per-skill checks.
+`~/.claude/skills/index.md` is the single source of truth for skill inventory.
 
 ```bash
-REGISTRY=~/.claude/skills/chsh-sk-skill-review/REGISTRY.md
+INDEX=~/.claude/skills/index.md
 
-# Every name in the registry must resolve on disk with a matching name: field
-grep -oP '`\K[a-z0-9-]+(?=`)' "$REGISTRY" | while read name; do
+# Extract skill directory names from index.md links: [name](dir/SKILL.md)
+grep -oP '\]\(\K[^/]+(?=/SKILL\.md)' "$INDEX" | sort > /tmp/index_skills.txt
+
+# Every skill listed in index.md must exist on disk with matching name: field
+while read name; do
   dir=~/.claude/skills/$name
-  [ -d "$dir" ]         || { echo "MISSING DIR: $name";     continue; }
-  [ -f "$dir/SKILL.md" ] || { echo "MISSING SKILL.md: $name"; continue; }
+  [ -d "$dir" ]          || { echo "P1 MISSING DIR: $name"; continue; }
+  [ -f "$dir/SKILL.md" ] || { echo "P1 MISSING SKILL.md: $name"; continue; }
   declared=$(grep "^name:" "$dir/SKILL.md" | sed 's/^name:[[:space:]]*//')
-  [ "$declared" = "$name" ] || echo "NAME MISMATCH: registry=$name  SKILL.md=$declared"
-done
+  [ "$declared" = "$name" ] || echo "P0 NAME MISMATCH: index=$name  SKILL.md=$declared"
+done < /tmp/index_skills.txt
 
-# Every skill on disk must have a registry entry
+# Every skill directory on disk must appear in index.md
 find ~/.claude/skills -mindepth 2 -maxdepth 2 -name "SKILL.md" | while read f; do
   name=$(basename "$(dirname "$f")")
-  grep -q "\`$name\`" "$REGISTRY" || echo "NOT REGISTERED: $name"
+  grep -q "($name/SKILL.md)" "$INDEX" || echo "P1 NOT IN INDEX: $name"
 done
 ```
 
-Flag each finding as **P1**. Apply registry fixes in Step 9.
+| Issue | Severity |
+|-------|----------|
+| Skill in index, directory missing | P1 |
+| Skill on disk, missing from index | P1 |
+| `name:` in SKILL.md doesn't match directory | P0 |
+| Index skill count in header wrong | P2 |
+| Index "Last updated" older than newest SKILL.md | P2 |
+
+Flag each finding as **P1/P0**. Apply index fixes in Step 9.
 
 ---
 
@@ -316,6 +345,8 @@ For each approved fix:
 1. Apply using StrReplace (prefer) or Write
 2. Log what was changed in the report under `## Applied Fixes`
 3. Mark the issue resolved
+4. After all fixes, append a row to `~/.claude/skills/log.md`:
+   `| YYYY-MM-DD | (review) | N issues fixed: <brief summary> |`
 
 Do NOT apply split or delete operations without explicit per-item approval.
 
@@ -337,20 +368,7 @@ Insert before `## Self-Update Policy` (or before `## Related Skills` if no Self-
 ```
 
 **P1-C — `Self-Update Policy` section is missing, abbreviated, or non-canonical:**
-Replace with the canonical template from `chsh-sk-skill-create` § Canonical Templates. Keep the domain-specific first paragraph; the 3 numbered steps and "Do not modify" line must be verbatim:
-```markdown
-## Self-Update Policy
-
-At the **end of each conversation**, review what was discovered and check
-whether any [domain-specific description].
-
-If updates are warranted:
-1. Collect all proposed changes with a brief rationale for each.
-2. Present a summary to the user and ask for approval using `AskQuestion`.
-3. Apply approved updates to this file immediately.
-
-Do **not** modify this skill mid-conversation unless the user explicitly asks.
-```
+Replace with the canonical template from [`chsh-sk-skill-create` § Canonical Templates](../chsh-sk-skill-create/SKILL.md). Keep the domain-specific first paragraph; the 3 numbered steps and "Do not modify" line must be verbatim.
 
 **P2 — SKILL.md over 500 lines:**
 1. Identify the largest self-contained section (workflow mode, reference table, long example).
