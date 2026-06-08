@@ -55,3 +55,6 @@ cursor-claude-control/
 security/
 .last-update-result.json
 policy-limits.json
+
+.obsidian/
+.claudian/
