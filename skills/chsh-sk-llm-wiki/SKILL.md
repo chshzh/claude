@@ -1,10 +1,10 @@
 ---
 name: chsh-sk-llm-wiki
 description: >-
-  Use when initializing a wiki, adding a source (URL, paper, transcript),
-  asking a domain question backed by the wiki, or running a wiki health audit.
-  Builds and maintains a persistent Karpathy-style LLM Wiki — a directory
-  of interlinked markdown files acting as a compounding knowledge base.
+  Use when initializing a wiki, adding a source (URL, paper, transcript), or
+  asking a domain question backed by the wiki. Builds and maintains a persistent
+  Karpathy-style LLM Wiki — a directory of interlinked markdown files acting as
+  a compounding knowledge base.
 ---
 
 # Karpathy's LLM Wiki
