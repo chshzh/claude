@@ -24,21 +24,21 @@
     "playwright@claude-plugins-official": [
       {
         "scope": "user",
-        "installPath": "/Users/chsh/.claude/plugins/cache/claude-plugins-official/playwright/bf52c096e0c2",
-        "version": "bf52c096e0c2",
+        "installPath": "/Users/chsh/.claude/plugins/cache/claude-plugins-official/playwright/8a6fd0cf78da",
+        "version": "8a6fd0cf78da",
         "installedAt": "2026-06-02T20:47:40.890Z",
-        "lastUpdated": "2026-06-09T07:41:20.697Z",
-        "gitCommitSha": "bf52c096e0c23bfb1cc844dceada17feb743d2fd"
+        "lastUpdated": "2026-06-09T21:23:37.924Z",
+        "gitCommitSha": "8a6fd0cf78da455aa7edb1e3517f2f0b762ec0ee"
       }
     ],
     "code-review@claude-plugins-official": [
       {
         "scope": "user",
-        "installPath": "/Users/chsh/.claude/plugins/cache/claude-plugins-official/code-review/bf52c096e0c2",
-        "version": "bf52c096e0c2",
+        "installPath": "/Users/chsh/.claude/plugins/cache/claude-plugins-official/code-review/8a6fd0cf78da",
+        "version": "8a6fd0cf78da",
         "installedAt": "2026-06-02T20:47:50.705Z",
-        "lastUpdated": "2026-06-09T07:41:20.690Z",
-        "gitCommitSha": "bf52c096e0c23bfb1cc844dceada17feb743d2fd"
+        "lastUpdated": "2026-06-09T21:23:37.918Z",
+        "gitCommitSha": "8a6fd0cf78da455aa7edb1e3517f2f0b762ec0ee"
       }
     ],
     "telegram@claude-plugins-official": [
