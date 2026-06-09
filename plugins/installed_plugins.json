@@ -24,21 +24,21 @@
     "playwright@claude-plugins-official": [
       {
         "scope": "user",
-        "installPath": "/Users/chsh/.claude/plugins/cache/claude-plugins-official/playwright/6a5c096c0020",
-        "version": "6a5c096c0020",
+        "installPath": "/Users/chsh/.claude/plugins/cache/claude-plugins-official/playwright/bf52c096e0c2",
+        "version": "bf52c096e0c2",
         "installedAt": "2026-06-02T20:47:40.890Z",
-        "lastUpdated": "2026-06-06T20:22:55.275Z",
-        "gitCommitSha": "6a5c096c0020b7972be39506b313b8e679b6b174"
+        "lastUpdated": "2026-06-09T07:41:20.697Z",
+        "gitCommitSha": "bf52c096e0c23bfb1cc844dceada17feb743d2fd"
       }
     ],
     "code-review@claude-plugins-official": [
       {
         "scope": "user",
-        "installPath": "/Users/chsh/.claude/plugins/cache/claude-plugins-official/code-review/6a5c096c0020",
-        "version": "6a5c096c0020",
+        "installPath": "/Users/chsh/.claude/plugins/cache/claude-plugins-official/code-review/bf52c096e0c2",
+        "version": "bf52c096e0c2",
         "installedAt": "2026-06-02T20:47:50.705Z",
-        "lastUpdated": "2026-06-06T20:22:55.280Z",
-        "gitCommitSha": "6a5c096c0020b7972be39506b313b8e679b6b174"
+        "lastUpdated": "2026-06-09T07:41:20.690Z",
+        "gitCommitSha": "bf52c096e0c23bfb1cc844dceada17feb743d2fd"
       }
     ],
     "telegram@claude-plugins-official": [
@@ -54,10 +54,10 @@
     "chrome-devtools-mcp@claude-plugins-official": [
       {
         "scope": "user",
-        "installPath": "/Users/chsh/.claude/plugins/cache/claude-plugins-official/chrome-devtools-mcp/1.1.1",
-        "version": "1.1.1",
+        "installPath": "/Users/chsh/.claude/plugins/cache/claude-plugins-official/chrome-devtools-mcp/1.2.0",
+        "version": "1.2.0",
         "installedAt": "2026-06-02T20:49:06.437Z",
-        "lastUpdated": "2026-06-02T20:49:06.437Z",
+        "lastUpdated": "2026-06-09T07:41:58.126Z",
         "gitCommitSha": "692b28adac70f6475737ffbc4e6e2a0bb65569db"
       }
     ],
