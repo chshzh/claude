@@ -46,13 +46,14 @@ The audit must respect the wiki's own conventions, not impose external defaults.
 ```bash
 LAST_AUDIT_COMMIT=$(grep -E '^## \[[0-9-]+\] lint \|' "$WIKI/log.md" | tail -1 | grep -oE '`[0-9a-f]{7,}`' | tr -d '`' || true)
 CURRENT_COMMIT=$(git -C "$WIKI" rev-parse --short HEAD 2>/dev/null || echo "unknown")
-if [ -n "$LAST_AUDIT_COMMIT" ] && [ "$LAST_AUDIT_COMMIT" = "$CURRENT_COMMIT" ]; then
+DIRTY=$(git -C "$WIKI" status --porcelain | grep -v 'log\.md' || true)
+if [ -n "$LAST_AUDIT_COMMIT" ] && [ "$LAST_AUDIT_COMMIT" = "$CURRENT_COMMIT" ] && [ -z "$DIRTY" ]; then
   echo "Wiki repo unchanged since last audit ($CURRENT_COMMIT). Nothing to do."
   # exit early — no report needed
 fi
 ```
 
-If the commit matches, stop and report "no changes since last audit". Only proceed past this point if the repo has new commits.
+If the commit matches and there are no uncommitted changes (other than log.md's expected dirty state from the previous audit), stop and report "no changes since last audit". Only proceed past this point if the repo has new commits or non-log.md uncommitted changes.
 
 ---
 
@@ -322,12 +323,16 @@ After all fixes are applied (but **before committing**):
    ## [YYYY-MM-DD] lint | Wiki review — N P0 fixed, N P1, N P2 | `<short-commit>`
    - <one-line summary of key findings>
    ```
-   Leave `<short-commit>` as a placeholder.
+   Use `<short-commit>` as a literal placeholder for now.
 
 2. Commit all changed wiki files **and `log.md` together** via `chsh-sk-git-commit`.
-   The resulting commit hash replaces the `<short-commit>` placeholder — since `log.md`
-   is part of that same commit, HEAD will equal the recorded hash after push,
-   enabling the early-exit check on the next audit run.
+
+3. After the commit, get the new HEAD and update the placeholder in-place — **do not commit this update**:
+   ```bash
+   HASH=$(git -C "$WIKI" rev-parse --short HEAD)
+   sed -i '' "s/<short-commit>/$HASH/" "$WIKI/log.md"
+   ```
+   Leave log.md dirty. The early-exit check on the next audit run excludes log.md from its dirty-state test, so this uncommitted hash update is the expected resting state.
 
 Never auto-apply without approval:
 - Tag changes (semantic)

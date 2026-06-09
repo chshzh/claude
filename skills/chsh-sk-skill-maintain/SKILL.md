@@ -40,13 +40,14 @@ Capture from SCHEMA.md:
 ```bash
 LAST_AUDIT_COMMIT=$(grep '| (review) |' ~/.claude/skills/log.md | tail -1 | grep -oP '`\K[0-9a-f]{7,}(?=`)' || true)
 CURRENT_COMMIT=$(git -C ~/.claude/skills rev-parse --short HEAD 2>/dev/null || echo "unknown")
-if [ -n "$LAST_AUDIT_COMMIT" ] && [ "$LAST_AUDIT_COMMIT" = "$CURRENT_COMMIT" ]; then
+DIRTY=$(git -C ~/.claude/skills status --porcelain | grep -v 'log\.md' || true)
+if [ -n "$LAST_AUDIT_COMMIT" ] && [ "$LAST_AUDIT_COMMIT" = "$CURRENT_COMMIT" ] && [ -z "$DIRTY" ]; then
   echo "Skills repo unchanged since last audit ($CURRENT_COMMIT). Nothing to do."
   # exit early — no report needed
 fi
 ```
 
-If the commit matches, stop and report "no changes since last audit". Only proceed past this point if the repo has new commits.
+If the commit matches and there are no uncommitted changes (other than log.md's expected dirty state from the previous audit), stop and report "no changes since last audit". Only proceed past this point if the repo has new commits or non-log.md uncommitted changes.
 
 ---
 
@@ -360,8 +361,14 @@ For each approved fix:
 3. Mark the issue resolved
 4. After all fixes are applied (but **before committing**), append a row to `~/.claude/skills/log.md`:
    `| YYYY-MM-DD | (review) | N issues fixed: <brief summary> | \`<short-commit>\` |`
-   Leave `<short-commit>` as a placeholder — it will be filled by the commit step.
-5. Commit all changed skill files **and `log.md` together** via `chsh-sk-git-commit`. The resulting commit hash is the one that belongs in the log row — since `log.md` is part of that same commit, HEAD will equal the recorded hash after the push, enabling the early-exit check on the next audit run.
+   Use `<short-commit>` as a literal placeholder for now.
+5. Commit all changed skill files **and `log.md` together** via `chsh-sk-git-commit`.
+6. After the commit, get the new HEAD and update the placeholder in-place — **do not commit this update**:
+   ```bash
+   HASH=$(git -C ~/.claude/skills rev-parse --short HEAD)
+   sed -i '' "s/<short-commit>/$HASH/" ~/.claude/skills/log.md
+   ```
+   Leave log.md dirty. The early-exit check on the next audit run excludes log.md from its dirty-state test, so this uncommitted hash update is the expected resting state.
 
 Do NOT apply split or delete operations without explicit per-item approval.
 
