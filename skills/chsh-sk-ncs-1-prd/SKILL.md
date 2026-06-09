@@ -11,7 +11,7 @@ and maintains a single `PRD.md` in `docs/` with a built-in revision history tabl
 No Kconfig, no Flash/RAM numbers, no architecture diagrams — those are for the engineer.
 The PRD answers: **What should this device do, for whom, and how should it behave?**
 
-Template: [`PRD_TEMPLATE.md`](PRD_TEMPLATE.md)
+Templates: [`PRD_TEMPLATE.md`](PRD_TEMPLATE.md), [`README_TEMPLATE.md`](README_TEMPLATE.md)
 
 ---
 
@@ -180,6 +180,24 @@ After any mode:
    (`date +%Y-%m-%d-%H-%M`); it must equal the newest Changelog row you add in the next
    step, and you bump it on every edit.
 3. If the project has a customer-facing README, update it using [`README_TEMPLATE.md`](README_TEMPLATE.md).
+   Apply the section policy below:
+   - `## Project Overview`: keep fixed subsection order (`Introduction`, `Supported hardware`, `Features`, `Target Users`).
+   - `### Introduction`: keep it brief and user-facing (2-4 sentences: what it is, for whom/use case, optional key capabilities).
+   - `### Features`: each bullet must include a short user-facing explanation (`<capability> — <what/why>`).
+   - `### Supported hardware`: keep fixed board/build-target table format.
+   - `### Target Users`: keep exactly Evaluator and Developer bullets.
+   - `## Evaluator Quick Start`: keep fixed 2-step flow (`Step 1 Flash`, `Step 2 Verify`). Any required onboarding (e.g. BLE provisioning) is a sub-step inside Step 1. Step 2 must cover: UART log evidence, button and LED behavior (with `### Buttons` and `### LEDs` tables inside Step 2), and application-logic verification (project-specific).
+   - `## Developer Guide`: keep fixed subsection order (`Project Structure`, `Workspace Setup`, `Build`, `Flash`, `Developer Notes`).
+   - `## Developer Guide` should be reuse-first: copy from an existing project README pattern and edit only project-specific values.
+   - `### Workspace Setup`: preserve Method 1 then Method 2 ordering.
+   - `### Build` and `### Flash`: use fixed dual-board command skeletons; only project-specific args/paths vary.
+   - Preserve existing phrasing patterns for workspace methods, release-version note, and dual-board command layout.
+   - Include optional `### Feature Overlay Builds` and `Subsequent updates` flash block only when relevant to that project.
+   - `## Documentation`: follow the fixed pattern from template (intro sentence + two-column document table).
+   - `## Methodology`: copy/paste the template block verbatim.
+   - `## License`: copy/paste the template block verbatim.
+   - For fixed-pattern sections, preserve section names, order, and structure; only project-specific values/rows should change.
+   - Do not rephrase `## Methodology` or `## License`; keep wording identical across projects.
 4. Add a new row to the **Changelog** table:
    ```markdown
    | YYYY-MM-DD-HH-MM | <one-line summary of changes> |
@@ -209,6 +227,9 @@ Before handing off, verify the PRD meets these criteria.
 - [ ] Changelog has a new entry for every change
 - [ ] Document Information uses the exact `PRD_TEMPLATE.md` fields (no `Latest Version` variant)
 - [ ] The `Version` field equals the latest Changelog entry timestamp (the current edit time)
+- [ ] Customer-facing README uses fixed patterns for Project Overview, Evaluator Quick Start, Buttons & LEDs, Developer Guide, Documentation, Methodology, and License
+- [ ] Developer Guide was reused from canonical pattern and only project-specific values were changed
+- [ ] Features list uses user-facing bullets and each feature includes a brief explanation
 
 ### Anti-patterns to avoid
 - Over-specifying implementation details (leave HOW to the engineer)
