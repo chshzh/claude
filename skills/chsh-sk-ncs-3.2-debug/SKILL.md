@@ -86,8 +86,8 @@ Required information:
 
   | Board config | Log VCOM | Port suffix | rtscts | Notes |
   |---|---|---|---|---|
-  | nRF7002DK | VCOM1 | `...3` e.g. `/dev/tty.usbmodem0010507879623` | False | Application logs on VCOM1; VCOM0 is NET core |
   | nRF54LM20DK + nRF7002EB2 | VCOM0 | `...1` e.g. `/dev/tty.usbmodem0010518067141` | True | Shield overlay disables UART20; app logs on UART30/VCOM0 |
+  | nRF7002DK | VCOM1 | `...3` e.g. `/dev/tty.usbmodem0010507879623` | False | Application logs on VCOM1; VCOM0 is NET core |
   | nRF54LM20DK (no shield) | VCOM1 | `...3` e.g. `/dev/tty.usbmodem0010518067143` | False | UART20/VCOM1 is the application log port |
   | nRF5340 Audio DK + nRF7002EK | VCOM0 | `...1` e.g. `/dev/tty.usbmodem0010501119811` | True | Application logs on VCOM0; PCA10121 board |
 
@@ -366,8 +366,16 @@ CONFIG_THREAD_ANALYZER=y
 
 ## Build and Flash Quick Reference
 
+**Build command policy (verification/repro):**
+- When a debug session includes build verification or repro builds, use only the
+  commands documented in the application's `README.md` `### Build` section.
+- Do not substitute with generic `west build -p` unless that exact command is
+  what README documents.
+- If README has no `### Build` section, report a docs gap and ask for the
+  canonical command before proceeding with build-based validation.
+
 ```bash
-# Build (pristine)
+# Build (pristine) — use this wrapper around the exact README Build command
 nrfutil sdk-manager toolchain launch --ncs-version=${NCS_VERSION:-v3.3.0} -- \
   west build -b <board> -p -d <app>/build <app> -- -DSHIELD=<shield>
 

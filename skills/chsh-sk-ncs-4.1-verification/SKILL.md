@@ -14,7 +14,7 @@ can run in CI.
 ```
 4.1 Verification
 ├── Code review (structure, config, standards)
-├── Build verification (west build -p)
+├── Build verification (README "### Build" commands only)
 └── Documentation consistency audit
 ```
 
@@ -34,7 +34,7 @@ grep "SPECS_VERSION" src/main.c                            # → code version ta
 
 # Remaining inputs
 ls docs/dev-specs/                                         # spec files present
-west build --build-dir build/ 2>&1 | tail -5              # confirm build baseline
+grep -n "^### Build" README.md                            # locate canonical build commands
 ```
 
 Record `PRD_VERSION` (latest PRD Changelog entry), `SPECS_VERSION` (latest specs/overview.md Changelog entry), and the version tag in `src/main.c` — all three go into every report header. The version chain must satisfy:
@@ -85,8 +85,19 @@ Inspect each area below. Flag each finding with severity (P0 / P1 / P2).
 
 ### 4.1.2 Build Verification
 
+**Build command policy (strict):**
+- Use only the commands listed in the application's `README.md` under `### Build`.
+- Do not invent or simplify build commands (no ad-hoc `west build -p`, no custom flags)
+  unless the README command itself requires parameter substitution.
+- If README has multiple board targets, run each command exactly as documented.
+- If `### Build` is missing, fail verification as documentation gap (P1) and stop build checks.
+
 ```bash
-west build -p
+# Run exactly the build commands from README "### Build" section.
+# Example policy:
+#   1) copy each documented command verbatim
+#   2) execute via the configured NCS toolchain launcher
+#   3) record pass/fail, warnings, and binary size for each target
 ```
 
 Zero warnings required. Record binary size. Any warning = P1.
