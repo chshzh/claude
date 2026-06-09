@@ -441,7 +441,7 @@ Check if skills with `Self-Update Policy` sections were last updated recently (v
 ## Gotchas
 
 - **False positives in security scan**: Credential patterns inside illustrative code blocks (e.g. `password = "your-password-here"`) are documentation, not leaks. Always read the surrounding context before flagging.
-- **Intentional placeholder links**: `path.md`, `reference.md`, `examples.md` in `chsh-sk-skill-create` and `chsh-sk-llm-wiki-review` are illustrative template placeholders, not dead links.
+- **Intentional placeholder links**: `path.md`, `reference.md`, `examples.md` in `chsh-sk-skill-create` and `chsh-sk-llm-wiki-maintain` are illustrative template placeholders, not dead links.
 - **P1-A rewrites must preserve content**: When fixing a description to start with the routing trigger, keep all original information — do not shorten, summarize, or drop details.
 - **P2 requires extraction, not deletion**: A 600-line skill is not fixed by cutting content; the content must move to `references/` so agents can still load it when needed.
 - **Private IPs in router-control/hermes-setup are intentional**: `192.168.75.30` is a lab VM address documented in `chsh-sk-router-control`. Flag it in the report but do not auto-remove.

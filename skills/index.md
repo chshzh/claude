@@ -40,7 +40,7 @@
 
 - [chsh-agentmemory-inject-session](chsh-agentmemory-inject-session/SKILL.md) — Bulk-imports Cursor or Claude chat history into AgentMemory
 - [chsh-sk-llm-wiki](chsh-sk-llm-wiki/SKILL.md) — Builds and maintains a Karpathy-style LLM Wiki
-- [chsh-sk-llm-wiki-review](chsh-sk-llm-wiki-review/SKILL.md) — Audits wiki health and lints pages
+- [chsh-sk-llm-wiki-maintain](chsh-sk-llm-wiki-maintain/SKILL.md) — Audits wiki health and lints pages (runs as scheduled routine)
 
 ## Skill Meta
 

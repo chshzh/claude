@@ -1,12 +1,13 @@
 ---
-name: chsh-sk-llm-wiki-review
+name: chsh-sk-llm-wiki-maintain
 description: >-
-  Load when running the daily Hermes wiki audit, or when asked to lint,
-  audit, or health-check a Karpathy-style LLM Wiki for schema compliance,
-  broken links, orphans, stale content, source drift, or contradiction markers.
+  Load when running the daily wiki audit, or when asked to lint, audit, or
+  health-check a Karpathy-style LLM Wiki for schema compliance, broken links,
+  orphans, stale content, source drift, or contradiction markers. Designed to
+  run as a scheduled cloud routine.
 ---
 
-# chsh-sk-llm-wiki-review — Daily LLM Wiki Health Audit
+# chsh-sk-llm-wiki-maintain — Daily LLM Wiki Health Audit
 
 Systematic review of a Karpathy-style LLM Wiki. Finds schema violations,
 broken links, orphan pages, index gaps, stale content, and source drift.
