@@ -45,7 +45,7 @@
 ## Skill Meta
 
 - [chsh-sk-skill-create](chsh-sk-skill-create/SKILL.md) — Creates and authors new SKILL.md files
-- [chsh-sk-skill-review](chsh-sk-skill-review/SKILL.md) — Audits and health-checks existing skills
+- [chsh-sk-skill-maintain](chsh-sk-skill-maintain/SKILL.md) — Audits and health-checks existing skills (runs as scheduled routine)
 
 ## Text & Docs
 

@@ -396,7 +396,7 @@ prompt that the user can run against fresh sources to detect updates.
 |------|-------|
 | Build, ingest, query the wiki | `chsh-sk-llm-wiki` |
 | Author a new skill | `chsh-sk-skill-create` |
-| Audit skills | `chsh-sk-skill-review` |
+| Audit skills | `chsh-sk-skill-maintain` |
 | Commit reviewed wiki fixes | `chsh-sk-git-commit` |
 
 ---

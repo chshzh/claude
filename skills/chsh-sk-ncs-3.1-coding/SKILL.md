@@ -121,6 +121,71 @@ For each module from the spec:
 
 ---
 
+## SMF Implementation Pattern
+
+When a module spec calls for an SMF state machine, use this canonical structure.
+
+**User object** — `smf_ctx` must be the first member:
+
+```c
+struct my_module_obj {
+    struct smf_ctx ctx;   /* MUST be first */
+    struct my_event event;
+    /* other state-local data */
+} s_obj;
+```
+
+**State table** — one entry per state, parent and initial transitions explicit:
+
+```c
+static const struct smf_state states[] = {
+    /* Parent state: entry, run, exit, parent=NULL, initial→child */
+    [STATE_RUNNING] = SMF_CREATE_STATE(running_entry, running_run, NULL,
+                                       NULL, &states[STATE_IDLE]),
+    /* Child states */
+    [STATE_IDLE]    = SMF_CREATE_STATE(idle_entry, idle_run, idle_exit,
+                                       &states[STATE_RUNNING], NULL),
+    [STATE_ACTIVE]  = SMF_CREATE_STATE(active_entry, active_run, active_exit,
+                                       &states[STATE_RUNNING], NULL),
+};
+```
+
+**Thread loop** — run-to-completion: one msgq pop = one `smf_run_state()` call:
+
+```c
+static void my_module_thread(void *a, void *b, void *c)
+{
+    smf_set_initial(SMF_CTX(&s_obj), &states[STATE_RUNNING]);
+    while (1) {
+        k_msgq_get(&my_msgq, &s_obj.event, K_FOREVER);
+        int rc = smf_run_state(SMF_CTX(&s_obj));
+        if (rc) {
+            LOG_INF("state machine terminated: %d", rc);
+            break;
+        }
+    }
+}
+```
+
+**Run function return values:**
+
+| Return | Meaning |
+|--------|---------|
+| `SMF_EVENT_PROPAGATE` | Event not consumed here — pass up to parent's run. **Use as default.** |
+| `SMF_EVENT_HANDLED` | Event consumed — parent run will NOT be called. |
+| *(calling `smf_set_state()`)* | Implicitly stops propagation to parent, regardless of return value. |
+
+**Required Kconfig for hierarchical state machines:**
+
+```kconfig
+CONFIG_SMF_ANCESTOR_SUPPORT=y      # enables parent state pointer
+CONFIG_SMF_INITIAL_TRANSITION=y    # enables parent→child default transition
+```
+
+Both must be set when `SMF_CREATE_STATE` uses non-NULL `parent` or `initial` parameters — without them those parameters are silently ignored.
+
+---
+
 ## Logging Standards
 
 Every module **must** have structured logging at all four levels. This enables post-mortem debugging without rebuilding.
@@ -150,6 +215,9 @@ Every module **must** have structured logging at all four levels. This enables p
 | Kconfig `depends on` vs `select` | Use `depends on` for optional features; use `select` only when the module unconditionally requires a lib (mirrors reference repos) |
 | `prj.conf` overlay order | `EXTRA_CONF_FILE` overlays win; put test-only settings in overlays, not `prj.conf` |
 | `west build -p` vs incremental | Always use `-p` when switching board or overlay set; incremental builds can silently keep stale objects |
+| `smf_set_state()` in exit functions | Generates a log warning and **no transition occurs**. Only call `smf_set_state()` from entry or run functions. |
+| `SMF_EVENT_PROPAGATE` vs `SMF_EVENT_HANDLED` | Return `SMF_EVENT_PROPAGATE` by default so unhandled events bubble to parents. Only return `SMF_EVENT_HANDLED` when you explicitly consumed the event and do not want the parent to see it. Note: calling `smf_set_state()` already stops propagation regardless of the return value. |
+| Missing HSM Kconfig | `CONFIG_SMF_ANCESTOR_SUPPORT=y` and `CONFIG_SMF_INITIAL_TRANSITION=y` are required for parent/initial transitions. Without them, the `parent` and `initial` parameters in `SMF_CREATE_STATE` are silently ignored — the hierarchy simply does not exist at runtime. |
 
 ---
 

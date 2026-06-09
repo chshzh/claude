@@ -1,12 +1,12 @@
 ---
-name: chsh-sk-skill-review
+name: chsh-sk-skill-maintain
 description: >-
-  Load when running the Hermes daily skill audit, or when asked to review,
-  audit, or health-check existing SKILL.md files for quality, duplication,
-  dead links, or structural compliance.
+  Load when running a scheduled or on-demand skill audit. Reviews, audits, and
+  health-checks all SKILL.md files for quality, duplication, dead links, and
+  structural compliance. Designed to run as a scheduled cloud routine.
 ---
 
-# chsh-sk-skill-review — Daily Skill Health Audit
+# chsh-sk-skill-maintain — Daily Skill Health Audit
 
 Systematic review of all Agent Skills. Finds structural violations, duplication,
 stale content, missing cross-references, and security issues (credential leaks,
@@ -285,7 +285,7 @@ For each `config.json` found: verify it is listed in `~/.claude/.gitignore`. If 
 
 Verify `~/.claude/.gitignore` contains at minimum:
 - `skills/**/config.json` — all first-run user setup files at any nesting level
-- `skills/chsh-sk-skill-review/report-*.md` — audit reports (may expose skill internals)
+- `skills/chsh-sk-skill-maintain/report-*.md` — audit reports (may expose skill internals)
 - Any skill-specific known-sensitive files not already matched by `skills/**/config.json`
 
 ---

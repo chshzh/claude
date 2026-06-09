@@ -122,6 +122,6 @@ Do **not** modify this skill mid-conversation unless the user explicitly asks.
 `## Self-Update Policy` section is present. If missing, add the canonical
 snippet above.
 
-**`chsh-sk-skill-review`** — a missing `## Self-Update Policy` section is a
+**`chsh-sk-skill-maintain`** — a missing `## Self-Update Policy` section is a
 **P1 defect**, same severity as a missing Gotchas section. Flag it in the
 Step 1 structure check and Step 6 freshness check.

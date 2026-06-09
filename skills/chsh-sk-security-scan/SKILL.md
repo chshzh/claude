@@ -1,11 +1,11 @@
 ---
 name: chsh-sk-security-scan
-description: Use when scanning files or a git repo for credentials, tokens, private keys, or sensitive data before committing, during a security audit, or when asked to check for secrets or leaks. Also called as a subroutine by chsh-ag-git, chsh-sk-skill-review, and chsh-sk-llm-wiki-review.
+description: Use when scanning files or a git repo for credentials, tokens, private keys, or sensitive data before committing, during a security audit, or when asked to check for secrets or leaks. Also called as a subroutine by chsh-ag-git, chsh-sk-skill-maintain, and chsh-sk-llm-wiki-review.
 ---
 
 # Security Scan
 
-Runs `scripts/scan.py` to detect sensitive data. Called standalone or as a subroutine from `chsh-ag-git`, `chsh-sk-skill-review`, and `chsh-sk-llm-wiki-review`.
+Runs `scripts/scan.py` to detect sensitive data. Called standalone or as a subroutine from `chsh-ag-git`, `chsh-sk-skill-maintain`, and `chsh-sk-llm-wiki-review`.
 
 ## Modes
 

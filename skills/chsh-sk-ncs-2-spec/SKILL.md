@@ -163,7 +163,7 @@ For each module from A2, use `MODULE_TEMPLATE.md` as base. Select the module typ
 - **Overview**: role of this module, version notes
 - **File location**: `src/modules/<name>/` — list expected files
 - **Zbus Integration**: channels subscribed to and published on, with struct definitions
-- **State Machine**: Mermaid `stateDiagram-v2` diagram (SMF pattern); omit for simple modules
+- **State Machine**: Mermaid `stateDiagram-v2` diagram (SMF pattern); omit for simple modules. The diagram must show: all states including parent superstates, initial transition arrows for every parent state, transitions labeled `event [guard] / action`, and error/reject paths — not just the happy path. Use hierarchy only when two or more child states share identical entry/exit logic or a common event handler; flat states are preferred otherwise. Document the run-to-completion model: what feeds events into the machine (msgq or Zbus channel), and that one event maps to one `smf_run_state()` call.
 - **Kconfig Flags**: table of config symbol → description → default value
 - **API / Public Interface**: function signatures with brief descriptions
 - **Error Handling**: list of error conditions and how each is handled
@@ -288,7 +288,12 @@ Rules:
 - Git tracks the actual diff; the Changelog is the human-readable log.
 
 ## Gotchas
-- TODO: add one entry per real observed failure or routing false-positive
+
+| Gotcha | Detail |
+|--------|--------|
+| `smf_set_state()` in exit functions | Calling `smf_set_state()` from an exit function generates a log warning and **no transition occurs**. Spec diagrams must not model a transition firing during exit. |
+| Transition actions run before exit (SMF ≠ UML) | SMF executes transition actions in the context of the source state, before exit actions run. If a spec models "exit then action", the implementation order will be "action then exit". |
+| `smf_set_state()` stops event propagation | Calling `smf_set_state()` inside a run function prevents the parent's run from executing — even if `SMF_EVENT_PROPAGATE` is returned. Account for this when deciding which level of the hierarchy handles which event. |
 
 ## Self-Update Policy
 
@@ -322,6 +327,9 @@ Use this checklist before handing off specs to `chsh-sk-ncs-3.1-coding`.
 - [ ] A developer could write all source files using only the specs — no PRD re-reading needed
 - [ ] All public function signatures are documented with parameters and return types
 - [ ] State machine diagrams show all states and all transitions, including error paths
+- [ ] SMF modules: all parent states have an initial transition defined (required for `CONFIG_SMF_INITIAL_TRANSITION`)
+- [ ] SMF modules: diagram labels which events return `SMF_EVENT_HANDLED` vs `SMF_EVENT_PROPAGATE`
+- [ ] SMF modules: run-to-completion model documented — event source (msgq or Zbus channel), one event per `smf_run_state()` call
 - [ ] Each Kconfig symbol has a default value and a one-line description
 - [ ] SYS_INIT priorities are assigned and justified
 
