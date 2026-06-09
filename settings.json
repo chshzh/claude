@@ -2,6 +2,7 @@
   "permissions": {
     "defaultMode": "default"
   },
+  "model": "sonnet",
   "enabledMcpjsonServers": [
     "logic2",
     "chrome-devtools",
@@ -29,8 +30,7 @@
       }
     }
   },
+  "effortLevel": "high",
   "theme": "auto",
-  "verbose": true,
-  "model": "sonnet",
-  "effortLevel": "high"
+  "verbose": true
 }
