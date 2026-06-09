@@ -30,7 +30,9 @@
 # claude
 /hooks/
 mcp-needs-auth-cache.json
+remote-settings.json
 .last-cleanup
+plugins/.last_inuse_sweep
 
 # Skills — first-run user config files (may contain API keys, server addresses)
 skills/**/config.json
