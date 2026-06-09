@@ -103,7 +103,19 @@ For each module from the spec:
    ```
    Fix all warnings. Confirm UART output matches spec test points.
 
-5. Handoff:
+5. Set up CI (new projects only):
+   - Read the template at `.claude/skills/chsh-sk-ncs-3.1-coding/build_template.yml`
+   - Replace all `<PLACEHOLDER>` tokens with the project-specific values:
+     - `<APP_NAME>` → repo/directory name
+     - `<APP_DISPLAY_NAME>` → human-readable title
+     - `<GITHUB_REPO>` → `owner/repo` slug
+     - `<CMAKE_ARGS_NRF54LM20DK>` → extra cmake args for nRF54LM20DK (e.g. `"-DSHIELD=nrf7002eb2"`)
+     - `<CMAKE_ARGS_NRF7002DK>` → extra cmake args for nRF7002DK (empty `""` if none)
+     - `<CMAKE_ARGS_NRF5340_AUDIO_DK>` → extra cmake args for nRF5340 Audio DK (e.g. `"-DSHIELD=nrf7002ek"`)
+   - Write the result to `.github/workflows/build.yml`
+   - If `APP_VERSION_STRING` is not used in the app's `CMakeLists.txt`, remove the version-injection block from the Build step.
+
+6. Handoff:
    > "Implementation complete. Run **chsh-sk-ncs-4.1-verification** for Phase 4
    > Verification & Test (static review + hardware validation)."
 
