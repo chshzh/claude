@@ -187,8 +187,8 @@ Check what the device needs to communicate over the network:
 
 | Board | Wi-Fi chip | Buttons | LEDs | Supported modes |
 |---|---|---|---|---|
-| nRF7002DK | nRF7002 (built in) | 2 | 2 | SoftAP, STA |
 | nRF54LM20DK + nRF7002EBII shield | nRF7002 (shield) | 3 | 4 | SoftAP, STA, P2P |
+| nRF7002DK | nRF7002 (built in) | 2 | 2 | SoftAP, STA |
 
 *Note: BUTTON 3 on nRF54LM20DK is unavailable when nRF7002EBII shield is attached.*
 

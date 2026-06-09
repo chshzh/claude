@@ -151,7 +151,7 @@ Use `PARTITION_LAYOUT_TEMPLATE.md` as the base. Fill in:
 - **Migration Notes**: fill only when migrating from PM; delete section for new projects
 - **DTS Overlay Checklist**: verify all overlay files exist and are consistent
 
-> Reference: `nordic-wifi-memfault/docs/dev-specs/partition-layout.md` is a complete example covering both nRF7002DK and nRF54LM20DK + nRF7002EB2 with Memfault coredump and log-state partitions.
+> Reference: `nordic-wifi-memfault/docs/dev-specs/partition-layout.md` is a complete example covering both nRF54LM20DK + nRF7002EB2 and nRF7002DK with Memfault coredump and log-state partitions.
 
 Add the changelog entry (initial version, today's date).
 
