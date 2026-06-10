@@ -9,6 +9,24 @@ Turns the product requirements in `docs/pm-prd/PRD.md` into the engineering spec
 that drive implementation. Specs live in `docs/dev-specs/` and are the contract
 between design (this skill) and implementation (`chsh-sk-ncs-3.1-coding`).
 
+## Decision Flow
+
+```
+User request
+  │
+  ▼
+Step 0: Detect context
+  ├─ No specs exist ────────────────────────→ [A] New Design        (A1–A8)
+  ├─ Specs exist + PRD has newer revision ────→ [B] Update Specs      (B1–B4)
+  └─ Code exists, no specs ───────────────→ [C] Reverse Design
+                            │
+                  (A and B)
+                            │
+                            ▼
+                   Handoff AskQuestion
+                   Run chsh-sk-ncs-3.1-coding? Yes / No
+```
+
 ---
 
 > **Knowledge sources**: Use `mcp_nordic-mcp_nordicsemi_search_sources` before specifying board targets, peripheral names, or Kconfig symbols — never hardcode these from memory.
@@ -28,7 +46,6 @@ git log --oneline -5                             # recent commits
 | No specs exist | **A — New Design** |
 | Specs exist, PRD has newer revision (check Revision History table) | **B — Update Specs** |
 | Code exists, no specs → document what is built | **C — Reverse Design** |
-| User asks to review spec-vs-PRD alignment only | **D — Alignment Check** |
 
 Ask the user to confirm the mode before proceeding.
 
@@ -188,8 +205,14 @@ After all specs are generated:
 
 1. Present a summary table of all files created.
 2. Ask the user to review and approve the specs.
-3. Remind the user:
-   > "Specs are ready. Run **chsh-sk-ncs-3.1-coding** to implement the code."
+3. Call `AskQuestion`:
+   ```
+   AskQuestion:
+     prompt: "Specs ready. Run chsh-sk-ncs-3.1-coding now to implement?"
+     options:
+       - "Yes — load chsh-sk-ncs-3.1-coding"
+       - "No — stop here"
+   ```
 
 ---
 
@@ -201,9 +224,24 @@ Use when the PRD has a newer revision entry than the latest spec revision.
 
 1. Read the PRD's **Revision History** table — note the new entries since the last spec update.
 2. Read each spec's **Revision History** table — note its current version date.
-3. List which PRD sections changed and which specs are affected.
+3. For each FR in the PRD, check which spec covers it and whether the spec's acceptance criteria still match.
+4. Present the gap table to the user:
 
-Present the impact analysis to the user before making changes.
+| PRD section | Spec file | Status | Gap |
+|-------------|-----------|--------|-----|
+| FR-001 Wi-Fi STA | network-module.md | OK | — |
+| FR-004 P2P | network-module.md | Gap | P2P error states not specified |
+
+5. Call `AskQuestion`:
+   ```
+   AskQuestion:
+     prompt: "Spec gap analysis complete. Apply fixes or report only?"
+     options:
+       - "Fix — update affected specs (proceed to B2)"
+       - "Report only — stop here"
+   ```
+   - **"Report only"** → stop.
+   - **"Fix"** → continue to B2.
 
 ### B2. Update affected specs
 
@@ -228,7 +266,13 @@ Always update `overview.md`:
 
 ### B4. Handoff
 
-> "Specs updated. Review the changes, then run **chsh-sk-ncs-3.1-coding** to update the implementation."
+```
+AskQuestion:
+  prompt: "Specs updated. Run chsh-sk-ncs-3.1-coding now to implement?"
+  options:
+    - "Yes — load chsh-sk-ncs-3.1-coding"
+    - "No — stop here"
+```
 
 ---
 
@@ -246,23 +290,6 @@ Use when code exists but no specs have been written.
 3. Generate specs as in Mode A4–A5 using the code as the source of truth.
 4. Generate `architecture.md` from the discovered structure.
 5. Note any undocumented behaviours or gaps as **Open Issues**.
-
----
-
-## Mode D — Alignment Check
-
-Verify that existing specs match the PRD without generating new files.
-
-1. For each FR in the PRD, identify the spec that covers it.
-2. Check that the spec's acceptance criteria match the PRD's acceptance criteria.
-3. Report mismatches as a table:
-
-| PRD section | Spec file | Status | Gap |
-|-------------|-----------|--------|-----|
-| FR-001 Wi-Fi STA | network-module.md | OK | — |
-| FR-004 P2P | network-module.md | Gap | P2P error states not specified |
-
-Output the report to the user. If gaps exist, offer to fix them (Mode B).
 
 ---
 
@@ -286,27 +313,6 @@ Rules:
 - Keep the summary short — one line describing what changed. When the change is driven by a PRD update, include the PRD version: `Updated to PRD v2026-04-09-10-00: added P2P mode`.
 - The `PRD Version` field in Document Information always reflects the PRD Changelog timestamp this spec was written against.
 - Git tracks the actual diff; the Changelog is the human-readable log.
-
-## Gotchas
-
-| Gotcha | Detail |
-|--------|--------|
-| `smf_set_state()` in exit functions | Calling `smf_set_state()` from an exit function generates a log warning and **no transition occurs**. Spec diagrams must not model a transition firing during exit. |
-| Transition actions run before exit (SMF ≠ UML) | SMF executes transition actions in the context of the source state, before exit actions run. If a spec models "exit then action", the implementation order will be "action then exit". |
-| `smf_set_state()` stops event propagation | Calling `smf_set_state()` inside a run function prevents the parent's run from executing — even if `SMF_EVENT_PROPAGATE` is returned. Account for this when deciding which level of the hierarchy handles which event. |
-
-## Self-Update Policy
-
-At the **end of each conversation**, review what was discovered and check whether any facts in this skill are new, corrected, or outdated (e.g. new spec templates, changelog conventions, architecture guidance).
-
-If updates are warranted:
-1. Collect all proposed changes with a brief rationale for each.
-2. Present a summary to the user and ask for approval using `AskQuestion`.
-3. Apply approved updates to this file immediately.
-
-Do **not** modify this skill mid-conversation unless the user explicitly asks.
-
----
 
 ## Spec Quality Checklist
 
@@ -347,3 +353,39 @@ Use this checklist before handing off specs to `chsh-sk-ncs-3.1-coding`.
 | Per-module spec | 250–600 words + state diagram (if applicable) |
 
 Specs longer than these targets often contain PRD content that belongs in `docs/pm-prd/PRD.md` instead.
+
+## Related Skills
+
+| Task | Skill |
+|------|-------|
+| Write product requirements | `chsh-sk-ncs-1-prd` |
+| Implement code from specs | `chsh-sk-ncs-3.1-coding` |
+| Commit and push changes | `chsh-sk-ncs-3.4-git-commit` |
+| Full project lifecycle orchestration | `chsh-sk-ncs-0-workflow` |
+
+## Gotchas
+
+| Gotcha | Detail |
+|--------|--------|
+| `smf_set_state()` in exit functions | Calling `smf_set_state()` from an exit function generates a log warning and **no transition occurs**. Spec diagrams must not model a transition firing during exit. |
+| Transition actions run before exit (SMF ≠ UML) | SMF executes transition actions in the context of the source state, before exit actions run. If a spec models "exit then action", the implementation order will be "action then exit". |
+| `smf_set_state()` stops event propagation | Calling `smf_set_state()` inside a run function prevents the parent's run from executing — even if `SMF_EVENT_PROPAGATE` is returned. Account for this when deciding which level of the hierarchy handles which event. |
+
+## Self-Update Policy
+
+At the **end of each conversation**, review what was discovered and check whether any facts in this skill are new, corrected, or outdated (e.g. new spec templates, changelog conventions, architecture guidance).
+
+If updates are warranted:
+1. Collect all proposed changes with a brief rationale for each.
+2. Call `AskQuestion`:
+   ```
+   AskQuestion:
+     prompt: "Apply these self-update changes to chsh-sk-ncs-2-spec?"
+     options:
+       - "Yes — apply all"
+       - "Yes — apply selected (describe below)"
+       - "No — skip for now"
+   ```
+3. Apply approved updates immediately.
+
+Do **not** modify this skill mid-conversation unless the user explicitly asks.

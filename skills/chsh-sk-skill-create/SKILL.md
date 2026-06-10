@@ -39,15 +39,25 @@ If you have previous conversation context, infer the skill from what was discuss
 
 ### Gathering Additional Information
 
-If you need clarification, use the AskQuestion tool when available:
+Always use `AskQuestion` — never ask conversationally. Fire these in sequence, stopping when the answer is already clear from context:
 
 ```
-Example AskQuestion usage:
-- "Where should this skill be stored?" with options like ["Personal (~/.claude/skills/)", "Project (.claude/skills/)"]
-- "Should this skill include executable scripts?" with options like ["Yes", "No"]
+AskQuestion:
+  prompt: "Where should this skill be stored?"
+  options:
+    - "Personal (~/.claude/skills/) — available across all projects"
+    - "Project (.claude/skills/) — shared with repo collaborators"
 ```
 
-If the AskQuestion tool is not available, ask these questions conversationally.
+```
+AskQuestion:
+  prompt: "Should this skill include executable utility scripts?"
+  options:
+    - "Yes — include scripts/ with helper scripts"
+    - "No — instructions only"
+```
+
+Skip any question whose answer is already unambiguous from the conversation.
 
 ---
 
@@ -86,6 +96,9 @@ description: "Load when [user intent in their own words]. ≤50 words."
 
 # Your Skill Name
 
+## Decision Flow          ← add this for workflow skills (see below)
+...
+
 ## Instructions
 Clear, step-by-step guidance for the agent.
 
@@ -95,6 +108,40 @@ Concrete examples of using this skill.
 ## Gotchas
 - [Known failure — add one entry per real agent failure observed]
 ```
+
+### When to Add a Decision Flow
+
+Add a `## Decision Flow` section **whenever the skill has multiple modes or a sequential branching flow** — i.e., the agent's first job is to detect context and pick a path.
+
+Omit it for single-path reference skills (a style guide, a lookup table, a formatter).
+
+Place it **after the intro paragraph and before the first `---`** so it is the first thing the agent reads after orientation.
+
+Use a plain ASCII tree in a code fence — not Mermaid (agents read raw text; Mermaid adds tokens with no rendering benefit):
+
+```markdown
+## Decision Flow
+
+\`\`\`
+User request
+  │
+  ▼
+Step 0: Detect context
+  ├─ Condition A ──────────────→ [A] Mode A        (A1–A5)
+  ├─ Condition B ──────────────→ [B] Mode B        (B1–B3)
+  └─ Condition C ──────────────→ [C] Mode C
+                          │
+              (A and B)
+                          │
+                          ▼
+                 Handoff AskQuestion
+\`\`\`
+```
+
+Rules:
+- One branch per condition — keep it scannable.
+- Label the handoff (`AskQuestion`) only if it exists for some modes but not others.
+- Match branch labels exactly to the mode headings that follow (`## Mode A`, `## Mode B`, etc.).
 
 ### Required Metadata Fields
 
@@ -328,7 +375,7 @@ Gather information about:
 4. Any specific requirements or constraints
 5. Existing examples or patterns to follow
 
-If you have access to the AskQuestion tool, use it for efficient structured gathering. Otherwise, ask conversationally.
+Always use `AskQuestion` for structured gathering — never ask conversationally. Skip questions whose answers are already clear from context.
 
 ### Phase 2: Design
 
@@ -378,6 +425,19 @@ Update the "Total skills" count and "Last updated" date in the index header.
 See [`references/complete-example.md`](references/complete-example.md) for a full worked example with directory structure and annotated SKILL.md.
 > **Quick tip**: Description must start with "Use when"/"Load when"; file must end with `## Self-Update Policy`.
 
+### Phase 6: Handoff
+
+After registering the skill in `index.md` and `log.md`, call `AskQuestion`:
+
+```
+AskQuestion:
+  prompt: "Skill created. What would you like to do next?"
+  options:
+    - "Test it now — trigger the new skill with a sample query"
+    - "Run skill audit — check all skills for issues (chsh-sk-skill-maintain)"
+    - "Done — nothing more needed"
+```
+
 ---
 
 ## Summary Checklist
@@ -426,8 +486,16 @@ whether any [domain-specific facts, patterns, or rules] are new, corrected, or o
 
 If updates are warranted:
 1. Collect all proposed changes with a brief rationale for each.
-2. Present a summary to the user and ask for approval using `AskQuestion`.
-3. Apply approved updates to this file immediately.
+2. Call `AskQuestion`:
+   ```
+   AskQuestion:
+     prompt: "Apply these self-update changes to this skill?"
+     options:
+       - "Yes — apply all"
+       - "Yes — apply selected (describe below)"
+       - "No — skip for now"
+   ```
+3. Apply approved updates immediately.
 
 Do **not** modify this skill mid-conversation unless the user explicitly asks.
 ```
@@ -459,7 +527,15 @@ or new skill authoring best practices).
 
 If updates are warranted:
 1. Collect all proposed changes with a brief rationale for each.
-2. Present a summary to the user and ask for approval using `AskQuestion`.
-3. Apply approved updates to this file immediately.
+2. Call `AskQuestion`:
+   ```
+   AskQuestion:
+     prompt: "Apply these self-update changes to chsh-sk-skill-create?"
+     options:
+       - "Yes — apply all"
+       - "Yes — apply selected (describe below)"
+       - "No — skip for now"
+   ```
+3. Apply approved updates immediately.
 
 Do **not** modify this skill mid-conversation unless the user explicitly asks.

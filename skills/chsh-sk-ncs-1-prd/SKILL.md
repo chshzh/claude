@@ -13,6 +13,29 @@ The PRD answers: **What should this device do, for whom, and how should it behav
 
 Templates: [`PRD_TEMPLATE.md`](PRD_TEMPLATE.md), [`README_TEMPLATE.md`](README_TEMPLATE.md)
 
+## Decision Flow
+
+```
+User request
+  │
+  ▼
+Step 0: Detect state
+  ├─ No PRD exists ──────────────→ [A] New PRD        (A1–A10 questions)
+  ├─ PRD + code commits ahead ───→ [D] Sync stale PRD  (D1–D3)
+  ├─ PRD + add a feature ────────→ [B] Add Feature
+  └─ PRD + change a feature ─────→ [C] Change Feature
+                            │
+                  (all modes)
+                            │
+                            ▼
+                   Generate Output
+                   (write PRD.md + README + Changelog)
+                            │
+                            ▼
+                   Handoff AskQuestion
+                   Run chsh-sk-ncs-2-spec? Yes / No
+```
+
 ---
 
 ## Step 0 — Detect Mode
@@ -99,6 +122,8 @@ Ask: *"Are there features or behaviours that you explicitly do NOT want in this 
 
 This is important — a clear "not building" list prevents engineer confusion and scope creep.
 Examples: "no cloud connectivity in v1", "no iOS app", "no OTA updates yet".
+
+Proceed to **Generate Output**.
 
 ---
 
@@ -205,6 +230,15 @@ After any mode:
    (`YYYY-MM-DD-HH-MM` = the same current time you put in the `Version` field.)
 5. Confirm: *"PRD updated. New revision added to Changelog (Version = <timestamp>)."*
 
+6. Call `AskQuestion`:
+   ```
+   AskQuestion:
+     prompt: "PRD updated. Run chsh-sk-ncs-2-spec now to update engineering specs?"
+     options:
+       - "Yes — load chsh-sk-ncs-2-spec"
+       - "No — stop here"
+   ```
+
 ---
 
 ## PRD Quality Checklist
@@ -237,19 +271,6 @@ Before handing off, verify the PRD meets these criteria.
 - Treating the PRD as immutable — update it as the team learns
 - Writing the PRD alone without developer/designer input
 
----
-
-## Handoff Prompt
-
-After saving the PRD, always ask:
-
-> "The PRD is updated at `docs/pm-prd/PRD.md` (see Revision History for this change).
->
-> Would you like to hand off to **chsh-sk-ncs-2-spec** to update the engineering specs,
-> or to **chsh-sk-ncs-3.1-coding** to implement or update the code?
->
-> Reply **design**, **implement**, or **no** to stop here."
-
 ## Related Skills
 
 | Task | Skill |
@@ -268,7 +289,15 @@ At the **end of each conversation**, review what was discovered and check whethe
 
 If updates are warranted:
 1. Collect all proposed changes with a brief rationale for each.
-2. Present a summary to the user and ask for approval using `AskQuestion`.
-3. Apply approved updates to this file immediately.
+2. Call `AskQuestion`:
+   ```
+   AskQuestion:
+     prompt: "Apply these self-update changes to chsh-sk-ncs-1-prd?"
+     options:
+       - "Yes — apply all"
+       - "Yes — apply selected (describe below)"
+       - "No — skip for now"
+   ```
+3. Apply approved updates immediately.
 
 Do **not** modify this skill mid-conversation unless the user explicitly asks.

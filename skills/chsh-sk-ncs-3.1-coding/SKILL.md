@@ -91,11 +91,15 @@ For each module from the spec:
    - `prj.conf`: `CONFIG_APP_<MODULE>_MODULE=y` + required Kconfig from spec
    - `CMakeLists.txt`: `add_subdirectory(src/modules/<name>)`
 
-3. Embed the spec version in `src/main.c`:
-   ```c
-   #define SPECS_VERSION "YYYY-MM-DD-HH-MM"  /* from docs/dev-specs/overview.md Changelog */
-   LOG_INF("<project> built from specs v" SPECS_VERSION);
+3. Set PRD and specs versions in `prj.conf`:
+   ```kconfig
+   # Track which PRD and specs revision this code was written against.
+   # Copy the newest Changelog timestamp from each document.
+   CONFIG_ZEGO_APP_PRD_VERSION="YYYY-MM-DD-HH-MM"    # from docs/pm-prd/PRD.md Changelog
+   CONFIG_ZEGO_APP_SPECS_VERSION="YYYY-MM-DD-HH-MM"  # from docs/dev-specs/overview.md Changelog
    ```
+   Update these values every time the code is re-synced to a new PRD or specs revision.
+   They appear in the boot banner as `PRD: ...` and `Specs: ...`.
 
 4. Build and verify:
    ```bash
@@ -228,7 +232,7 @@ Every module **must** have structured logging at all four levels. This enables p
 | Generate engineering specs | `chsh-sk-ncs-2-spec` |
 | Phase 4 Verification & Test | `chsh-sk-ncs-4.1-verification` |
 | Debug build failures, UART analysis | `chsh-sk-ncs-3.2-debug` |
-| Commit after implementation | `chsh-sk-git-commit` |
+| Commit after implementation | `chsh-sk-ncs-3.4-git-commit` |
 | Full lifecycle orchestration | `chsh-sk-ncs-0-workflow` |
 
 ## Self-Update Policy

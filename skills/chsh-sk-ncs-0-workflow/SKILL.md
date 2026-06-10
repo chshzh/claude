@@ -1,6 +1,6 @@
 ---
 name: chsh-sk-ncs-0-workflow
-description: Use as the single entry point for any NCS project work. Orchestrates the full NCS project lifecycle — detects where a project stands, guides through each phase (PRD → Specs → Code → QA+Test), and routes feedback back to the right phase.
+description: Use when you need a project status dashboard or when a drift is detected (code ahead of specs, specs ahead of PRD). Scans PRD/Specs/Code version timestamps, identifies which artifact is newest, and routes to the right skill. Not needed for normal forward-flow work — each phase skill handles its own handoff.
 ---
 
 # chsh-sk-ncs-0-workflow — NCS Project Lifecycle Orchestrator
@@ -13,56 +13,56 @@ status dashboard, and guides you through each phase — invoking the right skill
 ## The Four-Phase Cycle
 
 ```
-┌────────────────────────────────────────────────────────────────┐
-│  PHASE 1 — PRODUCT DEFINITION         skill: chsh-sk-ncs-1-prd       │
-│                                                                 │
-│  Product Manager defines device requirements:                  │
-│  • What should the device do, for whom, and why?               │
-│  • Which Wi-Fi modes, UI behaviours, connectivity features?    │
-│  • Success metrics and release criteria                        │
-│                                                                 │
-│  Input:  stakeholder ideas, user feedback, bug reports         │
-│  Output: docs/pm-prd/PRD.md  (Changelog updated)             │
-└───────────────────────────┬────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────┐
+│  PHASE 1 — PRODUCT DEFINITION         skill: chsh-sk-ncs-1-prd               │
+│                                                                              │
+│  Product Manager defines device requirements:                                │
+│  • What should the device do, for whom, and why?                             │
+│  • Which Wi-Fi modes, UI behaviours, connectivity features?                  │
+│  • Success metrics and release criteria                                      │
+│                                                                              │
+│  Input:  stakeholder ideas, user feedback, bug reports                       │
+│  Output: docs/pm-prd/PRD.md  (Changelog updated)                             │
+└───────────────────────────┬──────────────────────────────────────────────────┘
                             │ PRD approved → triggers Phase 2
                             ▼
-┌────────────────────────────────────────────────────────────────┐
-│  PHASE 2 — TECHNICAL DESIGN           skill: chsh-sk-ncs-2-spec     │
-│                                                                 │
-│  Developer Engineer translates PRD into technical specs:       │
-│  • Architecture choice (SMF+Zbus or multi-threaded)            │
-│  • docs/dev-specs/overview.md                          │
-│  • docs/dev-specs/architecture.md                      │
-│  • docs/dev-specs/<module>.md (one per feature)        │
-│  • docs/dev-specs/config.yaml (optional project context)           │
-│                                                                 │
-│  Input:  docs/pm-prd/PRD.md                                   │
-│  Output: docs/dev-specs/*.md (PRD Version field set)   │
-└───────────────────────────┬────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────┐
+│  PHASE 2 — TECHNICAL DESIGN           skill: chsh-sk-ncs-2-spec              │
+│                                                                              │
+│  Developer Engineer translates PRD into technical specs:                     │
+│  • Architecture choice (SMF+Zbus or multi-threaded)                          │
+│  • docs/dev-specs/overview.md                                                │
+│  • docs/dev-specs/architecture.md                                            │
+│  • docs/dev-specs/<module>.md (one per feature)                              │
+│  • docs/dev-specs/config.yaml (optional project context)                     │
+│                                                                              │
+│  Input:  docs/pm-prd/PRD.md                                                  │
+│  Output: docs/dev-specs/*.md (PRD Version field set)                         │
+└───────────────────────────┬──────────────────────────────────────────────────┘
                             │ Specs approved → triggers Phase 3
                             ▼
-┌────────────────────────────────────────────────────────────────┐
-│  PHASE 3 — IMPLEMENTATION   3.1-coding · 3.2-debug · 3.3-memopt        │
-│                                                                 │
-│  3.1 Coding: src/modules/, prj.conf, CMakeLists.txt, Kconfig   │
-│  3.2 Debug:  fix runtime failures, crashes, WiFi issues        │
-│  3.3 Memopt: RAM/Flash budget, stack overflow, memory usage    │
-│                                                                 │
-│  Input:  docs/dev-specs/*.md                           │
-│  Output: code, clean build, UART log evidence                  │
-└───────────────────────────┬────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────┐
+│  PHASE 3 — IMPLEMENTATION   3.1-coding · 3.2-debug · 3.3-memopt              │
+│                                                                              │
+│  3.1 Coding: src/modules/, prj.conf, CMakeLists.txt, Kconfig                 │
+│  3.2 Debug:  fix runtime failures, crashes, WiFi issues                      │
+│  3.3 Memopt: RAM/Flash budget, stack overflow, memory usage                  │
+│                                                                              │
+│  Input:  docs/dev-specs/*.md                                                 │
+│  Output: code, clean build, UART log evidence                                │
+└───────────────────────────┬──────────────────────────────────────────────────┘
                             │ Implementation done → triggers Phase 4
                             ▼
-┌────────────────────────────────────────────────────────────────┐
+┌──────────────────────────────────────────────────────────────────────────────┐
 │  PHASE 4 — VERIFICATION & VALIDATION (V&V)                                   │
-│           4.1: chsh-sk-ncs-4.1-verification · 4.2: chsh-sk-ncs-4.2-validation │
-│                                                                 │
-│  4.1 Verification (always, no HW): code review, build, docs    │
-│  4.2 Validation via EEDP (HW): GPIO, UART, Saleae, JLink, Router  │
-│  • Output: docs/qa-test/ (VERIFICATION + VALIDATION)                │
-│                                                                 │
-│  P0 → Phase 3  |  Spec gap → Phase 2  |  New req → Phase 1    │
-└────────────────────────────────────────────────────────────────┘
+│           4.1: chsh-sk-ncs-4.1-verification · 4.2: chsh-sk-ncs-4.2-validation│
+│                                                                              │
+│  4.1 Verification (always, no HW): code review, build, docs                  │
+│  4.2 Validation via EEDP (HW): GPIO, UART, Saleae, JLink, Router             │
+│  • Output: docs/qa-test/ (VERIFICATION + VALIDATION)                         │
+│                                                                              │
+│  P0 → Phase 3  |  Spec gap → Phase 2  |  New req → Phase 1                   │
+└──────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -72,42 +72,95 @@ status dashboard, and guides you through each phase — invoking the right skill
 Run this before anything else. Provide the project path if not already in it.
 
 ```bash
-# Documents
-ls docs/pm-prd/PRD.md 2>/dev/null              && echo "PRD: YES"     || echo "PRD: NO"
-ls docs/dev-specs/overview.md 2>/dev/null && echo "SPECS: YES" || echo "SPECS: NO"
-ls docs/qa-test/VALIDATION-*.md 2>/dev/null | sort | tail -1   && echo "VALIDATION: YES"    || echo "VALIDATION: NO"
+# Existence check
+ls docs/pm-prd/PRD.md 2>/dev/null             && echo "PRD: YES"        || echo "PRD: NO"
+ls docs/dev-specs/overview.md 2>/dev/null     && echo "SPECS: YES"      || echo "SPECS: NO"
+ls src/main.c 2>/dev/null                     && echo "CODE: YES"       || echo "CODE: NO"
+ls docs/qa-test/VALIDATION-*.md 2>/dev/null | sort | tail -1 && echo "VALIDATION: YES" || echo "VALIDATION: NO"
 
-# Code
-ls src/main.c 2>/dev/null    && echo "CODE: YES"    || echo "CODE: NO"
-ls src/modules/ 2>/dev/null  && echo "MODULES: YES" || echo "MODULES: NO"
+# Version extraction (only when all three exist)
+PRD_VER=$(grep -m1 '| [0-9]' docs/pm-prd/PRD.md 2>/dev/null | awk -F'|' '{print $2}' | tr -d ' ')
+SPEC_VER=$(grep -m1 '| [0-9]' docs/dev-specs/overview.md 2>/dev/null | awk -F'|' '{print $2}' | tr -d ' ')
 
-# Spec version in code
-grep "SPECS_VERSION" src/main.c 2>/dev/null || echo "SPECS_VERSION: not set"
+# Code version = last git commit timestamp that touched src/
+# If src/ has uncommitted changes, commit them first (use chsh-sk-ncs-3.4-git-commit)
+CODE_VER=$(git log --format="%ci" -- src/ 2>/dev/null | head -1 | awk '{print $1"-"$2}' | sed 's/://g; s/-[0-9]*$//; s/-/\//3; s/-/:/')
 
-# Recent activity
-git log --oneline -5
+echo "PRD_VER:  $PRD_VER"
+echo "SPEC_VER: $SPEC_VER"
+echo "CODE_VER: $CODE_VER"
 ```
+
+### Version format
+
+- **PRD version** = newest timestamp row in `docs/pm-prd/PRD.md` Changelog (`YYYY-MM-DD-HH-MM`)
+- **Specs version** = newest timestamp row in `docs/dev-specs/overview.md` Changelog (`YYYY-MM-DD-HH-MM`)
+- **Code version** = `git log --format="%ci" -- src/ | head -1` converted to `YYYY-MM-DD-HH-MM`
+  - ⚠️ If `src/` has **uncommitted changes**, invoke **chsh-sk-ncs-3.4-git-commit** first, then re-read `CODE_VER`.
+
+### Staleness decision table (all phases exist)
+
+Compare the three versions. Whichever timestamp is **newest** is the source of truth;
+the others must be brought forward.
+
+| Newest artifact | What drifted | Required sync | Recommended flow |
+|-----------------|-------------|---------------|-----------------|
+| **PRD** | Specs and/or Code lag | Read PRD Changelog entries newer than SPEC_VER; update specs to match, then update code | **1 → 2 → 3.1 → 4.1** |
+| **Specs** | PRD and/or Code lag | Read Specs Changelog entries newer than PRD_VER and CODE_VER; propagate intent back to PRD, then update code | **2 → 1 → 3.1 → 4.1** |
+| **Code** | PRD and/or Specs lag | Read `git log --oneline src/` from CODE_VER back to SPEC_VER (and PRD_VER); infer intent from commits; update Specs then PRD | **3.1 → 2 → 1 → 4.1** |
+| All equal | Nothing drifted | Skip to V&V | **4.1** |
+
+> **Tie-breaking:** if two artifacts share the same version, treat the *third* as the source of
+> truth if it is newer; otherwise treat the tie as "no drift" for that pair.
+
+### Sync procedure by case
+
+**Case A — PRD is newest (flow: 1 → 2 → 3.1 → 4.1)**
+
+1. Read PRD Changelog rows newer than `SPEC_VER`.
+2. Load **chsh-sk-ncs-2-spec**: update `overview.md` and affected `<module>.md` files.
+   Set `PRD Version` to `PRD_VER`.
+3. Load **chsh-sk-ncs-3.1-coding**: implement spec changes in `src/`.
+4. Proceed to Phase 4.1.
+
+**Case B — Specs are newest (flow: 2 → 1 → 3.1 → 4.1)**
+
+1. Read Specs Changelog rows newer than `PRD_VER` *and* rows newer than `CODE_VER`.
+2. Load **chsh-sk-ncs-1-prd**: surface any new requirements or behaviour changes back into
+   `PRD.md` (add Changelog entry, bump PRD version).
+3. Load **chsh-sk-ncs-3.1-coding**: implement the spec changes in `src/`.
+4. Proceed to Phase 4.1.
+
+**Case C — Code is newest (flow: 3.1 → 2 → 1 → 4.1)**
+
+1. Run: `git log --oneline src/` — read commits from `HEAD` back to the commit whose
+   timestamp matches `SPEC_VER` (or the nearest earlier commit).
+2. Infer the engineering intent from those commits.
+3. Load **chsh-sk-ncs-2-spec**: document the implemented behaviour in specs; bump
+   `overview.md` Changelog.
+4. Load **chsh-sk-ncs-1-prd**: if the commits introduced user-visible behaviour changes,
+   update `PRD.md`; add Changelog entry.
+5. Proceed to Phase 4.1.
+
+---
 
 Present the project status dashboard to the user:
 
 ```
-═══════════════════════════════════════════════
+═══════════════════════════════════════════════════════
   PROJECT STATUS: <project name>
-═══════════════════════════════════════════════
-  Phase 1 — PRD        [ YES / NO / STALE ]
-  Phase 2 — Specs      [ YES / NO / STALE ]
-  Phase 3 — Code       [ YES / NO / STALE ]
-  Phase 4 — V&V          [ YES / NO ]
-═══════════════════════════════════════════════
-  → Recommended next step: <phase + reason>
+═══════════════════════════════════════════════════════
+  Phase 1 — PRD    [ YES / NO ]  version: YYYY-MM-DD-HH-MM
+  Phase 2 — Specs  [ YES / NO ]  version: YYYY-MM-DD-HH-MM
+  Phase 3 — Code   [ YES / NO ]  version: YYYY-MM-DD-HH-MM
+  Phase 4 — V&V    [ YES / NO ]
+═══════════════════════════════════════════════════════
+  Newest artifact: <PRD | Specs | Code | all equal>
+  → Recommended flow: <A | B | C | 4.1 only> — <reason>
+═══════════════════════════════════════════════════════
 ```
 
-**Staleness check:**
-- PRD is **stale** if there are code commits newer than the latest PRD Changelog entry.
-- Specs are **stale** if the `PRD Version` field in `overview.md` is older than the latest PRD Changelog entry.
-- Code is **stale** if `SPECS_VERSION` in `src/main.c` is older than the latest `overview.md` Changelog entry.
-
-Ask: *"Where would you like to start?"* — or proceed with the recommended step.
+Ask: *"Proceed with recommended flow, or choose a different starting point?"*
 
 ---
 
@@ -121,9 +174,6 @@ Ask: *"Where would you like to start?"* — or proceed with the recommended step
 **Run:** Load skill **chsh-sk-ncs-1-prd** and follow its workflow.
 
 **Output:** `docs/pm-prd/PRD.md` with new Changelog entry
-
-**On completion**, ask:
-> "PRD is updated. Proceed to **Phase 2 — Specs** with chsh-sk-ncs-2-spec? (yes / stop)"
 
 ---
 
@@ -141,9 +191,6 @@ Ask: *"Where would you like to start?"* — or proceed with the recommended step
 - `docs/dev-specs/<module>.md` — one per feature module
 
 Each spec's `PRD Version` field must match the latest PRD Changelog timestamp.
-
-**On completion**, ask:
-> "Specs are ready. Proceed to **Phase 3 — Implementation** with chsh-sk-ncs-3.1-coding? (yes / stop)"
 
 ---
 
@@ -172,16 +219,15 @@ A user saying "start implementation" does **not** bypass this guard.
 memory budget exceeded → **3.3 Memopt** → back to 3.1. Iterate until clean build + UART
 log evidence of correct behavior.
 
-**On completion**, ask:
-> "Implementation done. Proceed to **Phase 4 — V&V** with chsh-sk-ncs-4.1-verification? (yes / stop)"
-
 ---
 
 ## Phase 4 — Verification & Validation (V&V)  `chsh-sk-ncs-4.1-verification` · `chsh-sk-ncs-4.2-validation`
 
-**Enter Phase 4 when:**
-- Implementation is complete or updated
-- Before any release or demo
+**Normal trigger:** The `chsh-sk-ncs-3.4-git-commit` / `chsh-ag-git` Step 8 `AskQuestion` offers to run 4.1 automatically after every commit in repos with `docs/qa-test/`. In normal forward-flow you do not need to enter Phase 4 manually.
+
+**Manual entry when:**
+- Skipped at commit time and want to run it now
+- Before a release or demo
 - After any merge to main
 
 **Run:** Load skill **chsh-sk-ncs-4.1-verification** and follow its workflow.
@@ -274,8 +320,9 @@ docs/qa-test/VALIDATION-2026-04-09-14-30.md
 | Small bug fix only | Phase 3 (Mode C) |
 | Feature request | Phase 1 (Mode B) |
 | Post-merge validation | Phase 4 |
-| PRD stale after code changes | Phase 1 (Mode D) |
-| Specs stale after PRD change | Phase 2 (Mode B) |
+| All phases exist — PRD is newest | Step 0 Case A → flow 1→2→3.1→4.1 |
+| All phases exist — Specs are newest | Step 0 Case B → flow 2→1→3.1→4.1 |
+| All phases exist — Code is newest | Step 0 Case C → flow 3.1→2→1→4.1 |
 | Architecture change | Phase 1 + 2 |
 | Before a demo or release | Phase 4 (V&V) |
 
@@ -292,8 +339,8 @@ docs/qa-test/VALIDATION-2026-04-09-14-30.md
 | `chsh-sk-ncs-3.2-debug` | Debugging firmware failures, UART log analysis | Root cause identified and fixed |
 | `chsh-sk-ncs-4.1-verification` | Phase 4.1 Verification (code review, build, docs audit — no hardware) | `docs/qa-test/VERIFICATION-*.md` |
 | `chsh-sk-ncs-4.2-validation` | Phase 4.2 Validation (hardware tests via EEDP against PRD acceptance criteria) | `docs/qa-test/VALIDATION-*.md` |
-| `chsh-sk-git-commit` | Preparing git commits | Clean, logical commit history |
-| `chsh-sk-git-release` | Tagging a release, publishing firmware, downloading and flashing pre-built `.hex` | GitHub release with verified artifact |
+| `chsh-sk-ncs-3.4-git-commit` | Preparing git commits | Clean, logical commit history |
+| `chsh-sk-ncs-3.5-release` | Tagging a release, watching CI, publishing firmware to GitHub | GitHub release with published artifact |
 | `chsh-sk-ncs-migrate` | Upgrading the project to a newer NCS version (single hop or multi-hop) | Migrated app, clean build, verified on hardware |
 | `chsh-sk-ncs-3.3-memopt` | Diagnosing memory usage | Heap / stack recommendations |
 
