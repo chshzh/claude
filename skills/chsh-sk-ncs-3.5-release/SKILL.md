@@ -1,9 +1,9 @@
 ---
-name: chsh-sk-git-release
-description: Use when cutting a release, publishing firmware, or doing a full release validation loop (tag → CI → download → flash → test). Tags a git release, creates a GitHub release with firmware artifacts, downloads pre-built firmware, and flashes + verifies on hardware.
+name: chsh-sk-ncs-3.5-release
+description: Use when tagging a release, watching CI, or publishing firmware to GitHub for NCS projects. Covers git tag → CI → GitHub Release artifact. After publishing, triggers chsh-sk-ncs-4.2-validation for hardware validation with pre-built firmware.
 ---
 
-# chsh-sk-git-release — Release Tagging, Publishing & Firmware Validation
+# chsh-sk-ncs-3.5-release — Release Tagging & Publishing
 
 Covers the full release cycle for NCS firmware projects: git tag → GitHub Actions CI → release artifact → flash → verify.
 
@@ -110,87 +110,16 @@ gh release delete-asset v<MAJOR>.<MINOR>.<PATCH> merged.hex \
 
 ---
 
-## Step 4 — Download Pre-Built Firmware
+## Step 4 — Handoff to Validation
 
-```bash
-mkdir -p /tmp/fw/<project>
+Release published with pre-built firmware artifact available. Hand off to Phase 4.2 for hardware validation.
 
-# Download latest release
-gh release download latest \
-  --repo <owner>/<repo> \
-  --pattern "*.hex" \
-  -D /tmp/fw/<project>/
-
-ls /tmp/fw/<project>/   # confirm descriptive filename
+```AskQuestion:
+  prompt: "Release published. Run Phase 4.2 Validation with the pre-built firmware?"
+  options:
+    - "Yes — load chsh-sk-ncs-4.2-validation (will download and flash pre-built artifact)"
+    - "No — release is done"
 ```
-
----
-
-## Step 5 — Flash and Verify
-
-### 5a. Identify connected boards
-
-```bash
-nrfutil device list
-```
-
-Note the serial numbers and VCOM port assignments.
-
-### 5b. Flash
-
-```bash
-# Standard flash — preserves NVS and WiFi credentials (both boards)
-nrfutil sdk-manager toolchain launch --ncs-version=v3.3.0 -- \
-  west flash --hex-file /tmp/fw/<project>/<firmware>.hex \
-  --dev-id <SN>
-
-# Use --recover only for first flash on nRF54LM20DK or after AP protection erase
-# WARNING: --recover and --erase wipe all flash including NVS/WiFi credentials
-```
-
-Or use **nRF Connect for Desktop → Programmer** (no local toolchain needed).
-
-### 5c. Verify boot over UART
-
-Call `mcp_nordic-mcp_nordicsemi_workflow_ncs` to load `nordicsemi_uart_monitor.py`, then:
-
-```bash
-python3 nordicsemi_uart_monitor.py --port /dev/tty.usbmodem<VCOM> --baud 115200
-```
-
-VCOM mapping:
-| Board + Shield | App console | HWFC |
-|----------------|-------------|------|
-| nRF54LM20DK + nRF7002EB-II sQSPI | VCOM1 (UART20) | No (`rtscts=False`) |
-| nRF7002DK | VCOM0 (single port) | Yes (`rtscts=True`) |
-
-Expected boot sequence:
-1. `*** Booting nRF Connect SDK` — MCUboot + firmware running
-2. Module init lines
-3. `uart:~$` — shell ready
-
-Quick functional smoke test:
-```sh
-uart:~$ wifi scan
-uart:~$ wifi status
-uart:~$ kernel threads
-```
-
----
-
-## Step 6 — Loop Until Stable (for releases)
-
-Before marking a release **done**, run the loop test to confirm stability:
-
-**Preferred**: Delegate to `chsh-ag-terminal` — run Mode F from **chsh-sk-ncs-3.2-debug** for automated loop test execution without a local script.
-
-**Manual fallback**: Copy `~/.claude/skills/chsh-sk-ncs-3.2-debug/scripts/loop_test.py` to `<app>/scripts/loop_test.py`, edit the constants at the top, then run:
-```bash
-python3 <app>/scripts/loop_test.py 10    # 10 passes = acceptance gate
-python3 <app>/scripts/loop_test.py 20    # 20 passes = release gate
-```
-
-Record the pass rate in the test report (see **chsh-sk-ncs-4.1-verification**).
 
 ---
 
@@ -214,7 +143,7 @@ When CI is failing, iterate:
 ```
 edit → commit (chsh-sk-git) → push → gh run watch
   → (fail) → gh run view --log-failed → fix → repeat
-  → (pass) → download latest → flash → verify uart:~$ → done
+  → (pass) → AskQuestion (Step 4) → load chsh-sk-ncs-4.2-validation → done
 ```
 
 ---
@@ -223,11 +152,10 @@ edit → commit (chsh-sk-git) → push → gh run watch
 
 | Task | Skill |
 |------|-------|
-| Commit before pushing | `chsh-sk-git-commit` |
-| Functional test after flashing | `chsh-sk-ncs-4.1-verification` |
+| Commit before pushing | `chsh-sk-ncs-3.4-git-commit` |
+| Hardware validation with pre-built firmware | `chsh-sk-ncs-4.2-validation` |
 | Debug CI failures, UART capture | `chsh-sk-ncs-3.2-debug` (Mode G) |
 | Build commands, toolchain | `chsh-sk-ncs-env` |
-| Loop test script template | `chsh-sk-ncs-3.2-debug/scripts/loop_test.py` |
 
 ---
 

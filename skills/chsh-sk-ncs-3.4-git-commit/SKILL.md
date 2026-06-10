@@ -1,6 +1,6 @@
 ---
-name: chsh-sk-git-commit
-description: Use when the user asks to commit, push, prepare commits, split commits, or wrap up work. Plans and executes git commits, extracts rationale from the conversation, and delegates to chsh-ag-git. Supports Conventional Commits (user app repos) and Zephyr style (NCS/Zephyr repos).
+name: chsh-sk-ncs-3.4-git-commit
+description: Use when the user asks to commit, push, prepare commits, split commits, or wrap up work. Works for any git repo. Auto-detects commit style: Conventional Commits (app/general repos), Zephyr style (NCS/Zephyr workspace repos). Delegates to chsh-ag-git.
 ---
 
 # Git Commit Skill
@@ -49,17 +49,34 @@ Once delegated:
 - Forward the subagent's final report back
 - Do not second-guess grouping or messages unless the user asks
 
-## After push — NCS / firmware repos
+## Doc-sync check (user app repos)
+
+The subagent automatically classifies `src/` changes into two severity levels using diff-pattern matching, then checks if the corresponding version pins are already bumped in the batch:
+
+**Phase 1 + 2** — user-visible behavior changed (new shell command, new Wi-Fi mode, banner change, timing constant, new public `.h` API):
+- Shows: `docs/pm-prd/PRD.md` (current: `<timestamp>`) and `docs/dev-specs/` (current: `<timestamp>`)
+- First option: **"Stop — update PRD + specs first"**
+
+**Phase 2 only** — implementation boundary crossed, no user-visible change (new Zbus channel, new SMF state, new Kconfig, new module):
+- Shows: `docs/dev-specs/overview.md` (current: `<timestamp>`)
+- First option: **"Stop — update specs first"**
+
+If pins are already bumped in the same batch → no warning shown.
+This check does **not** run for Zephyr-style repos, or any repo where `docs/qa-test/` does not exist.
+
+## After push — NCS / firmware repos only
+
+Skip this section for non-firmware repos (scripts, skills, configs, etc.).
 
 The subagent does **not** watch CI or flash firmware. For those next steps:
 
 | Need | Use |
 |---|---|
-| Watch CI, fix failures, loop | `chsh-sk-git-release` |
+| Watch CI, fix failures, loop | `chsh-sk-ncs-3.5-release` |
 | Flash pre-built artifact + UART verify | `chsh-sk-ncs-3.2-debug` Mode G |
-| Full release (tag → CI → artifact → flash) | `chsh-sk-git-release` |
+| Full release (tag → CI → artifact) | `chsh-sk-ncs-3.5-release` |
 
-> Rule: CI green is not enough for firmware repos — always flash the pre-built
+> **Firmware repos only:** CI green is not enough — always flash the pre-built
 > artifact and verify `uart:~$` on the correct VCOM port before marking done.
 
 ## Fallback: inline execution

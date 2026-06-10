@@ -58,18 +58,16 @@ Compare boot logs side-by-side when available. The first divergent line identifi
 
 ### A2. Capture UART output
 
-**Preferred (mcp.nordic-mcp)**: call `mcp_nordic-mcp_nordicsemi_workflow_ncs` to load the
-`nordicsemi_uart_monitor.py` script, then:
+**Primary**: Invoke `chsh-ag-terminal` — it opens the UART port, captures the boot log, and returns the full output. Tell it the board type and it will pick the right VCOM and baud rate.
 
-```bash
-python3 nordicsemi_uart_monitor.py --port /dev/cu.usbmodem... --baud 115200
+```
+chsh-ag-terminal: capture boot log on nRF7002DK
+chsh-ag-terminal: capture boot log on nRF54LM20DK
 ```
 
-**Manual** (if needed):
-```python
-import serial
-ser = serial.Serial("/dev/cu.usbmodem...", 115200, rtscts=True)
-# rtscts=True required when hw-flow-control is enabled (e.g. nRF54LM20DK UART30)
+**Fallback** (if chsh-ag-terminal is unavailable): call `mcp_nordic-mcp_nordicsemi_workflow_ncs` to load `nordicsemi_uart_monitor.py`, then:
+```bash
+python3 nordicsemi_uart_monitor.py --port /dev/cu.usbmodem... --baud 115200
 ```
 
 Capture the full boot log. Use this as evidence in the test report.
@@ -78,14 +76,20 @@ Capture the full boot log. Use this as evidence in the test report.
 
 ### A3. Send test commands via UART
 
-For each test case, send the required shell commands and capture the response:
+**Primary**: Invoke `chsh-ag-terminal` with the commands to send. It sends each command and returns the response.
 
-```bash
-uart:~$ wifi scan
-uart:~$ wifi connect -s <SSID> -k 1 -p <password>
-uart:~$ wifi status
-uart:~$ net iface
-uart:~$ kernel threads    # thread health
+```
+chsh-ag-terminal: send "wifi scan" and capture output
+chsh-ag-terminal: send "wifi connect -s <SSID> -k 1 -p <password>" then "wifi status"
+```
+
+Common test commands:
+```
+wifi scan
+wifi connect -s <SSID> -k 1 -p <password>
+wifi status
+net iface
+kernel threads
 ```
 
 Paste the relevant output lines as evidence for each test case — not generic "it worked".
@@ -94,12 +98,17 @@ Paste the relevant output lines as evidence for each test case — not generic "
 
 For any TC involving connectivity, boot reliability, or stability, always run a loop test:
 
-**Preferred**: Delegate to `chsh-ag-terminal` — run Mode F from **chsh-sk-ncs-3.2-debug** for automated loop test execution without a local script.
+**Primary**: Invoke `chsh-ag-terminal` in loop mode — it resets the board, captures the log, and repeats N times without a local script:
 
-**Manual fallback**: Copy `~/.claude/skills/chsh-sk-ncs-3.2-debug/scripts/loop_test.py` to `<app>/scripts/loop_test.py`, edit the constants at the top, then run:
+```
+chsh-ag-terminal: run loop test 10 iterations on nRF7002DK
+chsh-ag-terminal: run loop test 20 iterations on nRF54LM20DK
+```
+
+**Fallback** (if chsh-ag-terminal is unavailable): run Mode F from **chsh-sk-ncs-3.2-debug** using `loop_test.py`:
 ```bash
-python3 <app>/scripts/loop_test.py 10      # minimum for acceptance
-python3 <app>/scripts/loop_test.py 20      # for release
+python3 ~/.claude/skills/chsh-sk-ncs-3.2-debug/scripts/loop_test.py 10   # acceptance gate
+python3 ~/.claude/skills/chsh-sk-ncs-3.2-debug/scripts/loop_test.py 20   # release gate
 ```
 
 The loop test is **mandatory** for any PRD acceptance criterion that includes:
@@ -108,13 +117,6 @@ The loop test is **mandatory** for any PRD acceptance criterion that includes:
 - Boot time measurements
 
 Record pass rate and iteration count in the test report evidence.
-
-**Adjustable iteration count**: pass as the first argument:
-```bash
-python3 loop_test.py 5    # quick smoke test
-python3 loop_test.py 10   # acceptance gate
-python3 loop_test.py 20   # release gate
-```
 
 ### A5. Map PRD acceptance criteria to test cases
 
@@ -172,7 +174,7 @@ Use `VALIDATION_TEMPLATE.md` as the base. Fill in:
 
 After reporting, ask:
 > "Test complete. Route P0 issues to the appropriate phase, or proceed to
-> release with **chsh-sk-git-release**?"
+> release with **chsh-sk-ncs-3.5-release**?"
 
 ---
 
@@ -193,7 +195,7 @@ After reporting, ask:
 | Wi-Fi throughput benchmarking | `chsh-sk-ncs-tc-wifi-throughput` |
 | Phase 4.1 Verification (no hardware) | `chsh-sk-ncs-4.1-verification` |
 | Fix code for P0 failures | `chsh-sk-ncs-3.1-coding` |
-| Tag and publish release | `chsh-sk-git-release` |
+| Tag and publish release | `chsh-sk-ncs-3.5-release` |
 | Full lifecycle orchestration | `chsh-sk-ncs-0-workflow` |
 
 ## Gotchas
