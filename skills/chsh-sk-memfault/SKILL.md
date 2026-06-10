@@ -282,8 +282,8 @@ Expected: new entries within 60–90s of device boot (when developer mode is on)
 |------|-------|
 | Build / flash / west commands | `chsh-sk-ncs-env` |
 | Debug UART logs, capture disconnect traces | `chsh-sk-ncs-3.2-debug` |
-| Git commit + push after release | `chsh-sk-git-commit` |
-| Cut a GitHub release with firmware artifacts | `chsh-sk-git-release` |
+| Git commit + push after release | `chsh-sk-ncs-3.4-git-commit` |
+| Cut a GitHub release with firmware artifacts | `chsh-sk-ncs-3.5-release` |
 
 ---
 

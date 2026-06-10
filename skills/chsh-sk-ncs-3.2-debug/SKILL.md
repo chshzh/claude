@@ -429,8 +429,8 @@ REST API + MCP — see [`references/eedp-platform.md`](references/eedp-platform.
 | First-time NCS setup | `chsh-sk-ncs-env` |
 | Optimize RAM/Flash | `chsh-sk-ncs-3.3-memopt` || Review expected module behavior from spec | `chsh-sk-ncs-2-spec` || Phase 4 Verification & Test (static + EEDP hardware) | `chsh-sk-ncs-4.1-verification` |
 | EEDP platform setup + all modules | [`references/eedp-platform.md`](references/eedp-platform.md) · wiki: `eedp-platform` |
-| Commit after fixing | `chsh-sk-git-commit` |
-| Tag and publish a release after CI passes | `chsh-sk-git-release` |
+| Commit after fixing | `chsh-sk-ncs-3.4-git-commit` |
+| Tag and publish a release after CI passes | `chsh-sk-ncs-3.5-release` |
 | Migrate to a newer NCS version | `chsh-sk-ncs-migrate` |
 | Physical button/LED test automation | `references/eedp-gpio-shell-approach.md` — zero-firmware GPIO shell approach |
 | mcp.nordic-mcp tools reference | wiki: `mcp-nrflow-tools` |

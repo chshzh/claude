@@ -229,7 +229,7 @@ A smoke test per hop is not enough for a final delivery. After the last hop:
    release) — see **chsh-sk-ncs-3.2-debug** Mode F
 2. Run the full Phase 4 verification from **chsh-sk-ncs-4.1-verification** against the
    PRD acceptance criteria
-3. If a release is expected: tag and publish via **chsh-sk-git-release**
+3. If a release is expected: tag and publish via **chsh-sk-ncs-3.5-release**
 
 ---
 
@@ -320,7 +320,7 @@ Do **not** modify this skill mid-conversation unless the user explicitly asks.
 | Toolchain install + west command wrapper | `chsh-sk-ncs-env` |
 | Build/runtime debugging during migration | `chsh-sk-ncs-3.2-debug` |
 | Functional test against PRD acceptance criteria | `chsh-sk-ncs-4.1-verification` |
-| Per-hop commit | `chsh-sk-git-commit` |
-| Final release after migration | `chsh-sk-git-release` |
+| Per-hop commit | `chsh-sk-ncs-3.4-git-commit` |
+| Final release after migration | `chsh-sk-ncs-3.5-release` |
 | Update specs if migration changes architecture | `chsh-sk-ncs-2-spec` |
 | Optimize after migration (heap/stack defaults change) | `chsh-sk-ncs-3.3-memopt` |

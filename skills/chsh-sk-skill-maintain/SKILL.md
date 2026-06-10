@@ -117,7 +117,8 @@ For each personal skill, verify against `chsh-sk-skill-create` rules:
 | Description ≤ 50 words | Word count | P1 |
 | Skill has Gotchas section | `## Gotchas` heading present in body | P1 |
 | No duplicate section headings | Each `##` heading appears exactly once | P1 |
-| `Self-Update Policy` follows canonical 3-step form | Contains "end of each conversation", 3 numbered steps ending in "Apply approved updates", and "Do not modify this skill mid-conversation" | P1 |
+| `Self-Update Policy` follows canonical 3-step form | Contains "end of each conversation", 3 numbered steps, step 2 uses `AskQuestion` with approve/select/skip options, ends with "Do not modify this skill mid-conversation" | P1 |
+| `Decision Flow` present for workflow skills | If skill has multiple modes or a sequential branching flow (detectable by `## Mode` headings or a Step 0 detect-context block), a `## Decision Flow` section with ASCII tree exists before the first `---` | P1 |
 | SKILL.md body ≤ 500 lines | `wc -l` | P2 |
 | No Windows-style paths | No `\` path separators | P2 |
 | No time-sensitive info | No phrases like "before August 202X" | P2 |
@@ -219,8 +220,8 @@ When skill A mentions a topic that skill B owns, A should reference B.
 
 Patterns to detect:
 - A skill mentions "debug" or "UART" without referencing `chsh-sk-ncs-3.2-debug`
-- A skill mentions "git commit" or "push" without referencing `chsh-sk-git-commit`
-- A skill mentions "release" or "tag" without referencing `chsh-sk-git-release`
+- A skill mentions "git commit" or "push" without referencing `chsh-sk-ncs-3.4-git-commit`
+- A skill mentions "release" or "tag" without referencing `chsh-sk-ncs-3.5-release`
 - A skill mentions "PRD" or "requirements" without referencing `chsh-sk-ncs-1-prd`
 - A skill mentions "specs" without referencing `chsh-sk-ncs-2-spec`
 - A skill talks about "QA" or "test report" without referencing `chsh-sk-ncs-4.1-verification`
@@ -344,15 +345,16 @@ Produce a Markdown report at `report-YYYY-MM-DD.md` in this skill's directory:
 
 ## Step 9 — Apply Fixes (with approval)
 
-Present the report summary. Use `AskQuestion` to ask:
+Present the report summary, then call `AskQuestion`:
 
 ```
-Question: "Apply fixes from the review?"
-Options:
-  - "Apply P0 fixes automatically"
-  - "Apply P0 + P1 fixes automatically"
-  - "Show me each fix for approval"
-  - "Report only, no changes"
+AskQuestion:
+  prompt: "Apply fixes from the audit?"
+  options:
+    - "Apply P0 fixes only"
+    - "Apply P0 + P1 fixes"
+    - "Show me each fix for individual approval"
+    - "Report only — no changes"
 ```
 
 For each approved fix:
@@ -362,7 +364,7 @@ For each approved fix:
 4. After all fixes are applied (but **before committing**), append a row to `~/.claude/skills/log.md`:
    `| YYYY-MM-DD | (review) | N issues fixed: <brief summary> | \`<short-commit>\` |`
    Use `<short-commit>` as a literal placeholder for now.
-5. Commit all changed skill files **and `log.md` together** via `chsh-sk-git-commit`.
+5. Commit all changed skill files **and `log.md` together** via `chsh-sk-ncs-3.4-git-commit`.
 6. After the commit, get the new HEAD and update the placeholder in-place — **do not commit this update**:
    ```bash
    HASH=$(git -C ~/.claude/skills rev-parse --short HEAD)
@@ -370,7 +372,16 @@ For each approved fix:
    ```
    Leave log.md dirty. The early-exit check on the next audit run excludes log.md from its dirty-state test, so this uncommitted hash update is the expected resting state.
 
-Do NOT apply split or delete operations without explicit per-item approval.
+For split or delete operations, always ask per-item:
+
+```
+AskQuestion:
+  prompt: "<skill-name>: <proposed split/delete action>. Proceed?"
+  options:
+    - "Yes — apply"
+    - "No — skip"
+    - "Modify — describe change"
+```
 
 ### Fix Templates
 
@@ -390,7 +401,7 @@ Insert before `## Self-Update Policy` (or before `## Related Skills` if no Self-
 ```
 
 **P1-C — `Self-Update Policy` section is missing, abbreviated, or non-canonical:**
-Replace with the canonical template from [`chsh-sk-skill-create` § Canonical Templates](../chsh-sk-skill-create/SKILL.md). Keep the domain-specific first paragraph; the 3 numbered steps and "Do not modify" line must be verbatim.
+Replace with the canonical template from [`chsh-sk-skill-create` § Canonical Templates](../chsh-sk-skill-create/SKILL.md). Keep the domain-specific first paragraph; step 2 must use `AskQuestion` with approve/select/skip options (not plain text); the "Do not modify" line must be verbatim.
 
 **P2 — SKILL.md over 500 lines:**
 1. Identify the largest self-contained section (workflow mode, reference table, long example).
@@ -440,8 +451,8 @@ Check if skills with `Self-Update Policy` sections were last updated recently (v
 | Task | Skill |
 |------|-------|
 | Author a new skill | `chsh-sk-skill-create` |
-| Commit reviewed skill fixes | `chsh-sk-git-commit` |
-| Push to claude repo | `chsh-sk-git-commit` (Step 5 — push) |
+| Commit reviewed skill fixes | `chsh-sk-ncs-3.4-git-commit` |
+| Push to claude repo | `chsh-sk-ncs-3.4-git-commit` (Step 5 — push) |
 
 ---
 
@@ -463,7 +474,15 @@ patterns need updating based on what was found in this audit.
 
 If updates are warranted:
 1. Collect all proposed changes with a brief rationale for each.
-2. Present a summary to the user and ask for approval using `AskQuestion`.
-3. Apply approved updates to this file immediately.
+2. Call `AskQuestion`:
+   ```
+   AskQuestion:
+     prompt: "Apply these self-update changes to chsh-sk-skill-maintain?"
+     options:
+       - "Yes — apply all"
+       - "Yes — apply selected (describe below)"
+       - "No — skip for now"
+   ```
+3. Apply approved updates immediately.
 
 Do **not** modify this skill mid-conversation unless the user explicitly asks.

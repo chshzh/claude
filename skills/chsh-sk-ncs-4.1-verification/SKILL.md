@@ -199,7 +199,7 @@ After reporting, ask:
 | Debug firmware failures | `chsh-sk-ncs-3.2-debug` |
 | Auto-fix clang-format violations | `chsh-sk-ncs-clang-format` |
 | Hardware validation (Phase 4.2) | `chsh-sk-ncs-4.2-validation` |
-| Tag and publish release | `chsh-sk-git-release` |
+| Tag and publish release | `chsh-sk-ncs-3.5-release` |
 | Full lifecycle orchestration | `chsh-sk-ncs-0-workflow` |
 
 ## Self-Update Policy

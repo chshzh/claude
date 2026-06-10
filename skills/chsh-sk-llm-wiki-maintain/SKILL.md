@@ -325,7 +325,7 @@ After all fixes are applied (but **before committing**):
    ```
    Use `<short-commit>` as a literal placeholder for now.
 
-2. Commit all changed wiki files **and `log.md` together** via `chsh-sk-git-commit`.
+2. Commit all changed wiki files **and `log.md` together** via `chsh-sk-ncs-3.4-git-commit`.
 
 3. After the commit, get the new HEAD and update the placeholder in-place — **do not commit this update**:
    ```bash
@@ -403,7 +403,7 @@ prompt that the user can run against fresh sources to detect updates.
 | Build, ingest, query the wiki | `chsh-sk-llm-wiki` |
 | Author a new skill | `chsh-sk-skill-create` |
 | Audit skills | `chsh-sk-skill-maintain` |
-| Commit reviewed wiki fixes | `chsh-sk-git-commit` |
+| Commit reviewed wiki fixes | `chsh-sk-ncs-3.4-git-commit` |
 
 ---
 

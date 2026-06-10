@@ -1,7 +1,7 @@
 # Skills Index
 
 > Skill catalog. Each entry links to the SKILL.md for that skill.
-> Last updated: 2026-06-06 | Total skills: 24
+> Last updated: 2026-06-11 | Total skills: 23
 
 ## NCS / Firmware Workflow
 
@@ -24,8 +24,8 @@
 
 ## Git & Release
 
-- [chsh-sk-git-commit](chsh-sk-git-commit/SKILL.md) — Plans and executes git commits; delegates to chsh-ag-git
-- [chsh-sk-git-release](chsh-sk-git-release/SKILL.md) — Cuts a release: tag → CI → publish
+- [chsh-sk-ncs-3.4-git-commit](chsh-sk-ncs-3.4-git-commit/SKILL.md) — Plans and executes git commits; delegates to chsh-ag-git
+- [chsh-sk-ncs-3.5-release](chsh-sk-ncs-3.5-release/SKILL.md) — Tags a release, watches CI, publishes firmware to GitHub
 
 ## Memfault
 
@@ -38,7 +38,6 @@
 
 ## Memory / AI Tools
 
-- [chsh-agentmemory-inject-session](chsh-agentmemory-inject-session/SKILL.md) — Bulk-imports Cursor or Claude chat history into AgentMemory
 - [chsh-sk-llm-wiki](chsh-sk-llm-wiki/SKILL.md) — Builds and maintains a Karpathy-style LLM Wiki
 - [chsh-sk-llm-wiki-maintain](chsh-sk-llm-wiki-maintain/SKILL.md) — Audits wiki health and lints pages (runs as scheduled routine)
 
