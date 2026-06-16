@@ -28,16 +28,24 @@ can run in CI.
 
 ```bash
 # Extract version chain — record all three before proceeding
-grep -m1 -E "^##\s+v[0-9]" docs/pm-prd/PRD.md            # → PRD_VERSION
-grep -m1 -E "^##\s+v[0-9]" docs/dev-specs/overview.md    # → SPECS_VERSION
-grep "SPECS_VERSION" src/main.c                            # → code version tag
+# PRD_VERSION: last timestamp row in the PRD Changelog table
+grep -E "^\| [0-9]{4}" docs/pm-prd/PRD.md | tail -1
+
+# SPECS_VERSION: last timestamp row in overview.md Changelog table
+grep -E "^\| [0-9]{4}" docs/dev-specs/overview.md | tail -1
+
+# Code version: prj.conf carries both version tags
+grep -E "ZEGO_APP_(PRD|SPECS)_VERSION" prj.conf
 
 # Remaining inputs
 ls docs/dev-specs/                                         # spec files present
+git status --short                                         # check for uncommitted changes
 grep -n "^### Build" README.md                            # locate canonical build commands
 ```
 
-Record `PRD_VERSION` (latest PRD Changelog entry), `SPECS_VERSION` (latest specs/overview.md Changelog entry), and the version tag in `src/main.c` — all three go into every report header. The version chain must satisfy:
+Record `PRD_VERSION` (latest PRD Changelog entry), `SPECS_VERSION` (latest overview.md Changelog entry), and the version tags in `prj.conf` — all three go into every report header.
+
+> **Note on uncommitted changes**: if `git status` shows modified source files, the code version is ahead of the last commit. Build and test anyway — but note in the report that the build reflects uncommitted state. The version chain must satisfy:
 
 ```
 PRD_VERSION  →  specs/overview.md written against PRD_VERSION
@@ -64,7 +72,7 @@ Inspect each area below. Flag each finding with severity (P0 / P1 / P2).
 
 **Config**
 - `prj.conf` free of conflicts; overlay files named consistently
-- No unguarded `CONFIG_SHELL`, `CONFIG_LOG_BACKEND_*` in release build
+- `CONFIG_SHELL`: acceptable in **developer template** projects where the UART shell is a documented feature. Flag as P1 only if the project README does not document shell usage or if it is production firmware (not a template).
 - All overlay files documented in README
 
 **Standards**
@@ -100,7 +108,9 @@ Inspect each area below. Flag each finding with severity (P0 / P1 / P2).
 #   3) record pass/fail, warnings, and binary size for each target
 ```
 
-Zero warnings required. Record binary size. Any warning = P1.
+Zero **compiler** warnings required. Record binary size. Any compiler warning = P1.
+
+> **Known non-P1 Kconfig notices**: `warning: Experimental symbol WIFI_NM_WPA_SUPPLICANT is enabled` and similar NCS Wi-Fi experimental warnings appear on every nRF70 build and are expected. Do not flag these as P1 — they are upstream NCS status notices, not project issues. Only flag new or project-specific Kconfig warnings.
 
 ### 4.1.3 Documentation Consistency Audit
 
@@ -110,10 +120,10 @@ Work through the version chain in order. A failure at an earlier step blocks the
 
 ```bash
 # 1. Read the latest PRD Changelog entry to get PRD_VERSION
-grep -A3 -m1 -E "^##\s+v[0-9]" docs/pm-prd/PRD.md
+grep -E "^\| [0-9]{4}" docs/pm-prd/PRD.md | tail -1
 
-# 2. Confirm specs/overview.md declares it was written against PRD_VERSION
-grep -i "prd.version\|based on prd\|prd_version\|PRD v" docs/dev-specs/overview.md | head -5
+# 2. Confirm overview.md PRD Version field matches PRD_VERSION
+grep "PRD Version" docs/dev-specs/overview.md
 ```
 
 | Check | Pass condition |
@@ -125,15 +135,16 @@ grep -i "prd.version\|based on prd\|prd_version\|PRD v" docs/dev-specs/overview.
 
 ```bash
 # 1. Read the latest Specs Changelog entry to get SPECS_VERSION
-grep -A3 -m1 -E "^##\s+v[0-9]" docs/dev-specs/overview.md
+grep -E "^\| [0-9]{4}" docs/dev-specs/overview.md | tail -1
 
-# 2. Confirm src/main.c carries the matching tag
-grep "SPECS_VERSION" src/main.c
+# 2. Confirm prj.conf carries the matching tags
+grep -E "ZEGO_APP_(PRD|SPECS)_VERSION" prj.conf
 ```
 
 | Check | Pass condition |
 |-------|----------------|
-| `SPECS_VERSION` in `src/main.c` | Matches the latest `docs/dev-specs/overview.md` Changelog entry |
+| `CONFIG_ZEGO_APP_SPECS_VERSION` in `prj.conf` | Matches the latest `docs/dev-specs/overview.md` Changelog entry |
+| `CONFIG_ZEGO_APP_PRD_VERSION` in `prj.conf` | Matches the latest `docs/pm-prd/PRD.md` Changelog entry |
 | Spec modules → code | Every `docs/dev-specs/<module>.md` has a `src/modules/<name>/` counterpart |
 
 **Step C — PRD features → README** *(only if Steps A & B pass)*
@@ -188,6 +199,10 @@ After reporting, ask:
 | clang-format version mismatch | Use NCS toolchain clang-format (`nrfutil sdk-manager toolchain launch -- clang-format`), not system clang-format |
 | PRD "not visible" ≠ "not implemented" | Auto-reconnect via Zephyr WiFi manager has no visible app code — check `CONFIG_WIFI_CREDENTIALS` / `CONFIG_WIFI_NM` before flagging |
 | Security grep false positive | `grep -r "password"` hits comments/docs — read context before flagging |
+| Version grep matches table header | `grep -m1 '\| [0-9]'` captures the `\| Version \|` header row, not a real version. Use `grep -E '^\| [0-9]{4}'` to match only timestamp rows. |
+| PRD Changelog entries out of order | Authors sometimes append entries non-chronologically. Always read **all** rows and pick the lexicographically latest timestamp, not just the last row. |
+| Uncommitted changes affect code version | `git log` reflects the last commit, not on-disk state. Run `git status --short` — if modified files exist, note in the report that the build reflects uncommitted code. |
+| SoftAP default password `12345678` | This is the WPS PIN / developer hotspot passphrase, not a user's Wi-Fi password. Context matters — do not flag as a security issue for developer templates. |
 
 ---
 

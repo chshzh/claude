@@ -8,7 +8,6 @@
 | Version | YYYY-MM-DD-HH-MM |
 | PRD Version | YYYY-MM-DD-HH-MM |
 | Specs Version | YYYY-MM-DD-HH-MM |
-| Reviewer | |
 | NCS Version | e.g. v3.3.0 |
 | Status | Draft / Pass / Fail |
 
@@ -19,7 +18,14 @@
 | Version | Summary |
 |---------|---------|
 | YYYY-MM-DD-HH-MM | Initial QA review |
+---
 
+## Build State
+
+| Item | Value |
+|------|-------|
+| Uncommitted changes | Yes / No (list files if yes) |
+| Build reflects | Last commit / Uncommitted on-disk state |
 ---
 
 ## 1. Security Risk
@@ -48,24 +54,13 @@ Violations:
 
 ---
 
-## 3. Code Quality
+## 3. Build Results
 
-| Category | Score (0–10) | Notes |
-|----------|-------------|-------|
-| Project structure | | |
-| Core files (CMakeLists, Kconfig, prj.conf) | | |
-| Error handling | | |
-| Thread safety | | |
-| Memory | | |
-| Wi-Fi implementation | | |
-| Documentation / README | | |
-| Build (zero warnings) | | |
-| Security (from §1) | | |
-| **Normalized total** | **/100** | |
+| Board | Result | Compiler Warnings | FLASH | RAM |
+|-------|--------|-------------------|-------|-----|
+| | ✅ PASS / ❌ FAIL | 0 | xx% | xx% |
 
-Score formula: (sum / 90) × 100
-
-**Quality verdict**: ✅ Excellent / ✅ Good / ⚠️ Satisfactory / ⚠️ Needs Work / ❌ Fail
+> Kconfig `Experimental symbol` notices are expected on nRF70 builds and are not counted as compiler warnings.
 
 ---
 
@@ -82,6 +77,30 @@ Score formula: (sum / 90) × 100
 
 ---
 
+## 5. Documentation Consistency Audit
+
+| Step | Check | Result | Notes |
+|------|-------|--------|-------|
+| A | `overview.md` PRD Version field matches latest PRD Changelog timestamp | ✅ / ❌ | |
+| A | All FR/NFR items in PRD traceable to spec | ✅ / ❌ | |
+| B | `CONFIG_ZEGO_APP_SPECS_VERSION` in `prj.conf` matches `overview.md` latest Changelog | ✅ / ❌ | |
+| B | `CONFIG_ZEGO_APP_PRD_VERSION` in `prj.conf` matches PRD latest Changelog | ✅ / ❌ | |
+| B | Spec modules have `src/modules/<name>/` counterparts | ✅ / ❌ | |
+| C | README features match current PRD FR list | ✅ / ❌ | |
+| C | No stale features in README | ✅ / ❌ | |
+
+---
+
+## 6. Fixes Applied During This Verification
+
+| File | Fix | Severity |
+|------|-----|----------|
+| | | P0/P1/P2 |
+
+*(Delete this section if no fixes were applied.)*
+
+---
+
 ## Summary
 
 **Overall verdict**: PASS / PASS WITH ISSUES / FAIL
@@ -90,3 +109,4 @@ Score formula: (sum / 90) × 100
 |----------|---------|-------|
 | P0 | | Phase 3 |
 | P1 | | Phase 3 |
+| P2 | | Next iteration |
