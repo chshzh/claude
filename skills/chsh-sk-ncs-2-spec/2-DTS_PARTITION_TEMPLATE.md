@@ -138,5 +138,5 @@ For each board, ensure the following exist and are consistent:
 
 ## Related Specs
 
-- [architecture.md](architecture.md) — memory budget and SoC selection
-- *(add any module specs that write to NVS or dedicated partitions)*
+- [1-architecture.md](1-architecture.md) — memory budget and SoC selection
+- [3-memopt.md](3-memopt.md) — RAM budget and headroom tracking

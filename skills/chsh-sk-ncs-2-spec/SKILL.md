@@ -1,6 +1,6 @@
 ---
 name: chsh-sk-ncs-2-spec
-description: Use when starting a new project design, updating specs after a PRD change, or documenting an existing codebase's design. Translates a PRD into engineering specs — architecture.md and per-module specs for app modules and library wrappers.
+description: Use when starting a new project design, updating specs after a PRD change, or documenting an existing codebase's design. Translates a PRD into engineering specs — 0-overview, 1-architecture, 2-dts-partition, 3-memopt, and per-module specs for app modules and library wrappers.
 ---
 
 # chsh-sk-ncs-2-spec — Technical Design Workflow
@@ -76,9 +76,10 @@ Derive the required spec files from PRD features. Always required:
 
 | File | Content |
 |------|---------|
-| `docs/dev-specs/overview.md` | Entry point — spec index, PRD-to-spec mapping, design decisions |
-| `docs/dev-specs/architecture.md` | System overview, module map, Zbus channels, boot sequence, memory budget |
-| `docs/dev-specs/partition-layout.md` | DTS-based partition layout per board, NVS capacity notes, migration rationale (**include whenever the project uses MCUboot OTA, Memfault coredumps, or custom NVS partitions**) |
+| `docs/dev-specs/0-overview.md` | Entry point — spec index, PRD-to-spec mapping, design decisions |
+| `docs/dev-specs/1-architecture.md` | System overview, module map, Zbus channels, boot sequence, memory budget |
+| `docs/dev-specs/2-dts-partition.md` | DTS-based partition layout per board, NVS capacity notes, migration rationale |
+| `docs/dev-specs/3-memopt.md` | Memory optimization report — Flash/RAM budget, stack watermarks, reduction history |
 
 Per module (one file per significant feature):
 
@@ -97,11 +98,11 @@ Per module (one file per significant feature):
 
 Present the plan to the user and confirm before generating.
 
-### A3. Generate `docs/dev-specs/overview.md`
+### A3. Generate `docs/dev-specs/0-overview.md`
 
-Use `OVERVIEW_TEMPLATE.md` as the base. Fill in:
+Use `0-OVERVIEW_TEMPLATE.md` as the base. Fill in:
 
-- **Document Information**: fill the table exactly as defined in the matching template's Document Information (`OVERVIEW_TEMPLATE.md` / `ARCH_TEMPLATE.md` / `MODULE_TEMPLATE.md`) — the template documents what `Version` and `PRD Version` mean. Do this for every spec file generated.
+- **Document Information**: fill the table exactly as defined in the matching template's Document Information (`0-OVERVIEW_TEMPLATE.md` / `1-ARCHITECTURE_TEMPLATE.md` / `MODULE_TEMPLATE.md`) — the template documents what `Version` and `PRD Version` mean. Do this for every spec file generated.
 - **Spec Index**: list every spec file to be generated, with a one-line description and the PRD sections it covers
 - **Architecture Summary**: pattern choice (SMF+Zbus vs multi-threaded) and the top 3–5 design decisions with rationale
 - **PRD-to-Spec Mapping**: table mapping each FR/NFR to the spec file that implements it
@@ -110,9 +111,9 @@ Use `OVERVIEW_TEMPLATE.md` as the base. Fill in:
 
 Add the changelog entry (initial version, today's date).
 
-### A6. Generate `docs/dev-specs/architecture.md`
+### A6. Generate `docs/dev-specs/1-architecture.md`
 
-Use `ARCH_TEMPLATE.md` as the base. Fill in:
+Use `1-ARCHITECTURE_TEMPLATE.md` as the base. Fill in:
 
 - **Overview**: one paragraph — architecture pattern, key design decisions
 - **Module Map**: directory tree showing all `src/modules/<name>/` directories
@@ -152,15 +153,11 @@ Choose the observer type that matches the work performed by each module:
 
 Add the revision history entry (version 1.0, today's date).
 
-### A6b. Generate `docs/dev-specs/partition-layout.md` (when needed)
+### A6b. Generate `docs/dev-specs/2-dts-partition.md`
 
-Include this spec whenever the project uses any of:
-- MCUboot OTA (requires `slot0_partition` + `slot1_partition`)
-- Memfault coredump storage (requires a dedicated coredump partition)
-- Custom NVS partitions beyond `storage_partition`
-- Migration from Partition Manager (NCS ≤ 3.2) to DTS fixed-partitions (NCS ≥ 3.3)
+Always required. Include this spec in every project that uses MCUboot OTA, Memfault coredump storage, custom NVS partitions, or DTS fixed-partitions.
 
-Use `PARTITION_LAYOUT_TEMPLATE.md` as the base. Fill in:
+Use `2-DTS_PARTITION_TEMPLATE.md` as the base. Fill in:
 - **Document Information**: project, boards, NCS version
 - **Internal flash table** per board: `boot_partition`, `slot0_partition`, `storage_partition`, coredump partition — actual addresses and sizes from the board DTS/overlay or SoC datasheet
 - **External flash table** per board (if present): `slot1_partition` plus any project-specific partitions
@@ -168,13 +165,31 @@ Use `PARTITION_LAYOUT_TEMPLATE.md` as the base. Fill in:
 - **Migration Notes**: fill only when migrating from PM; delete section for new projects
 - **DTS Overlay Checklist**: verify all overlay files exist and are consistent
 
-> Reference: `nordic-wifi-memfault/docs/dev-specs/partition-layout.md` is a complete example covering both nRF54LM20DK + nRF7002EB2 and nRF7002DK with Memfault coredump and log-state partitions.
+> Reference: `nordic-wifi-memfault/docs/dev-specs/2-dts-partition.md` is a complete example covering both nRF54LM20DK + nRF7002EB2 and nRF7002DK with Memfault coredump and log-state partitions.
+
+Add the changelog entry (initial version, today's date).
+
+### A6c. Generate `docs/dev-specs/3-memopt.md`
+
+Always required. Documents the memory budget and optimization history for the project.
+
+Use `3-MEMOPT_TEMPLATE.md` as the base. Fill in:
+
+- **Sizing Rules**: confirm the 20 %/10 % headroom rules match the project's risk tolerance
+- **Headroom Targets**: minimum flash and RAM headroom percentages
+- **Thread Stack Analysis**: one row per thread/WQ — ZView watermark, sizing rule applied, new and old size, delta. Use worst-case across boards.
+- **Heap Analysis**: separate rows for system heap, mbedTLS heap, and any dedicated K_HEAPs (`NRF_WIFI_*`, `WPA_SUPPLICANT_*`); note if split heaps are in use
+- **ISR Stack**: measured usage vs. `CONFIG_ISR_STACK_SIZE` (default 2048 B)
+- **Flash & RAM Budget**: total flash/RAM used vs. available per board from `zephyr.map`
+- **Summary of Changes**: Kconfig, old value, new value, delta, reason
+
+> Reference: `nordic-wifi-memfault/docs/dev-specs/3-memopt.md` is a complete example.
 
 Add the changelog entry (initial version, today's date).
 
 ### A7. Generate per-module specs
 
-For each module from A2, use `MODULE_TEMPLATE.md` as base. Select the module type first:
+For each module from A2, use `MODULE_TEMPLATE.md` as base.
 
 **For application modules** (SMF+Zbus or multi-threaded):
 - **Overview**: role of this module, version notes
@@ -251,18 +266,19 @@ For each impacted spec file:
 - Apply the PRD change to the relevant section (state machine, Kconfig, API, etc.).
 - Add a new row to the spec's **Changelog** table (its version cell = the `Version` field = now):
   `| <now> | Updated to PRD v<prd-version>: <summary of change> |`
-- If a module is newly added, generate its spec from `MODULE_TEMPLATE.md`.
+- If a module is newly added, generate its spec from `MODULE_TEMPLATE.md`. Select the module type first:
 - If a module is removed, mark it `[DEPRECATED]` in the header; do not delete.
 
-### B3. Update `architecture.md` and `overview.md`
+### B3. Update `1-architecture.md` and `0-overview.md`
 
 If the module map, Zbus channels, or memory budget changed:
-- Update those sections in `architecture.md` and add a Changelog entry.
+- Update those sections in `1-architecture.md` and add a Changelog entry.
+- Update `3-memopt.md` if the memory budget or thread stack sizes changed.
 
-Always update `overview.md`:
+Always update `0-overview.md`:
 - Add/remove rows from the Spec Index and PRD-to-Spec Mapping tables.
 - Update the Module Dependency Map if inter-module message flows changed.
-- Add a Changelog entry to `overview.md`.
+- Add a Changelog entry to `0-overview.md`.
 
 ### B4. Handoff
 
@@ -288,8 +304,9 @@ Use when code exists but no specs have been written.
    - Kconfig symbols
    - Public functions
 3. Generate specs as in Mode A4–A5 using the code as the source of truth.
-4. Generate `architecture.md` from the discovered structure.
-5. Note any undocumented behaviours or gaps as **Open Issues**.
+4. Generate `1-architecture.md` from the discovered structure.
+5. Generate `3-memopt.md` from build map files and ZView stack data if available.
+6. Note any undocumented behaviours or gaps as **Open Issues**.
 
 ---
 
@@ -309,6 +326,7 @@ Every document produced by this skill must include a **Changelog** table near th
 
 Rules:
 - Version is a timestamp `YYYY-MM-DD-HH-MM` (e.g. `2026-04-09-14-30`) — includes time so multiple edits on the same day are distinguishable.
+  Generate with: `date +%Y-%m-%d-%H-%M`
 - Never delete rows; the table is append-only.
 - Keep the summary short — one line describing what changed. When the change is driven by a PRD update, include the PRD version: `Updated to PRD v2026-04-09-10-00: added P2P mode`.
 - The `PRD Version` field in Document Information always reflects the PRD Changelog timestamp this spec was written against.
@@ -321,7 +339,8 @@ Use this checklist before handing off specs to `chsh-sk-ncs-3.1-coding`.
 > **Reminder**: The spec covers HOW. The PRD covers WHAT. A good spec answers every question a developer needs to write code — without them having to re-read the PRD.
 
 ### Completeness
-- [ ] Every FR in the PRD maps to at least one spec section (check PRD-to-Spec table in `overview.md`)
+- [ ] Every FR in the PRD maps to at least one spec section (check PRD-to-Spec table in `0-overview.md`)
+- [ ] `3-memopt.md` exists and has a memory budget table with headroom
 - [ ] Every module has a spec file with Overview, Zbus Integration, Error Handling, and Memory Estimate
 - [ ] Architecture.md has a Thread Budget (justified) and Memory Budget (with headroom)
 - [ ] All Zbus channels are listed with publisher, subscriber(s), and message struct
@@ -348,8 +367,10 @@ Use this checklist before handing off specs to `chsh-sk-ncs-3.1-coding`.
 ### Size guidelines (not hard limits — use judgment)
 | Document | Target length |
 |----------|--------------|
-| `overview.md` | 200–400 words + tables |
-| `architecture.md` | 400–800 words + diagrams |
+| `0-overview.md` | 200–400 words + tables |
+| `1-architecture.md` | 400–800 words + diagrams |
+| `2-dts-partition.md` | 150–300 words + tables |
+| `3-memopt.md` | 150–300 words + tables |
 | Per-module spec | 250–600 words + state diagram (if applicable) |
 
 Specs longer than these targets often contain PRD content that belongs in `docs/pm-prd/PRD.md` instead.

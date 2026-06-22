@@ -37,7 +37,9 @@ For the product requirements that drive this design, see `docs/pm-prd/PRD.md`.
 
 | Spec file | Covers | PRD sections |
 |-----------|--------|--------------|
-| [architecture.md](architecture.md) | System overview, module map, Zbus channels, boot sequence, memory budget | All |
+| [1-architecture.md](1-architecture.md) | System overview, module map, Zbus channels, boot sequence, memory budget | All |
+| [2-dts-partition.md](2-dts-partition.md) | Flash partition layout per board | NFR flash/OTA |
+| [3-memopt.md](3-memopt.md) | Memory optimization — stack watermarks, heap budget, headroom | NFR memory |
 | [<module-a>-module.md](<module-a>-module.md) | <brief description> | FR-00x, FR-00y |
 | [<module-b>-module.md](<module-b>-module.md) | <brief description> | FR-00z |
 
@@ -76,7 +78,7 @@ For the product requirements that drive this design, see `docs/pm-prd/PRD.md`.
 <module-d>  ──Zbus──▶  <module-b>
 ```
 
-> For the full Zbus channel table, see [architecture.md](architecture.md).
+> For the full Zbus channel table, see [1-architecture.md](1-architecture.md).
 
 ---
 
