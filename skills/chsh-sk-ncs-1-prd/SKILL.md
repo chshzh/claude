@@ -227,7 +227,8 @@ After any mode:
    ```markdown
    | YYYY-MM-DD-HH-MM | <one-line summary of changes> |
    ```
-   (`YYYY-MM-DD-HH-MM` = the same current time you put in the `Version` field.)
+   (`YYYY-MM-DD-HH-MM` = the same current time you put in the `Version` field.
+   Generate with: `date +%Y-%m-%d-%H-%M`)
 5. Confirm: *"PRD updated. New revision added to Changelog (Version = <timestamp>)."*
 
 6. Call `AskQuestion`:
