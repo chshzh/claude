@@ -58,7 +58,7 @@ status dashboard, and guides you through each phase — invoking the right skill
 │           4.1: chsh-sk-ncs-4.1-verification · 4.2: chsh-sk-ncs-4.2-validation│
 │                                                                              │
 │  4.1 Verification (always, no HW): code review, build, docs                  │
-│  4.2 Validation via EEDP (HW): GPIO, UART, Saleae, JLink, Router             │
+│  4.2 Validation (HW): shell-first UART + ZView watermarks, Router            │
 │  • Output: docs/qa-test/ (VERIFICATION + VALIDATION)                         │
 │                                                                              │
 │  P0 → Phase 3  |  Spec gap → Phase 2  |  New req → Phase 1                   │
@@ -76,7 +76,7 @@ Run this before anything else. Provide the project path if not already in it.
 ls docs/pm-prd/PRD.md 2>/dev/null             && echo "PRD: YES"        || echo "PRD: NO"
 ls docs/dev-specs/overview.md 2>/dev/null     && echo "SPECS: YES"      || echo "SPECS: NO"
 ls src/main.c 2>/dev/null                     && echo "CODE: YES"       || echo "CODE: NO"
-ls docs/qa-test/VALIDATION-*.md 2>/dev/null | sort | tail -1 && echo "VALIDATION: YES" || echo "VALIDATION: NO"
+ls docs/qa-test/VALIDATION_REPORT.md 2>/dev/null && echo "VALIDATION: YES" || echo "VALIDATION: NO"
 
 # Version extraction (only when all three exist)
 PRD_VER=$(grep -m1 '| [0-9]' docs/pm-prd/PRD.md 2>/dev/null | awk -F'|' '{print $2}' | tr -d ' ')
@@ -235,7 +235,7 @@ log evidence of correct behavior.
 | Sub-phase | Document | Hardware? |
 |-----------|----------|-----------|
 | 4.1 Verification (always) | `docs/qa-test/VERIFICATION-YYYY-MM-DD-HH-MM.md` | No |
-| 4.2 Validation (always) | `docs/qa-test/VALIDATION-YYYY-MM-DD-HH-MM.md` | Yes |
+| 4.2 Validation (always) | `docs/qa-test/VALIDATION_PLAN.md` + `docs/qa-test/VALIDATION_REPORT.md` | Yes |
 
 **Feedback routing after Phase 4:**
 
@@ -278,16 +278,20 @@ Changes are tracked in a built-in Changelog table:
 ```
 
 - Version is a timestamp `YYYY-MM-DD-HH-MM` — time included so same-day edits are distinguishable.
+  Generate with: `date +%Y-%m-%d-%H-%M`
 - Never delete rows — append-only.
 - Git provides the full diff; the Changelog is the human-readable log.
 
 ### Audit snapshots — dated filenames
 
-QA and Test reports are **point-in-time snapshots**. Each run creates a new dated file:
+Verification reports are **point-in-time snapshots**. Each run creates a new dated file:
 
 ```
-docs/qa-test/VALIDATION-2026-04-09-14-30.md
+docs/qa-test/VERIFICATION-2026-04-09-14-30.md
 ```
+
+Validation uses two **living** documents (fixed names, internal Changelog), not dated snapshots:
+`docs/qa-test/VALIDATION_PLAN.md` and `docs/qa-test/VALIDATION_REPORT.md`.
 
 ---
 
@@ -299,7 +303,7 @@ docs/qa-test/VALIDATION-2026-04-09-14-30.md
 | `overview.md` | `docs/dev-specs/` | Developer | Spec index, PRD-to-spec map, design decisions |
 | `architecture.md` | `docs/dev-specs/` | Developer | System design, module map, memory budget |
 | `<module>.md` | `docs/dev-specs/` | Developer | State machines, Kconfig, APIs |
-| `VALIDATION-*.md` | `docs/qa-test/` | Tester / PM + Reviewer | PRD acceptance criteria pass/fail, UART evidence, code quality score |
+| `VALIDATION_PLAN.md` / `VALIDATION_REPORT.md` | `docs/qa-test/` | Tester / PM | Test plan + PRD acceptance pass/fail, UART evidence, ZView memory watermarks |
 
 **Division of responsibility:**
 - PRD: behaviour in user terms — no Kconfig flags, no memory numbers.
@@ -338,7 +342,7 @@ docs/qa-test/VALIDATION-2026-04-09-14-30.md
 | `chsh-sk-ncs-3.1-coding` | Implementing code from specs | `src/`, `prj.conf`, passing build |
 | `chsh-sk-ncs-3.2-debug` | Debugging firmware failures, UART log analysis | Root cause identified and fixed |
 | `chsh-sk-ncs-4.1-verification` | Phase 4.1 Verification (code review, build, docs audit — no hardware) | `docs/qa-test/VERIFICATION-*.md` |
-| `chsh-sk-ncs-4.2-validation` | Phase 4.2 Validation (hardware tests via EEDP against PRD acceptance criteria) | `docs/qa-test/VALIDATION-*.md` |
+| `chsh-sk-ncs-4.2-validation` | Hardware validation (shell-first + ZView watermarks against PRD acceptance criteria) | `docs/qa-test/VALIDATION_PLAN.md` + `VALIDATION_REPORT.md` |
 | `chsh-sk-ncs-3.4-git-commit` | Preparing git commits | Clean, logical commit history |
 | `chsh-sk-ncs-3.5-release` | Tagging a release, watching CI, publishing firmware to GitHub | GitHub release with published artifact |
 | `chsh-sk-ncs-migrate` | Upgrading the project to a newer NCS version (single hop or multi-hop) | Migrated app, clean build, verified on hardware |
