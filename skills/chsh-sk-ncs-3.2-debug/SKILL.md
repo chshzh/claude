@@ -49,6 +49,8 @@ Issue reported
       ▼
 [Step 0] Baseline — confirm board, VCOM port, NCS version
       │
+      ├── nRF54LM20DK? ──→ [Step 0.1] Check Board Configurator settings
+      │
       ▼
 [Mode A] Serial capture + reset — read boot log
       │
@@ -80,6 +82,7 @@ git -C <app> log --oneline -3  # recent changes
 
 Required information:
 - **Board HW**: board name + version (e.g., `nRF54LM20DK PCA10173 v0.7.0`)
+  - **nRF54LM20DK only**: check Board Configurator settings before debugging — see Step 0.1.
 - **NCS version**: e.g., `v3.3.0`
 - **Firmware version**: git tag or commit hash
 - **UART port**: correct VCOM — see table below:
@@ -96,6 +99,32 @@ Required information:
 
 > **Rule**: If you have two boards, assign one as **reference** (known-good firmware)
 > and one as **test** (under investigation). Compare their logs at the first divergence.
+
+### Step 0.1 — nRF54LM20DK Board Configurator Check (nRF54LM20DK only)
+
+**Do this before any serial capture or flash attempt** when the target board is nRF54LM20DK.
+
+The nRF54LM20DK has a hardware board configurator that controls board-level hardware settings.
+Misconfiguration here can look identical to a firmware bug. Always verify the settings match
+what the firmware expects before spending time on code-level debugging.
+
+**Settings to review** (open **nRF Connect for Desktop** → **Board Configurator** → select nRF54LM20DK):
+
+| Setting | What it affects |
+|---|---|
+| **External memory** | Powers the MX25R6435F SPI NOR; must be ON if firmware uses external flash (e.g. MCUboot secondary slot) |
+| **Debug port** | Must be enabled to flash/debug via SWD |
+| **VCOM** | Must be enabled to receive UART logs over USB |
+| **LED / GPIO switch** | Controls whether on-board LEDs and GPIOs are connected |
+| **GPIO voltage** | Must match the voltage levels expected by connected hardware |
+
+**How to apply:**
+1. Open **nRF Connect for Desktop** → **Board Configurator**
+2. Select the nRF54LM20DK
+3. Verify/adjust settings for the current use case
+4. Click **Write**
+
+After writing, reflash and test. No firmware changes are needed.
 
 ### Step 0.5 — Resolve Test Target (Required Before Any Serial Action)
 
@@ -446,6 +475,8 @@ REST API + MCP — see [`references/eedp-platform.md`](references/eedp-platform.
 - **DNS-SD -EAGAIN race (mDNS additional records)**: mDNS PTR responses include the A record as an additional record arriving ~100–200µs after the instance-name callback. If code calls `dns_get_addr_info` unconditionally after receiving the instance name, it gets `-EAGAIN (-11)` because the prior query slot is still occupied by pending callbacks. Symptom: headset log shows `A record: x.x.x.x` followed immediately by `DNS-SD discovery attempt N failed (err -11)` on all 3 retries. Fix: `k_sleep(K_MSEC(50))` after instance name to drain remaining callbacks, then guard the A-record query with `if (!ctx.addr_received)`.
 
 - **Identifying gateway vs headset role at runtime**: If both boards are already past boot, `nrfutil device list` does not indicate role. Reset both boards simultaneously (parallel threads) and read ~15 lines each — the `fw_info: Compiled as AUDIO GATEWAY / HEADSET LEFT` line appears at ~460–470ms into boot on nRF5340 Audio DK.
+
+- **nRF54LM20DK Board Configurator — external flash (MX25R6435F) must be explicitly enabled**: The nRF54LM20DK has a hardware board configurator (nRF Connect for Desktop → Board Configurator app) that controls which external peripherals are powered. **External memory (MX25R6435F SPI NOR) is disabled by default.** When it is disabled, the flash chip's VCC is cut or its power-enable GPIO is not asserted, and the SPI bus returns all zeros — the JEDEC ID reads `00 00 00` instead of `C2 28 17`. MCUboot then fails with `E: Device id 00 00 00 does not match config c2 28 17` → `E: Failed to open flash area ID 0 (image 0 slot 1): -19` → `E: Failed to open flash areas, cannot continue` and the application never starts. **This is not a firmware bug.** No amount of `t-exit-dpd`, `t-reset-recovery`, or `reset-gpios` tuning will fix it. The fix is: open Board Configurator, select the nRF54LM20DK, enable **External memory**, and click **Write**. Check this first on any nRF54LM20DK that shows zero UART output or JEDEC read failures.
 
 ## Self-Update Policy
 
