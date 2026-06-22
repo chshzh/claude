@@ -17,6 +17,22 @@ description: Use when analyzing RAM/Flash usage, reducing memory footprint, debu
 
 ## Workflow
 
+### Step 0 — Prefer the validation report as the sizing input
+
+Before measuring anything yourself, check for `docs/qa-test/VALIDATION_REPORT.md`. If it has a
+populated **Memory Watermarks** section, that is the **primary** input — those peaks were
+captured by ZView during the validation high-memory round under worst-case concurrent load
+(`chsh-sk-ncs-4.2-validation`), which is exactly the scenario you want to size against.
+
+- Use its per-board peak thread stacks and heap peaks directly; its columns map 1:1 onto the
+  Thread Stack / Heap Analysis tables below.
+- Apply the sizing formulas (Step 3 / Heap Sizing) to those peaks and update `prj.conf`.
+- Honour any "thread not active during the round" note — keep the prior value for that thread.
+- Record provenance in the report `Source` field: `VALIDATION_REPORT.md v<version>`.
+
+Fall back to your own capture (Steps 1–4 below: Thread Analyzer + `heap_monitor`) only when no
+validation report exists, or to re-measure a thread the validation round didn't exercise.
+
 ### Step 1 — Build and check summary
 
 ```sh
@@ -49,6 +65,59 @@ See the sections below. Apply one category at a time, rebuild, verify.
 
 Memory usage differs between Debug and Release builds and between QEMU and real hardware.
 Always measure on the target board with the Release build and representative workload.
+
+---
+
+## Live ZView — interactive memory viewer
+
+ZView reads thread stack watermarks and heap usage **over SWD (J-Link), no UART/RTT, no on-target
+code** — ideal for watching memory live while you exercise the app during optimization.
+(For unattended peak capture during validation, `chsh-sk-ncs-4.2-validation` uses `record`/`dump`.)
+
+### 0. Check it's installed (remind to install if not)
+
+```sh
+nrfutil sdk-manager toolchain launch --ncs-version=${NCS_VERSION:-v3.3.0} -- west zview --help
+```
+
+If this errors (extension or deps missing), remind the user to install ZView, then stop:
+- It ships as a west module at `modules/tools/zview`. If absent, add to the west manifest and
+  `west update zview` (see its `README.md`); the J-Link runner needs `pylink-square`.
+
+### 1. Resolve ELF + J-Link target per board
+
+This project builds with **sysbuild**, so the application ELF is under the project-named
+sub-image directory, not the top-level `zephyr/`:
+
+| Board | J-Link target | ELF |
+|-------|---------------|-----|
+| nRF7002DK (nRF5340) | `nRF5340_xxAA` | `build_nrf7002dk/nordic-wifi-memfault/zephyr/zephyr.elf` |
+| nRF54LM20DK | `nRF54LM20A_M33` | `build_nrf54lm20dk/nordic-wifi-memfault/zephyr/zephyr.elf` |
+
+> Prerequisite Kconfig in the build: `CONFIG_INIT_STACKS=y`, `CONFIG_THREAD_MONITOR=y`,
+> `CONFIG_THREAD_STACK_INFO=y` (+ `CONFIG_SYS_HEAP_RUNTIME_STATS=y` for heap, `CONFIG_THREAD_NAME=y`
+> for names). If ZView shows empty threads/heaps, the build lacks these — rebuild with them.
+
+### 2. Launch `live`
+
+`live` is a full-screen TUI — it needs a real terminal, so the agent **cannot host it inline**.
+Run it in your own terminal, or have the agent open it in a new macOS Terminal window:
+
+```sh
+# nRF7002DK  (get S/N with: nrfutil device list)
+west zview live -e build_nrf7002dk/nordic-wifi-memfault/zephyr/zephyr.elf -r jlink -t nRF5340_xxAA -s <SN>
+
+# nRF54LM20DK
+west zview live -e build_nrf54lm20dk/nordic-wifi-memfault/zephyr/zephyr.elf -r jlink -t nRF54LM20A_M33 -s <SN>
+```
+
+Wrap in the toolchain launcher if `west` isn't on PATH:
+`nrfutil sdk-manager toolchain launch --ncs-version=${NCS_VERSION:-v3.3.0} -- west zview live …`.
+TUI keys: **ENTER** = drill into a thread/heap · **H** = heap fragmentation view · **Q** = quit.
+
+> When the user asks to "open ZView", confirm which connected board (run `nrfutil device list`),
+> then launch that board's command in a new Terminal window (e.g. macOS `osascript … Terminal …`).
+> For a scripted/non-interactive readout instead, use `west zview dump … --json` and parse with `jq`.
 
 ---
 
@@ -200,7 +269,7 @@ Create `pm_static.yml` (or `pm_static_<board>.yml`) for custom partition sizes.
 
 - [reference/heap-monitor.md](reference/heap-monitor.md) — heap monitor module, tuning knobs, log format, Memfault integration, heap architecture (system / net buffers / mbedTLS)
 - [reference/optimization-configs.md](reference/optimization-configs.md) — full Flash/RAM config options, development vs production templates, profiling tools
-- [MEMORY_REPORT_TEMPLATE.md](MEMORY_REPORT_TEMPLATE.md) — template for documenting memory optimization findings and recommendations
+- [MEMOPT_REPORT_TEMPLATE.md](MEMOPT_REPORT_TEMPLATE.md) — base for `MEMOPT_REPORT.md`; documents measured watermarks, sizing math, and the `prj.conf` changes applied (consumes `VALIDATION_REPORT.md` when present)
 
 ---
 

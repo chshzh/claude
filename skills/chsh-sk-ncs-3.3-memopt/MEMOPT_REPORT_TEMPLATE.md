@@ -8,7 +8,8 @@
 | Version | YYYY-MM-DD-HH-MM |
 | NCS Version | e.g. v3.3.0 |
 | Target Board(s) | e.g. nRF7002DK, nRF54LM20DK + nRF7002EB2 |
-| Method | Thread Analyzer (`CONFIG_THREAD_ANALYZER_AUTO`) + heap_monitor, steady-state after <describe scenario: Wi-Fi connect, upload cycle, etc.> |
+| Source | `VALIDATION_REPORT.md` vYYYY-MM-DD-HH-MM (Memory Watermarks) — *or* own capture if no report |
+| Method | ZView watermarks from validation high-memory round — *or* Thread Analyzer (`CONFIG_THREAD_ANALYZER_AUTO`) + heap_monitor, steady-state after <scenario> |
 | Status | Draft / Applied |
 
 ---
