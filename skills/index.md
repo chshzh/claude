@@ -12,7 +12,7 @@
 - [chsh-sk-ncs-3.2-debug](chsh-sk-ncs-3.2-debug/SKILL.md) — Debugs boot failures, WiFi issues, driver crashes, kernel hangs
 - [chsh-sk-ncs-3.3-memopt](chsh-sk-ncs-3.3-memopt/SKILL.md) — Analyzes RAM/Flash usage, reduces footprint, debugs stack overflows
 - [chsh-sk-ncs-4.1-verification](chsh-sk-ncs-4.1-verification/SKILL.md) — Phase 4.1 Verification: code review, static analysis, doc audit
-- [chsh-sk-ncs-4.2-validation](chsh-sk-ncs-4.2-validation/SKILL.md) — Phase 4.2 Validation: hardware tests and test framework
+- [chsh-sk-ncs-4.2-validation](chsh-sk-ncs-4.2-validation/SKILL.md) — Hardware validation (run anytime): PLAN → execute shell-first → REPORT with ZView memory watermarks
 - [chsh-sk-ncs-env](chsh-sk-ncs-env/SKILL.md) — Sets up NCS environment and runs west build/flash commands
 - [chsh-sk-ncs-migrate](chsh-sk-ncs-migrate/SKILL.md) — Upgrades/ports an NCS project to a newer SDK version
 - [chsh-sk-ncs-clang-format](chsh-sk-ncs-clang-format/SKILL.md) — Runs clang-format on NCS/Zephyr code

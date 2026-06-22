@@ -8,5 +8,5 @@
 | 2026-06-08 | chsh-sk-llm-wiki-review | Add early-exit commit-hash check, log entry format with commit, commit sequencing | `1365cbe` |
 | 2026-06-08 | chsh-sk-llm-wiki | Remove "running a wiki health audit" from description (routes to -review instead) | `2a30fa0` |
 | 2026-06-08 | chsh-sk-llm-wiki-review | Fix: 200→500 line threshold; [[wikilinks]]→standard links in fix templates; exempt root files from quality-signal checks | `64a70d6` |
-| 2026-06-11 | chsh-sk-ncs-3.5-release, chsh-sk-ncs-3.4-git-commit | Renamed (from chsh-sk-git-release / chsh-sk-ncs-3.4-git); moved firmware download/flash/loop steps to 4.2; 4.2 log+shell via chsh-ag-terminal now primary | `<short-commit>` |
-| 2026-06-11 | (review) | 12 issues fixed: index stale entries (git-release→3.5-release, removed dead agentmemory entry, count 24→23, date); 8 skills' git-release refs → 3.5-release | `<short-commit>` |
+| 2026-06-11 | chsh-sk-ncs-3.5-release, chsh-sk-ncs-3.4-git-commit | Renamed (from chsh-sk-git-release / chsh-sk-ncs-3.4-git); moved firmware download/flash/loop steps to 4.2; 4.2 log+shell via chsh-ag-terminal now primary | `b63560d` |
+| 2026-06-11 | (review) | 12 issues fixed: index stale entries (git-release→3.5-release, removed dead agentmemory entry, count 24→23, date); 8 skills' git-release refs → 3.5-release | `b63560d` |
